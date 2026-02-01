@@ -1,0 +1,20 @@
+{
+  "name": "CONSTRUMETRIX - Financial Construction Analytics",
+  "short_name": "CONSTRUMETRIX",
+  "description": "Plataforma profesional para análisis financiero, avalúos comerciales y valoración técnica de proyectos de construcción",
+  "start_url": "./index.html",
+  "display": "standalone",
+  "background_color": "#050507",
+  "theme_color": "#3b60ff",
+  "orientation": "any",
+  "icons": [
+    {
+      "src": "favicon.svg",
+      "sizes": "any",
+      "type": "image/svg+xml",
+      "purpose": "any maskable"
+    }
+  ],
+  "categories": ["business", "finance", "productivity"],
+  "screenshots": []
+}
