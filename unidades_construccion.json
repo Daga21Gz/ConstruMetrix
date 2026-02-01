@@ -1,0 +1,392 @@
+[
+    {
+        "cod": "01",
+        "nombre": "Viviendas hasta 3 pisos – R",
+        "tipo": "CV"
+    },
+    {
+        "cod": "49",
+        "nombre": "Estación de Bombeo – C",
+        "tipo": "CV"
+    },
+    {
+        "cod": "06",
+        "nombre": "Bodega Casa Bomba – I",
+        "tipo": "CV"
+    },
+    {
+        "cod": "50",
+        "nombre": "Estadios – Plaza de Toros – C",
+        "tipo": "CV"
+    },
+    {
+        "cod": "07",
+        "nombre": "Industrias - I",
+        "tipo": "CV"
+    },
+    {
+        "cod": "51",
+        "nombre": "Cárceles – C",
+        "tipo": "CV"
+    },
+    {
+        "cod": "12",
+        "nombre": "Colegios y Universidades – C",
+        "tipo": "CV"
+    },
+    {
+        "cod": "52",
+        "nombre": "Parque Cementerio – C",
+        "tipo": "CV"
+    },
+    {
+        "cod": "13",
+        "nombre": "Biblioteca – C",
+        "tipo": "CV"
+    },
+    {
+        "cod": "53",
+        "nombre": "Vivienda Colonial – R",
+        "tipo": "CV"
+    },
+    {
+        "cod": "14",
+        "nombre": "Garajes Cubiertos – R",
+        "tipo": "CV"
+    },
+    {
+        "cod": "54",
+        "nombre": "Comercio Colonial – C",
+        "tipo": "CV"
+    },
+    {
+        "cod": "16",
+        "nombre": "Bodegas Comerciales – Grandes Almacenes – C",
+        "tipo": "CV"
+    },
+    {
+        "cod": "55",
+        "nombre": "Oficinas – Consultorios Coloniales – C",
+        "tipo": "CV"
+    },
+    {
+        "cod": "19",
+        "nombre": "Clínicas – Hospitales – Centros Médicos – C",
+        "tipo": "CV"
+    },
+    {
+        "cod": "56",
+        "nombre": "Apartamentos en Edificio de 4 y 6 Pisos",
+        "tipo": "CV"
+    },
+    {
+        "cod": "25",
+        "nombre": "Hoteles en PH – C",
+        "tipo": "CV"
+    },
+    {
+        "cod": "58",
+        "nombre": "Centros Comerciales – C",
+        "tipo": "CV"
+    },
+    {
+        "cod": "27",
+        "nombre": "Casa Elbas – R",
+        "tipo": "CV"
+    },
+    {
+        "cod": "63",
+        "nombre": "Vivienda Recreacional – R",
+        "tipo": "CV"
+    },
+    {
+        "cod": "28",
+        "nombre": "Comercio – C",
+        "tipo": "CV"
+    },
+    {
+        "cod": "70",
+        "nombre": "Vivienda hasta 3 pisos en PH -R",
+        "tipo": "CV"
+    },
+    {
+        "cod": "29",
+        "nombre": "Iglesia – C",
+        "tipo": "CV"
+    },
+    {
+        "cod": "71",
+        "nombre": "Apartamentos 4 y más pisos en PH – R",
+        "tipo": "CV"
+    },
+    {
+        "cod": "31",
+        "nombre": "Hoteles – C",
+        "tipo": "CV"
+    },
+    {
+        "cod": "72",
+        "nombre": "Vivienda Recreacional en PH – R",
+        "tipo": "CV"
+    },
+    {
+        "cod": "33",
+        "nombre": "Clubes – Casinos – C",
+        "tipo": "CV"
+    },
+    {
+        "cod": "73",
+        "nombre": "Bodegas Casa Bomba en PH – I",
+        "tipo": "CV"
+    },
+    {
+        "cod": "34",
+        "nombre": "Oficinas – Consultorios – C",
+        "tipo": "CV"
+    },
+    {
+        "cod": "74",
+        "nombre": "Bodegas Comerciales en PH – C",
+        "tipo": "CV"
+    },
+    {
+        "cod": "35",
+        "nombre": "Apartamentos más de 4 Pisos – R",
+        "tipo": "CV"
+    },
+    {
+        "cod": "75",
+        "nombre": "Comercio en PH – C",
+        "tipo": "CV"
+    },
+    {
+        "cod": "36",
+        "nombre": "Restaurantes – C",
+        "tipo": "CV"
+    },
+    {
+        "cod": "76",
+        "nombre": "Centros Comerciales en PH – C",
+        "tipo": "CV"
+    },
+    {
+        "cod": "37",
+        "nombre": "Pensiones y Residencias – C",
+        "tipo": "CV"
+    },
+    {
+        "cod": "77",
+        "nombre": "Oficinas Consultorios en PH – C",
+        "tipo": "CV"
+    },
+    {
+        "cod": "38",
+        "nombre": "Puestos de Salud – C",
+        "tipo": "CV"
+    },
+    {
+        "cod": "78",
+        "nombre": "Parqueaderos en PH – C",
+        "tipo": "CV"
+    },
+    {
+        "cod": "39",
+        "nombre": "Parqueaderos – C",
+        "tipo": "CV"
+    },
+    {
+        "cod": "79",
+        "nombre": "Garajes en PH -R",
+        "tipo": "CV"
+    },
+    {
+        "cod": "40",
+        "nombre": "Barracas – R",
+        "tipo": "CV"
+    },
+    {
+        "cod": "80",
+        "nombre": "Industrias en PH – I",
+        "tipo": "CV"
+    },
+    {
+        "cod": "41",
+        "nombre": "Teatro – Cinemas – C",
+        "tipo": "CV"
+    },
+    {
+        "cod": "86",
+        "nombre": "Teatros – Cinemas en PH – C",
+        "tipo": "CV"
+    },
+    {
+        "cod": "42",
+        "nombre": "Aulas de Clases – C",
+        "tipo": "CV"
+    },
+    {
+        "cod": "87",
+        "nombre": "Iglesia en PH – C",
+        "tipo": "CV"
+    },
+    {
+        "cod": "43",
+        "nombre": "Coliseos - C",
+        "tipo": "CV"
+    },
+    {
+        "cod": "88",
+        "nombre": "Restaurantes en PH – C",
+        "tipo": "CV"
+    },
+    {
+        "cod": "44",
+        "nombre": "Casas de Culto – C",
+        "tipo": "CV"
+    },
+    {
+        "cod": "89",
+        "nombre": "Hotel Colonial – C",
+        "tipo": "CV"
+    },
+    {
+        "cod": "45",
+        "nombre": "Talleres – I",
+        "tipo": "CV"
+    },
+    {
+        "cod": "90",
+        "nombre": "Restaurante Colonial – C",
+        "tipo": "CV"
+    },
+    {
+        "cod": "46",
+        "nombre": "Jardín Infantil en Casa – C",
+        "tipo": "CV"
+    },
+    {
+        "cod": "91",
+        "nombre": "Entidad Educativa Colonial",
+        "tipo": "CV"
+    },
+    {
+        "cod": "02",
+        "nombre": "Ramadas – Cobertizos – Caneyes – A",
+        "tipo": "NC"
+    },
+    {
+        "cod": "47",
+        "nombre": "Torres de Enfriamiento - A",
+        "tipo": "NC"
+    },
+    {
+        "cod": "03",
+        "nombre": "Galpones – Gallineros – A",
+        "tipo": "NC"
+    },
+    {
+        "cod": "48",
+        "nombre": "Muelles – A",
+        "tipo": "NC"
+    },
+    {
+        "cod": "04",
+        "nombre": "Establos – Pesebreras – Caballerizas – A",
+        "tipo": "NC"
+    },
+    {
+        "cod": "60",
+        "nombre": "Canchas de Tenis – A",
+        "tipo": "NC"
+    },
+    {
+        "cod": "05",
+        "nombre": "Cocheras – Marraneras – Porquerizas – A",
+        "tipo": "NC"
+    },
+    {
+        "cod": "62",
+        "nombre": "Toboganes – A",
+        "tipo": "NC"
+    },
+    {
+        "cod": "08",
+        "nombre": "Silos – A",
+        "tipo": "NC"
+    },
+    {
+        "cod": "64",
+        "nombre": "Camaroneras - A",
+        "tipo": "NC"
+    },
+    {
+        "cod": "09",
+        "nombre": "Piscinas – A",
+        "tipo": "NC"
+    },
+    {
+        "cod": "65",
+        "nombre": "Fuertes y Castillos - A",
+        "tipo": "NC"
+    },
+    {
+        "cod": "10",
+        "nombre": "Tanques – A",
+        "tipo": "NC"
+    },
+    {
+        "cod": "66",
+        "nombre": "Murallas - A",
+        "tipo": "NC"
+    },
+    {
+        "cod": "11",
+        "nombre": "Beneficiaderos – A",
+        "tipo": "NC"
+    },
+    {
+        "cod": "82",
+        "nombre": "Marquesinas – Patios Cubiertos – A",
+        "tipo": "NC"
+    },
+    {
+        "cod": "18",
+        "nombre": "Secaderos -A",
+        "tipo": "NC"
+    },
+    {
+        "cod": "83",
+        "nombre": "Lagunas de Oxidación – A",
+        "tipo": "NC"
+    },
+    {
+        "cod": "20",
+        "nombre": "Pozos – A",
+        "tipo": "NC"
+    },
+    {
+        "cod": "84",
+        "nombre": "Vía Férrea - A",
+        "tipo": "NC"
+    },
+    {
+        "cod": "21",
+        "nombre": "Kioscos – A",
+        "tipo": "NC"
+    },
+    {
+        "cod": "85",
+        "nombre": "Carretera – A",
+        "tipo": "NC"
+    },
+    {
+        "cod": "23",
+        "nombre": "Albercas – Bañaderas – A",
+        "tipo": "NC"
+    },
+    {
+        "cod": "99",
+        "nombre": "Cimientos, Estructura, Muros y Placa Base - A",
+        "tipo": "NC"
+    }
+]

@@ -1,0 +1,16 @@
+# Large files (GitHub limit is 100MB)
+*.pdf
+construdata209-(2024) 1.pdf
+contrucciones.pdf
+
+# Data files (Check if you really want these online, keeping small ones)
+*.xlsx
+*.csv
+# *.json # Assuming items.json is needed for the app
+
+# OS files
+.DS_Store
+Thumbs.db
+
+# VS Code
+.vscode/
