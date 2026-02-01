@@ -1,0 +1,177 @@
+<!DOCTYPE html>
+<html lang="es">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Test - CONSTRUMETRIX</title>
+    <style>
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: #050507;
+            color: #fff;
+            padding: 40px;
+            max-width: 800px;
+            margin: 0 auto;
+        }
+
+        .status {
+            margin: 20px 0;
+            padding: 15px;
+            border-radius: 8px;
+            border-left: 4px solid #3b60ff;
+            background: rgba(59, 96, 255, 0.1);
+        }
+
+        .error {
+            border-left-color: #ef4444;
+            background: rgba(239, 68, 68, 0.1);
+        }
+
+        .success {
+            border-left-color: #10b981;
+            background: rgba(16, 185, 129, 0.1);
+        }
+
+        code {
+            background: #1a1a1d;
+            padding: 2px 6px;
+            border-radius: 4px;
+            font-family: 'Courier New', monospace;
+        }
+
+        h1 {
+            color: #3b60ff;
+        }
+
+        h2 {
+            color: #8b5cf6;
+            font-size: 18px;
+            margin-top: 30px;
+        }
+
+        button {
+            background: #3b60ff;
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 6px;
+            cursor: pointer;
+            margin: 10px 5px;
+        }
+
+        button:hover {
+            background: #2a45e5;
+        }
+    </style>
+</head>
+
+<body>
+    <h1>🏗️ CONSTRUMETRIX - Diagnóstico del Sistema</h1>
+
+    <h2>📋 Archivos Requeridos</h2>
+    <div id="fileChecks"></div>
+
+    <h2>🔧 Prueba de Carga de Datos</h2>
+    <button onclick="testDataLoad()">Probar Carga de JSON</button>
+    <div id="dataResults"></div>
+
+    <h2>📊 Información del Navegador</h2>
+    <div class="status">
+        <strong>Navegador:</strong> <code id="browser"></code><br>
+        <strong>Protocolo:</strong> <code id="protocol"></code><br>
+        <strong>URL Actual:</strong> <code id="currentUrl"></code>
+    </div>
+
+    <h2>✅ Solución Recomendada</h2>
+    <div id="solution" class="status"></div>
+
+    <script>
+        // Información del navegador
+        document.getElementById('browser').textContent = navigator.userAgent;
+        document.getElementById('protocol').textContent = window.location.protocol;
+        document.getElementById('currentUrl').textContent = window.location.href;
+
+        // Verificar archivos
+        const requiredFiles = [
+            'items.json',
+            'unidades_construccion.json',
+            'blueprints.js',
+            'app.js'
+        ];
+
+        const fileChecksDiv = document.getElementById('fileChecks');
+        requiredFiles.forEach(file => {
+            const div = document.createElement('div');
+            div.className = 'status';
+            div.innerHTML = `<strong>${file}</strong>: Verificando...`;
+            fileChecksDiv.appendChild(div);
+
+            fetch(file)
+                .then(response => {
+                    if (response.ok) {
+                        div.className = 'status success';
+                        div.innerHTML = `✅ <strong>${file}</strong>: Encontrado (${response.status})`;
+                    } else {
+                        div.className = 'status error';
+                        div.innerHTML = `❌ <strong>${file}</strong>: Error ${response.status}`;
+                    }
+                })
+                .catch(error => {
+                    div.className = 'status error';
+                    div.innerHTML = `❌ <strong>${file}</strong>: ${error.message}`;
+                });
+        });
+
+        // Función de prueba de carga
+        async function testDataLoad() {
+            const resultsDiv = document.getElementById('dataResults');
+            resultsDiv.innerHTML = '<div class="status">Cargando datos...</div>';
+
+            try {
+                const response = await fetch('items.json');
+                const data = await response.json();
+
+                resultsDiv.innerHTML = `
+                    <div class="status success">
+                        ✅ <strong>items.json cargado exitosamente</strong><br>
+                        Total de ítems: <code>${data.length}</code><br>
+                        Primer ítem: <code>${data[0]?.nombre || 'N/A'}</code>
+                    </div>
+                `;
+            } catch (error) {
+                resultsDiv.innerHTML = `
+                    <div class="status error">
+                        ❌ <strong>Error al cargar items.json</strong><br>
+                        Detalles: <code>${error.message}</code>
+                    </div>
+                `;
+            }
+        }
+
+        // Solución basada en el protocolo
+        const solutionDiv = document.getElementById('solution');
+        if (window.location.protocol === 'file:') {
+            solutionDiv.className = 'status error';
+            solutionDiv.innerHTML = `
+                <strong>⚠️ PROBLEMA DETECTADO: Protocolo file://</strong><br><br>
+                Los navegadores modernos bloquean la carga de archivos JSON cuando abres un HTML directamente desde el disco (file://).<br><br>
+                <strong>Soluciones:</strong><br>
+                1. <strong>Usar un servidor local</strong> (Recomendado):<br>
+                   <code>python -m http.server 8000</code> (Python)<br>
+                   o instala la extensión "Live Server" en VS Code<br><br>
+                2. <strong>Publicar en GitHub Pages</strong> (Ya lo tienes configurado)<br><br>
+                3. <strong>Usar Chrome con flag especial</strong> (No recomendado para producción):<br>
+                   <code>chrome.exe --allow-file-access-from-files</code>
+            `;
+        } else {
+            solutionDiv.className = 'status success';
+            solutionDiv.innerHTML = `
+                ✅ <strong>Protocolo correcto detectado</strong><br>
+                Estás usando <code>${window.location.protocol}</code> que permite la carga de archivos JSON correctamente.
+            `;
+        }
+    </script>
+</body>
+
+</html>
