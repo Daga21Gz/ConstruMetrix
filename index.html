@@ -9,8 +9,8 @@
     <title>CONSTRUMETRIX | Financial Construction Analytics</title>
     <link rel="icon" type="image/svg+xml" href="favicon.svg">
     <link rel="manifest" href="manifest.json">
-    <meta name="theme-color" content="#3b60ff">
-    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="theme-color" content="#f7fc00">
+    <meta name="mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
 
     <script>
@@ -34,6 +34,7 @@
         rel="stylesheet">
     <script src="https://unpkg.com/lucide@latest"></script>
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <link rel="stylesheet" href="elite-colors.css">
     <link rel="stylesheet" href="animations.css">
     <script>
         tailwind.config = {
@@ -1080,6 +1081,9 @@
     <!-- Excel Export Library -->
     <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
 
+    <!-- Official Data Sources -->
+    <script src="fuentes-oficiales.js"></script>
+
     <!-- Logic -->
     <script src="blueprints.js"></script>
     <script src="app.js"></script>
@@ -1098,15 +1102,6 @@
                     });
             });
         }
-
-        // Install prompt
-        let deferredPrompt;
-        window.addEventListener('beforeinstallprompt', (e) => {
-            e.preventDefault();
-            deferredPrompt = e;
-            // Show install button (we'll add UI for this later)
-            console.log('💡 PWA: App lista para instalación');
-        });
     </script>
 </body>
 

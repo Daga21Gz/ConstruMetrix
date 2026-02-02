@@ -4,8 +4,8 @@
   "description": "Plataforma profesional para análisis financiero, avalúos comerciales y valoración técnica de proyectos de construcción",
   "start_url": "./index.html",
   "display": "standalone",
-  "background_color": "#050507",
-  "theme_color": "#3b60ff",
+  "background_color": "#0a0b0f",
+  "theme_color": "#f7fc00",
   "orientation": "any",
   "icons": [
     {
@@ -15,6 +15,10 @@
       "purpose": "any maskable"
     }
   ],
-  "categories": ["business", "finance", "productivity"],
+  "categories": [
+    "business",
+    "finance",
+    "productivity"
+  ],
   "screenshots": []
 }

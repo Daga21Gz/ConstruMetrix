@@ -1,0 +1,332 @@
+/**
+ * CONSTRUMETRIX v2.0 - ELITE COLOR SYSTEM
+ * Esquema de colores premium inspirado en diseño de producto moderno
+ * Paleta: Deep Space + Electric Citrus + Construction Orange
+ */
+
+:root {
+    /* === PRIMARY PALETTE === */
+    /* Deep Space - Base oscura sofisticada */
+    --color-space-950: #0a0b0f;
+    --color-space-900: #11121a;
+    --color-space-800: #181a25;
+    --color-space-700: #1f2230;
+    --color-space-600: #2a2d3f;
+
+    /* Electric Citrus - Acento principal vibrante */
+    --color-citrus-600: #f7fc00;
+    --color-citrus-500: #feff3d;
+    --color-citrus-400: #feff5c;
+    --color-citrus-300: #feff8a;
+
+    /* Construction Orange - Acento secundario */
+    --color-construct-600: #ff6b00;
+    --color-construct-500: #ff8533;
+    --color-construct-400: #ffa366;
+    --color-construct-300: #ffc299;
+
+    /* Cyber Blue - Acento tecnológico */
+    --color-cyber-600: #00d9ff;
+    --color-cyber-500: #33e1ff;
+    --color-cyber-400: #66e9ff;
+    --color-cyber-300: #99f1ff;
+
+    /* Emerald Pro - Success */
+    --color-emerald-600: #10b981;
+    --color-emerald-500: #34d399;
+    --color-emerald-400: #6ee7b7;
+
+    /* Ruby Alert - Error */
+    --color-ruby-600: #ef4444;
+    --color-ruby-500: #f87171;
+    --color-ruby-400: #fca5a5;
+
+    /* === FUNCTIONAL COLORS === */
+    --bg-primary: var(--color-space-950);
+    --bg-secondary: var(--color-space-900);
+    --bg-tertiary: var(--color-space-800);
+    --bg-card: var(--color-space-800);
+    --bg-hover: var(--color-space-700);
+
+    --border-primary: rgba(247, 252, 0, 0.1);
+    --border-secondary: rgba(255, 255, 255, 0.05);
+    --border-active: var(--color-citrus-600);
+
+    --text-primary: #ffffff;
+    --text-secondary: #e5e7eb;
+    --text-tertiary: #9ca3af;
+    --text-muted: #6b7280;
+
+    --accent-primary: var(--color-citrus-600);
+    --accent-secondary: var(--color-construct-600);
+    --accent-tech: var(--color-cyber-600);
+
+    /* === GRADIENT BACKGROUNDS === */
+    --gradient-hero: linear-gradient(135deg,
+            var(--color-space-950) 0%,
+            var(--color-space-900) 50%,
+            #1a1b2e 100%);
+
+    --gradient-card: linear-gradient(145deg,
+            rgba(247, 252, 0, 0.03) 0%,
+            rgba(255, 107, 0, 0.02) 100%);
+
+    --gradient-accent: linear-gradient(135deg,
+            var(--color-citrus-600) 0%,
+            var(--color-construct-600) 100%);
+
+    --gradient-tech: linear-gradient(135deg,
+            var(--color-cyber-600) 0%,
+            #667eea 100%);
+
+    /* === GLOW EFFECTS === */
+    --glow-citrus: 0 0 20px rgba(247, 252, 0, 0.3),
+        0 0 40px rgba(247, 252, 0, 0.15);
+
+    --glow-construct: 0 0 20px rgba(255, 107, 0, 0.3),
+        0 0 40px rgba(255, 107, 0, 0.15);
+
+    --glow-cyber: 0 0 20px rgba(0, 217, 255, 0.3),
+        0 0 40px rgba(0, 217, 255, 0.15);
+
+    /* === SHADOWS === */
+    --shadow-low: 0 2px 8px rgba(0, 0, 0, 0.3);
+    --shadow-medium: 0 4px 16px rgba(0, 0, 0, 0.4);
+    --shadow-high: 0 8px 32px rgba(0, 0, 0, 0.5);
+    --shadow-glow: 0 0 40px rgba(247, 252, 0, 0.15);
+}
+
+/* === DARK MODE OVERRIDES === */
+html.dark {
+    --bg-dark: var(--color-space-950);
+    --bg-dark-card: var(--color-space-800);
+    --bg-dark-border: rgba(247, 252, 0, 0.1);
+    --brand: var(--color-citrus-600);
+    --brand-600: var(--color-citrus-500);
+}
+
+/* === BASE RESETS === */
+body {
+    background: var(--gradient-hero);
+    color: var(--text-primary);
+    font-family: 'Inter', system-ui, -apple-system, sans-serif;
+}
+
+/* === CARD STYLES === */
+.glass-card {
+    background: linear-gradient(145deg,
+            rgba(247, 252, 0, 0.05) 0%,
+            rgba(255, 107, 0, 0.03) 100%);
+    backdrop-filter: blur(12px) saturate(180%);
+    border: 1px solid var(--border-primary);
+}
+
+/* === ACCENT BORDERS === */
+.border-accent-citrus {
+    border-color: var(--color-citrus-600);
+    box-shadow: var(--glow-citrus);
+}
+
+.border-accent-construct {
+    border-color: var(--color-construct-600);
+    box-shadow: var(--glow-construct);
+}
+
+.border-accent-cyber {
+    border-color: var(--color-cyber-600);
+    box-shadow: var(--glow-cyber);
+}
+
+/* === BUTTON VARIANTS === */
+.btn-citrus {
+    background: var(--gradient-accent);
+    color: var(--color-space-950);
+    font-weight: 700;
+    text-shadow: 0 1px 2px rgba(0, 0, 0, 0.2);
+    box-shadow: var(--glow-citrus);
+}
+
+.btn-citrus:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 0 30px rgba(247, 252, 0, 0.4),
+        0 0 60px rgba(247, 252, 0, 0.2);
+}
+
+.btn-cyber {
+    background: var(--gradient-tech);
+    color: white;
+    font-weight: 700;
+    box-shadow: var(--glow-cyber);
+}
+
+.btn-outline-citrus {
+    background: transparent;
+    border: 2px solid var(--color-citrus-600);
+    color: var(--color-citrus-600);
+}
+
+.btn-outline-citrus:hover {
+    background: rgba(247, 252, 0, 0.1);
+    box-shadow: var(--glow-citrus);
+}
+
+/* === TEXT GRADIENTS === */
+.text-gradient-citrus {
+    background: var(--gradient-accent);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+}
+
+.text-gradient-cyber {
+    background: var(--gradient-tech);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+}
+
+/* === BADGE STYLES === */
+.badge-citrus {
+    background: rgba(247, 252, 0, 0.15);
+    color: var(--color-citrus-600);
+    border: 1px solid rgba(247, 252, 0, 0.3);
+}
+
+.badge-construct {
+    background: rgba(255, 107, 0, 0.15);
+    color: var(--color-construct-600);
+    border: 1px solid rgba(255, 107, 0, 0.3);
+}
+
+.badge-cyber {
+    background: rgba(0, 217, 255, 0.15);
+    color: var(--color-cyber-600);
+    border: 1px solid rgba(0, 217, 255, 0.3);
+}
+
+/* === HOVER GLOW EFFECTS === */
+.hover-glow-citrus {
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.hover-glow-citrus:hover {
+    border-color: var(--color-citrus-600);
+    box-shadow: var(--glow-citrus);
+    transform: translateY(-2px);
+}
+
+.hover-glow-construct:hover {
+    border-color: var(--color-construct-600);
+    box-shadow: var(--glow-construct);
+}
+
+/* === PROGRESS BARS === */
+.progress-citrus {
+    background: var(--gradient-accent);
+    box-shadow: inset 0 1px 3px rgba(0, 0, 0, 0.3);
+}
+
+/* === ANIMATED BORDERS === */
+@keyframes border-flow {
+
+    0%,
+    100% {
+        border-color: var(--color-citrus-600);
+    }
+
+    50% {
+        border-color: var(--color-construct-600);
+    }
+}
+
+.border-animated {
+    animation: border-flow 3s ease-in-out infinite;
+}
+
+/* === NEON GLOW PULSE === */
+@keyframes neon-pulse {
+
+    0%,
+    100% {
+        box-shadow: 0 0 20px rgba(247, 252, 0, 0.3),
+            0 0 40px rgba(247, 252, 0, 0.15);
+        border-color: var(--color-citrus-600);
+    }
+
+    50% {
+        box-shadow: 0 0 30px rgba(247, 252, 0, 0.5),
+            0 0 60px rgba(247, 252, 0, 0.25);
+        border-color: var(--color-citrus-500);
+    }
+}
+
+.neon-pulse {
+    animation: neon-pulse 2s ease-in-out infinite;
+}
+
+/* === SCROLLBAR CUSTOM === */
+.custom-scroll::-webkit-scrollbar {
+    width: 8px;
+    height: 8px;
+}
+
+.custom-scroll::-webkit-scrollbar-track {
+    background: var(--color-space-900);
+}
+
+.custom-scroll::-webkit-scrollbar-thumb {
+    background: linear-gradient(180deg,
+            var(--color-citrus-600),
+            var(--color-construct-600));
+    border-radius: 4px;
+}
+
+.custom-scroll::-webkit-scrollbar-thumb:hover {
+    background: linear-gradient(180deg,
+            var(--color-citrus-500),
+            var(--color-construct-500));
+}
+
+/* === GLASS MORPHISM ENHANCED === */
+.glass-panel-elite {
+    background: linear-gradient(145deg,
+            rgba(247, 252, 0, 0.08) 0%,
+            rgba(255, 107, 0, 0.05) 50%,
+            rgba(0, 217, 255, 0.03) 100%);
+    backdrop-filter: blur(20px) saturate(200%);
+    border: 1px solid rgba(247, 252, 0, 0.2);
+    box-shadow: var(--shadow-medium), var(--shadow-glow);
+}
+
+/* === FOCUS STATES === */
+*:focus-visible {
+    outline: 2px solid var(--color-citrus-600);
+    outline-offset: 2px;
+    box-shadow: var(--glow-citrus);
+}
+
+input:focus,
+select:focus,
+textarea:focus {
+    border-color: var(--color-citrus-600);
+    box-shadow: 0 0 0 3px rgba(247, 252, 0, 0.15);
+}
+
+/* === RESPONSIVE COLOR INTENSITY === */
+@media (max-width: 768px) {
+    :root {
+        /* Reduce glow intensity on mobile for battery */
+        --glow-citrus: 0 0 10px rgba(247, 252, 0, 0.2);
+        --glow-construct: 0 0 10px rgba(255, 107, 0, 0.2);
+        --glow-cyber: 0 0 10px rgba(0, 217, 255, 0.2);
+    }
+}
+
+/* === PRINT === */
+@media print {
+    * {
+        background: white !important;
+        color: black !important;
+        box-shadow: none !important;
+    }
+}

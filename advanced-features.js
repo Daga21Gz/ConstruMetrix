@@ -356,11 +356,4 @@ if ('IntersectionObserver' in window) {
     document.querySelectorAll('img[data-src]').forEach(img => imageObserver.observe(img));
 }
 
-// Preload critical resources
-const preloadLink = document.createElement('link');
-preloadLink.rel = 'preload';
-preloadLink.as = 'fetch';
-preloadLink.href = 'items.json';
-document.head.appendChild(preloadLink);
-
 console.log('%c✨ CONSTRUMETRIX v2.0 - Advanced Features Loaded', 'color: #3b60ff; font-size: 14px; font-weight: bold;');
