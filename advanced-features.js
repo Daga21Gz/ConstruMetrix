@@ -316,6 +316,26 @@ function dismissPWAPrompt() {
     }
 }
 
+// Check PWA status and update badge
+window.addEventListener('load', () => {
+    const badge = document.getElementById('pwaStatusBadge');
+    if (!badge) return;
+
+    // Check if already installed
+    if (window.matchMedia('(display-mode: standalone)').matches || window.navigator.standalone) {
+        badge.classList.remove('hidden');
+        badge.textContent = '✓ Instalada';
+        badge.classList.remove('bg-brand/10', 'text-brand', 'border-brand/20');
+        badge.classList.add('bg-emerald-500/10', 'text-emerald-400', 'border-emerald-500/20');
+    }
+    // Check if service worker is registered
+    else if ('serviceWorker' in navigator) {
+        navigator.serviceWorker.ready.then(() => {
+            badge.classList.remove('hidden');
+        });
+    }
+});
+
 // ==================== PERFORMANCE OPTIMIZATIONS ====================
 
 // Lazy load images (future enhancement)

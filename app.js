@@ -228,9 +228,13 @@ document.addEventListener('DOMContentLoaded', async () => {
         '2.630': 'Estructuras Viales'
     };
 
+
     // --- 3. INITIALIZATION ---
     async function init() {
         try {
+            // Show skeleton loaders
+            showSkeletonLoaders();
+
             // Load Data
             const [itemsRes, unitsRes] = await Promise.all([
                 fetch('items.json'),
@@ -250,12 +254,23 @@ document.addEventListener('DOMContentLoaded', async () => {
             recalculate();
             setupResponsiveListeners();
             setupIntelligenceListeners();
+
+            // Hide skeletons
+            hideSkeletonLoaders();
+
+            // Add fade-in animations to main content
+            document.querySelectorAll('.item-card').forEach((card, i) => {
+                card.style.animationDelay = `${i * 0.05}s`;
+                card.classList.add('animate-fade-in-up');
+            });
+
             lucide.createIcons();
 
-            showToast("CONSTRUMETRIX Enterprise Cargado", "success");
+            showToast("✅ CONSTRUMETRIX v2.0 Listo", "success");
         } catch (e) {
             console.error(e);
-            showToast("Error cargando base de datos", "error");
+            hideSkeletonLoaders();
+            showToast("❌ Error cargando base de datos", "error");
         }
     }
 
@@ -1341,6 +1356,28 @@ document.addEventListener('DOMContentLoaded', async () => {
         } else {
             UI.intelPanel.classList.add('hidden');
         }
+    }
+
+    // --- SKELETON LOADERS ---
+    function showSkeletonLoaders() {
+        const grid = UI.grid;
+        if (!grid) return;
+
+        grid.innerHTML = Array.from({ length: 12 }, () => `
+            <div class="skeleton skeleton-card rounded-2xl"></div>
+        `).join('');
+
+        // Add skeleton to budget panel
+        if (UI.budgetList) {
+            UI.budgetList.innerHTML = Array.from({ length: 5 }, () => `
+                <div class="skeleton skeleton-text mb-2"></div>
+            `).join('');
+        }
+    }
+
+    function hideSkeletonLoaders() {
+        // Skeletons are replaced by actual content in renderGrid()
+        // This function exists for explicit cleanup if needed
     }
 
     // Initialize App
