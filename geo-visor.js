@@ -199,74 +199,24 @@
     async function fetchValuationData(cedula) {
         if (!cedula) return;
 
-        updateGisStatus("🔍 Consultando registros de avalúo...", "info");
-
-        // Helper para convertir la tarea de Esri en Promesa con soporte de múltiples campos ID
-        const queryRegistry = (url, id) => {
-            return new Promise((resolve) => {
-                const layerId = url.split('/').pop();
-
-                // Construcción de cláusula WHERE específica por capa para evitar error 400 (campo no existe)
-                let whereClause = "";
-
-                if (layerId === "17") {
-                    // REGISTRO_1 tiene ambos campos
-                    whereClause = `NUMERO_PREDIAL_NACIONAL = '${id}' OR NUMERO_DEL_PREDIO = '${id}'`;
-                } else if (layerId === "18") {
-                    // REGISTRO_2 suele NO tener NUMERO_PREDIAL_NACIONAL
-                    whereClause = `NUMERO_DEL_PREDIO = '${id}'`;
-                } else {
-                    // Fallback para otras capas
-                    whereClause = `NUMERO_DEL_PREDIO = '${id}' OR CODIGO = '${id}'`;
-                }
-
-                // Fallback adicional por longitud del ID (si es muy largo, es nacional)
-                if (id.length > 22 && layerId === "17") {
-                    const idShort = id.substring(0, 22);
-                    whereClause += ` OR NUMERO_PREDIAL_NACIONAL LIKE '${idShort}%'`;
-                }
-
-                console.log(`📡 Consultando IGAC (${layerId}):`, whereClause);
-
-                L.esri.query({ url: url })
-                    .where(whereClause)
-                    .run((error, featureCollection) => {
-                        if (error) {
-                            console.warn(`⚠️ Error en capa ${layerId}:`, error);
-                            resolve(null);
-                        } else if (!featureCollection || !featureCollection.features.length) {
-                            resolve(null);
-                        } else {
-                            resolve(featureCollection.features[0].properties);
-                        }
-                    });
-            });
-        };
+        updateGisStatus("🔍 Consultando registros de avalúo vía API Service...", "info");
 
         try {
-            // Ejecutamos consultas en paralelo
-            const [reg1, reg2] = await Promise.all([
-                queryRegistry(GIS_STATE.urls.registry1, cedula),
-                queryRegistry(GIS_STATE.urls.registry2, cedula)
-            ]);
+            // USAGE OF CENTRALIZED SERVICE (Proxy Ready)
+            const valData = await GisApiService.fetchValuationData(cedula);
 
-            // UNIÓN INTELIGENTE DE DATOS (Expert GIS Merge)
-            // Combinamos ambos registros sin sobreescribir con valores nulos
-            const valData = { ...(reg1 || {}), ...(reg2 || {}) };
-
-            if (reg1 || reg2) {
-                console.log("💎 Datos Oficiales Integrados (R1+R2):", valData);
+            if (valData && Object.keys(valData).length > 0) {
+                console.log("💎 Datos Oficiales Integrados (Service Layer):", valData);
 
                 updateGisStatus("💎 Registros R1 y R2 sincronizados.", "success");
                 GIS_STATE.activePredio._valuation = valData;
 
                 // --- MAPEO DE CAMPOS EXPERTO ---
-
                 // 1. Dirección y Nombre
                 const finalAddr = valData.DIRECCION || valData.DIRECCION_PREDIO || valData.NOMBRE_PREDIO || GIS_STATE.activePredio.DIRECCION;
                 if (finalAddr) UI_GIS.dispAddress.textContent = finalAddr;
 
-                // 2. Áreas (Preferencia a Registro 1 que suele ser el más actualizado en áreas totales)
+                // 2. Áreas
                 const builtArea = valData.AREA_CONSTRUIDA_TOTAL || valData.AREA_CONSTRUIDA || valData.AREA_CONSTRUIDA_1;
                 if (builtArea) UI_GIS.dispBuiltArea.textContent = parseFloat(builtArea).toLocaleString() + ' m²';
 
@@ -285,12 +235,17 @@
                 const zEco = valData.ZONA_ECONOMICA_1 || valData.ZONA_ECONOMICA;
                 if (zFis) UI_GIS.dispZones.textContent = `${zFis} / ${zEco || '--'}`;
 
-                // 5. Detalles Técnicos (Hab, Baños, Pisos) - Exclusivos de R2
+                // 5. Detalles Técnicos (Hab, Baños, Pisos)
                 UI_GIS.dispHabitaciones.textContent = valData.HABITACIONES_1 || valData.HABITACIONES || '0';
                 UI_GIS.dispBanos.textContent = valData.BANOS_1 || valData.BANOS || '0';
                 UI_GIS.dispPisos.textContent = valData.PISOS_1 || valData.PISOS || '1';
 
-                // Actualizar contexto de valuación (Avalúo Catastral)
+                // --- SYNC WITH FINANCIAL CORE ---
+                const syncEvent = new CustomEvent('construmetrix:gis-sync', {
+                    detail: { valuation: valData, cedula: cedula }
+                });
+                window.dispatchEvent(syncEvent);
+
                 renderValuationHUD(valData);
             } else {
                 updateGisStatus("ℹ️ Sin registros en bases R1/R2 para este ID.", "info");
@@ -594,8 +549,11 @@
         }
 
         if (window.showToast) window.showToast("⚡ Inteligencia de Valoración Inyectada", "success");
-        document.dispatchEvent(new CustomEvent('gisSync', { detail: syncData }));
-        if (typeof window.recalculate === 'function') window.recalculate();
+
+        const syncEvent = new CustomEvent('construmetrix:gis-sync', {
+            detail: { valuation: p._valuation || p, cedula: p.CODIGO || p.NUMERO_CATASTRAL }
+        });
+        window.dispatchEvent(syncEvent);
 
         UI_GIS.overlay.classList.remove('opacity-100');
         setTimeout(() => UI_GIS.overlay.classList.add('hidden'), 700);
@@ -662,6 +620,17 @@
 
         container.classList.remove('hidden');
         container.classList.add('flex');
+
+        // Initial Scroll Bind
+        const tableContainer = document.querySelector('#gisAttributeTablePanel .overflow-auto');
+        if (tableContainer) {
+            tableContainer.onscroll = (e) => {
+                const { scrollTop, scrollHeight, clientHeight } = e.target;
+                if (scrollTop + clientHeight >= scrollHeight - 50) {
+                    loadNextGisBatch();
+                }
+            };
+        }
 
         // Trigger map resize after UI shift
         if (GIS_STATE.map) {
@@ -752,32 +721,36 @@
         renderTableRows(tableBody, keys);
     }
 
-    function renderTableRows(tbody, keys) {
+    function renderTableRows(tbody, keys, append = false) {
         const start = (GIS_TABLE.currentPage - 1) * GIS_TABLE.rowsPerPage;
         const end = start + GIS_TABLE.rowsPerPage;
         const pageData = GIS_TABLE.filteredData.slice(start, end);
 
-        let htmlContent = '';
+        const fragment = document.createDocumentFragment();
 
         pageData.forEach(row => {
             const isSelected = GIS_TABLE.selectedGids.has(row._gid);
-            htmlContent += `
-                <tr class="border-b border-gray-800 hover:bg-white/5 transition-colors group ${isSelected ? 'bg-brand/10' : ''}">
-                    <td class="p-2 text-center border-b border-white/5">
-                        <input type="checkbox" class="row-selector rounded bg-black/40 border-white/10 text-brand focus:ring-brand" data-gid="${row._gid}" ${isSelected ? 'checked' : ''}>
-                    </td>
-                    <td class="p-2 text-[10px] text-gray-500 font-mono border-b border-white/5">${row._gid}</td>
-                    ${keys.map(k => `<td class="p-2 text-[10px] text-gray-300 whitespace-nowrap overflow-hidden text-ellipsis max-w-[150px] border-b border-white/5" title="${row[k]}">${row[k] || '--'}</td>`).join('')}
-                    <td class="p-2 text-right border-b border-white/5 border-l border-white/10 sticky right-0 bg-[#0a0c10] z-[50] shadow-[-5px_0_10px_rgba(0,0,0,0.5)]">
-                        <button type="button" class="action-zoom-btn gis-action-btn" style="background-color: #2563eb !important; color: #ffffff !important; padding: 6px 14px; border-radius: 6px; font-weight: 900; font-size: 11px; text-transform: uppercase; border: 1px solid rgba(255,255,255,0.3); display: inline-flex; align-items: center; gap: 6px; cursor: pointer; white-space: nowrap;" data-gid="${row._gid}">
-                            🔍 VER
-                        </button>
-                    </td>
-                </tr>
+            const tr = document.createElement('tr');
+            tr.className = `border-b border-gray-800 hover:bg-white/5 transition-colors group ${isSelected ? 'bg-brand/10' : ''}`;
+            tr.setAttribute('role', 'row');
+
+            tr.innerHTML = `
+                <td class="p-2 text-center border-b border-white/5" role="gridcell">
+                    <input type="checkbox" class="row-selector rounded bg-black/40 border-white/10 text-brand focus:ring-brand" aria-label="Seleccionar fila" data-gid="${row._gid}" ${isSelected ? 'checked' : ''}>
+                </td>
+                <td class="p-2 text-[10px] text-gray-500 font-mono border-b border-white/5" role="gridcell">${row._gid}</td>
+                ${keys.map(k => `<td class="p-2 text-[10px] text-gray-300 whitespace-nowrap overflow-hidden text-ellipsis max-w-[150px] border-b border-white/5" role="gridcell" title="${row[k]}">${row[k] || '--'}</td>`).join('')}
+                <td class="p-2 text-right border-b border-white/5 border-l border-white/10 sticky right-0 bg-[#0a0c10] z-[50] shadow-[-5px_0_10px_rgba(0,0,0,0.5)]" role="gridcell">
+                    <button type="button" class="action-zoom-btn gis-action-btn" aria-label="Ver elemento en mapa" style="background-color: #2563eb !important; color: #ffffff !important; padding: 6px 14px; border-radius: 6px; font-weight: 900; font-size: 11px; text-transform: uppercase; border: 1px solid rgba(255,255,255,0.3); display: inline-flex; align-items: center; gap: 6px; cursor: pointer; white-space: nowrap;" data-gid="${row._gid}">
+                        <i data-lucide="map-pin" class="w-3 h-3"></i> VER
+                    </button>
+                </td>
             `;
+            fragment.appendChild(tr);
         });
 
-        tbody.innerHTML = htmlContent;
+        if (!append) tbody.innerHTML = '';
+        tbody.appendChild(fragment);
 
         // Add event listeners for checkboxes
         document.querySelectorAll('.row-selector').forEach(cb => {
@@ -990,9 +963,6 @@
         }
     };
 
-    function updatePaginationInfo() {
-        // Simple logic for footer if needed
-    }
 
     // --- SELECTION ENGINE (v5.1) ---
     window.toggleRowSelection = function (gid, selected) {
@@ -1172,6 +1142,38 @@
             updateGisStatus("⚠️ Error de sintaxis en expresión.", "error");
         }
     };
+
+    // --- DATA GRID VIRTUALIZATION / LAZY LOADING (v5.5) ---
+    let isLoadingBatch = false;
+    window.loadNextGisBatch = function () {
+        if (isLoadingBatch) return;
+
+        const totalPages = Math.ceil(GIS_TABLE.filteredData.length / GIS_TABLE.rowsPerPage);
+        if (GIS_TABLE.currentPage < totalPages) {
+            isLoadingBatch = true;
+            // Add a small visual delay for UX feel (looks more professional)
+            const tableBody = document.getElementById('gisTableBody');
+
+            setTimeout(() => {
+                GIS_TABLE.currentPage++;
+                const keys = Object.keys(GIS_TABLE.data[0] || {}).filter(k => k !== '_gid' && k !== '_geometry' && k !== 'geometry');
+                renderTableRows(tableBody, keys, true); // true = append mode
+                isLoadingBatch = false;
+                console.log(`📑 Inf-Scroll: Batch ${GIS_TABLE.currentPage}/${totalPages} loaded.`);
+            }, 150);
+        }
+    };
+
+    window.nextGisPage = () => window.loadNextGisBatch(); // Legacy support
+
+    function updatePaginationInfo() {
+        const infoPara = document.getElementById('gisRenderingInfo');
+        if (infoPara) {
+            const count = document.querySelectorAll('#gisTableBody tr').length;
+            const total = GIS_TABLE.filteredData.length;
+            infoPara.textContent = `RENDERIZADOS: ${count} / ${total} REGISTROS (SCROLL PARA MÁS)`;
+        }
+    }
 
     console.log("✅ GIS Engine v3.1: All modules (Selection, Filtering, Expressions) loaded.");
 })();

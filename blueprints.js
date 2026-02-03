@@ -96,6 +96,52 @@ const ConstructionBlueprints = {
                 { codigo: "1.04.0382", factor: 25.0, calcMode: "area" }
             ]
         }
+    },
+    // 35 - Apartamentos más de 4 Pisos
+    "35": {
+        name: "Apartamento Estándar",
+        chapters: {
+            "Preliminares": [{ codigo: "1.01.0361", factor: 1.0, calcMode: "area" }],
+            "Estructura": [
+                { codigo: "1.04.0384", factor: 0.12, calcMode: "volume" },
+                { codigo: "1.04.0382", factor: 12.0, calcMode: "volume" }
+            ],
+            "Mampostería": [{ codigo: "1.05.0354", factor: 1.2, calcMode: "volume" }],
+            "Acabados": [
+                { codigo: "1.07.0393", factor: 1.0, calcMode: "area" },
+                { codigo: "1.08.0403", factor: 2.5, calcMode: "volume" }
+            ]
+        }
+    },
+    // 56 - Casa Alta Gama (Customized mapping)
+    "56": {
+        name: "Casa Alta Gama",
+        chapters: {
+            "Preliminares": [{ codigo: "1.01.0361", factor: 1.0, calcMode: "area" }],
+            "Estructura": [
+                { codigo: "1.04.0384", factor: 0.15, calcMode: "volume" },
+                { codigo: "1.04.0383", factor: 15.0, calcMode: "volume" }
+            ],
+            "Mampostería": [{ codigo: "1.05.0355", factor: 1.5, calcMode: "volume" }],
+            "Acabados Premium": [
+                { codigo: "1.07.0393", factor: 1.0, calcMode: "area" },
+                { codigo: "1.09.0419", factor: 1.0, calcMode: "area" },
+                { codigo: "1.17.0279", factor: 0.05, calcMode: "area" }
+            ]
+        }
+    },
+    // 34 - Edificio Comercial
+    "34": {
+        name: "Edificio Comercial",
+        chapters: {
+            "Cimentación": [{ codigo: "1.03.0380", factor: 0.1, calcMode: "volume" }],
+            "Estructura Pesada": [
+                { codigo: "1.04.0384", factor: 0.2, calcMode: "volume" },
+                { codigo: "1.04.0383", factor: 25.0, calcMode: "volume" }
+            ],
+            "Pisos Técnicos": [{ codigo: "1.06.0580", factor: 1.0, calcMode: "area" }],
+            "Redes Especiales": [{ codigo: "1.18.0559", factor: 0.1, calcMode: "area" }]
+        }
     }
 };
 

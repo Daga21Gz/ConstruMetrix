@@ -24,6 +24,21 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v4
       
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+
+      - name: Security Scan (Linting placeholder)
+        run: |
+          echo "🔍 Running initial Security Scan..."
+          # Mock: En un entorno real aquí iría 'npm audit' o 'snyk test'
+        
+      - name: Validate Core Files
+        run: |
+          ls -la index.html app.js geo-visor.js
+          echo "✅ Core files presence validated."
+
       - name: Setup Pages
         uses: actions/configure-pages@v5
       

@@ -66,10 +66,35 @@ document.addEventListener('DOMContentLoaded', async () => {
         AIU_SUGGESTED: 0.30,
         SOURCES: ["DANE", "Ministerio del Trabajo", "Camacol", "Homecenter", "PresuCosto"],
         CONSTRUCTION_COSTS: {
-            BASIC: { min: 1800000, max: 2200000 },
-            MEDIUM: { min: 2500000, max: 3500000 },
-            HIGH: { min: 4000000, max: 6000000 }
-        }
+            RESIDENTIAL: {
+                "CASA_SOCIAL": { name: "Casa Interés Social", min: 1800000, max: 2200000, specs: "Acabados básicos, materiales económicos" },
+                "CASA_MEDIA": { name: "Casa Media", min: 2500000, max: 3500000, specs: "Acabados estándar, calidad media" },
+                "CASA_ALTA": { name: "Casa Alta Gama", min: 4500000, max: 7000000, specs: "Acabados premium, importados" },
+                "APTO_ESTANDAR": { name: "Apartamento Estándar", min: 2200000, max: 3000000, specs: "Torre, zonas comunes básicas" },
+                "EDIFICIO_COMERCIAL": { name: "Edificio Comercial", min: 3000000, max: 5000000, specs: "Áreas abiertas, sistemas técnicos" }
+            },
+            CATEGORIES: {
+                BASIC: { min: 1800000, max: 2200000 },
+                MEDIUM: { min: 2500000, max: 3500000 },
+                HIGH: { min: 4500000, max: 7000000 }
+            }
+        },
+        MATERIALS: [
+            { item: "Cemento Gris", unit: "Bulto 50kg", price: "42000 - 48000", delta: "+8%" },
+            { item: "Arena Lavada", unit: "M3", price: "85000 - 110000", delta: "+6%" },
+            { item: "Grava", unit: "M3", price: "95000 - 125000", delta: "+7%" },
+            { item: "Ladrillo Común", unit: "Unidad", price: "950 - 1200", delta: "+5%" },
+            { item: "Bloque #5", unit: "Unidad", price: "3200 - 3800", delta: "+6%" },
+            { item: "Varilla 3/8\"", unit: "6m", price: "28000 - 32000", delta: "+4%" },
+            { item: "Varilla 1/2\"", unit: "6m", price: "48000 - 55000", delta: "+4%" }
+        ],
+        FINISHES: [
+            { item: "Cerámica Básica", unit: "M2", price: "25000 - 40000" },
+            { item: "Cerámica Premium", unit: "M2", price: "60000 - 120000" },
+            { item: "Estuco en Pasta", unit: "Galón", price: "42000 - 55000" },
+            { item: "Pintura Vinilo", unit: "Galón", price: "35000 - 52000" },
+            { item: "Pintura Esmalte", unit: "Galón", price: "68000 - 95000" }
+        ]
     };
 
     const COLLOQUIAL_MAP = {
@@ -252,6 +277,87 @@ document.addEventListener('DOMContentLoaded', async () => {
     };
 
 
+    /**
+     * Listen for official data coming from the GIS engine and sync with Financial STATE
+     */
+    function setupGisSync() {
+        window.addEventListener('construmetrix:gis-sync', (e) => {
+            const { valuation, cedula } = e.detail;
+            if (!valuation) return;
+
+            console.log("🔄 [Financial Sync] Updating STATE with GIS Data...", valuation);
+
+            // Atomic Updates
+            STATE.meta.cedula = cedula || STATE.meta.cedula;
+            STATE.meta.matricula = valuation.MATRICULA_INMOBILIARIA || valuation.MATRICULA || STATE.meta.matricula;
+            STATE.meta.owner = valuation.NOMBRE_PREDIO || valuation.PROPIETARIO || valuation.DIRECCION || STATE.meta.owner;
+            STATE.meta.city = valuation.MUNICIPIO || valuation.NOMBRE_MUNICIPIO || STATE.meta.city;
+            STATE.meta.dept = valuation.DEPARTAMENTO || valuation.NOMBRE_DEPARTAMENTO || STATE.meta.dept;
+
+            // Critical Metric Sync (Areas)
+            const areaBuilt = parseFloat(valuation.AREA_CONSTRUIDA_TOTAL || valuation.AREA_CONSTRUIDA || 0);
+            const areaLand = parseFloat(valuation.AREA_TERRENO || valuation.AREA_TERRENO_1 || 0);
+            const valuationAuto = parseFloat(valuation.AVALUO_CATASTRAL || valuation.AVALUO_VIGENTE || 0);
+
+            if (areaBuilt > 0) {
+                STATE.meta.area = areaBuilt;
+                if (UI.inputArea) UI.inputArea.value = areaBuilt;
+            }
+
+            if (areaLand > 0) {
+                STATE.meta.landArea = areaLand;
+                if (UI.inputLandArea) UI.inputLandArea.value = areaLand;
+            }
+
+            STATE.meta.igacValuation = valuationAuto;
+            STATE.meta.igacDestino = valuation.DESTINO_ECONOMICO || '';
+            STATE.meta.landType = valuation.TIPO_SUELO || valuation._landType || 'Urbano';
+
+            // Automatic business logic: informal land detection
+            if (STATE.meta.landType.toLowerCase().includes('informal')) {
+                STATE.config.imprev = 15; // +10% risk premium
+                if (UI.inImprev) UI.inImprev.value = 15;
+                showToast("⚠️ Suelo Informal: Contingencia aumentada al 15%", "warning");
+            }
+
+            // Update UI Sidebar inputs if they exist
+            if (UI.inputCedula) UI.inputCedula.value = STATE.meta.cedula;
+            if (UI.inputMatricula) UI.inputMatricula.value = STATE.meta.matricula;
+            if (UI.inputOwner) UI.inputOwner.value = STATE.meta.owner;
+            if (UI.inputCity) UI.inputCity.value = STATE.meta.city;
+            if (UI.inputState) UI.inputState.value = STATE.meta.dept;
+
+            // --- Update "GIS Intelligence Card" (Visual Feedback) ---
+            if (UI.gisCard) {
+                UI.gisCard.classList.remove('hidden');
+                UI.gisCard.classList.add('animate-up');
+
+                if (UI.gisIgacValue) {
+                    UI.gisIgacValue.textContent = APP_UTILS.format(valuationAuto);
+                }
+
+                if (UI.gisLandType) {
+                    UI.gisLandType.textContent = `Destino: ${STATE.meta.igacDestino || 'N/D'} | ${STATE.meta.landType}`;
+                }
+            }
+
+            // Sync with "Ubicación Geo-Económica" select
+            if (UI.selectRegion && valuation.REGION_VALUACION) {
+                UI.selectRegion.value = valuation.REGION_VALUACION.toLowerCase();
+                STATE.meta.region = UI.selectRegion.value;
+            }
+
+            // --- UX Auto-Tab Switching ---
+            if (UI.tabAnalysis && UI.viewAnalysis.classList.contains('opacity-0')) {
+                UI.tabAnalysis.click();
+            }
+
+            // Trigger Recalculation
+            recalculate();
+            showToast("💎 Datos IGAC sincronizados con el presupuesto", "success");
+        });
+    }
+
     // --- 3. INITIALIZATION ---
     async function init() {
         try {
@@ -277,6 +383,9 @@ document.addEventListener('DOMContentLoaded', async () => {
             recalculate();
             setupResponsiveListeners();
             setupIntelligenceListeners();
+
+            // Setup GIS Sync (Function is defined within this same DOMContentLoaded scope)
+            setupGisSync();
 
             // Edit Mode Listener
             if (UI.btnEditMode) {
@@ -365,6 +474,7 @@ document.addEventListener('DOMContentLoaded', async () => {
             });
         }
     }
+
 
     function setupBlueprintsUI() {
         const cvGroup = document.getElementById('cv_group');
@@ -1289,29 +1399,6 @@ document.addEventListener('DOMContentLoaded', async () => {
     UI.inputCity.addEventListener('input', (e) => { STATE.meta.city = e.target.value; saveToStorage(); });
     UI.inputState.addEventListener('input', (e) => { STATE.meta.dept = e.target.value; saveToStorage(); });
 
-    // GIS SYNC: El cerebro que recibe la carga del mapa
-    document.addEventListener('gisSync', (e) => {
-        const meta = e.detail;
-        if (UI.inputCedula) UI.inputCedula.value = meta.cedula || '';
-        if (UI.inputArea) {
-            UI.inputArea.value = meta.area || 0;
-            STATE.meta.area = parseFloat(meta.area) || 1.0;
-        }
-
-        // Inyectar inteligencia IGAC al estado
-        if (meta.igacValuation) STATE.meta.igacValuation = meta.igacValuation;
-        if (meta.igacDestino) STATE.meta.igacDestino = meta.igacDestino;
-        if (meta.landType) STATE.meta.landType = meta.landType;
-
-        // Lógica de Negocio: Si el suelo es INFORMAL, aumentamos imprevistos automáticamente
-        if (meta.landType && meta.landType.toLowerCase().includes('informal')) {
-            STATE.config.imprev = 15; // Sube del 5% al 15% por riesgo jurídico
-            if (UI.inImprev) UI.inImprev.value = 15;
-            showToast("⚠️ Suelo Informal detectado: Contingencia legal aumentada al 15%", "info");
-        }
-
-        recalculate();
-    });
 
     UI.btnClear.addEventListener('click', async () => {
         if (await showModal("¿Reiniciar Proyecto?", "Se borrarán todos los ítems y configuraciones.")) {
@@ -1399,6 +1486,49 @@ document.addEventListener('DOMContentLoaded', async () => {
         }
     }
 
+    window.openMarketRef = () => {
+        const m = document.getElementById('marketRefModal');
+        const resList = document.getElementById('marketRefResidencial');
+        const matList = document.getElementById('marketRefMaterials');
+
+        // Populate Residential
+        resList.innerHTML = Object.values(CONSTANTS_2026.CONSTRUCTION_COSTS.RESIDENTIAL).map(t => `
+            <div class="p-4 rounded-2xl bg-dark-bg border border-white/5 hover:border-brand/40 transition-all group">
+                <div class="flex justify-between items-start mb-1">
+                    <span class="text-xs font-bold text-white group-hover:text-brand transition-colors">${t.name}</span>
+                    <span class="text-[10px] font-black text-brand bg-brand/10 px-2 py-0.5 rounded">2026</span>
+                </div>
+                <p class="text-[14px] font-black text-white">${APP_UTILS.format(t.min)} - ${APP_UTILS.format(t.max)}</p>
+                <p class="text-[9px] text-gray-500 mt-1 uppercase tracking-tighter">${t.specs}</p>
+            </div>
+        `).join('');
+
+        // Populate Materials & Finishes
+        const allItems = [...CONSTANTS_2026.MATERIALS, ...CONSTANTS_2026.FINISHES];
+        matList.innerHTML = allItems.map(m => `
+            <div class="flex items-center justify-between p-3 rounded-xl hover:bg-white/5 transition-all border-b border-white/5 last:border-0">
+                <div>
+                    <p class="text-[10px] font-bold text-gray-300">${m.item}</p>
+                    <p class="text-[8px] text-gray-500 uppercase">${m.unit}</p>
+                </div>
+                <div class="text-right">
+                    <p class="text-[11px] font-mono font-bold text-emerald-400">$${m.price}</p>
+                    ${m.delta ? `<span class="text-[8px] font-black text-red-400">${m.delta} ▲</span>` : ''}
+                </div>
+            </div>
+        `).join('');
+
+        m.classList.remove('hidden');
+        m.classList.add('flex', 'animate-fade-in');
+        lucide.createIcons();
+    };
+
+    window.closeMarketRef = () => {
+        const m = document.getElementById('marketRefModal');
+        m.classList.add('hidden');
+        m.classList.remove('flex', 'animate-fade-in');
+    };
+
     window.showModal = (title, text) => new Promise(res => {
         const m = document.getElementById('confirmModal');
         document.getElementById('confirmTitle').textContent = title;
@@ -1479,20 +1609,29 @@ document.addEventListener('DOMContentLoaded', async () => {
 
         // 3. Eficiencia de Costo por m2
         if (sqmCost > 0) {
-            const avgSqm = CONSTANTS_2026.CONSTRUCTION_COSTS.MEDIUM.min; // Referencia base 2026
-            if (sqmCost > avgSqm * 1.5) {
+            const residential = CONSTANTS_2026.CONSTRUCTION_COSTS.RESIDENTIAL;
+            let match = null;
+
+            if (sqmCost >= residential.CASA_ALTA.min) match = residential.CASA_ALTA;
+            else if (sqmCost >= residential.CASA_MEDIA.min) match = residential.CASA_MEDIA;
+            else if (sqmCost >= residential.CASA_SOCIAL.min) match = residential.CASA_SOCIAL;
+
+            if (match) {
+                insights.push({
+                    icon: 'target',
+                    color: 'text-brand-300',
+                    title: `Perfil Detectado: ${match.name}`,
+                    desc: `El costo de ${format(sqmCost)}/m² coincide con el estándar de ${match.name}. ${match.specs}.`
+                });
+            }
+
+            const highThreshold = residential.CASA_ALTA.max;
+            if (sqmCost > highThreshold) {
                 insights.push({
                     icon: 'award',
                     color: 'text-purple-400',
-                    title: 'Proyecto de Alta Gama / Lujo',
-                    desc: 'El valor por m² indica un estándar superior (Premium). El mercado objetivo debe ser Prime para asegurar el retorno.'
-                });
-            } else if (sqmCost < CONSTANTS_2026.CONSTRUCTION_COSTS.BASIC.min) {
-                insights.push({
-                    icon: 'trending-down',
-                    color: 'text-emerald-400',
-                    title: 'Alta Eficiencia de Costos',
-                    desc: 'El valor por m² está por debajo del promedio básico. Ideal para proyectos de inversión o Vivienda de Interés Social.'
+                    title: 'Proyecto de Lujo Extremo',
+                    desc: 'El valor por m² supera los $7.000.000. Se clasifica como construcción de ultra-lujo con acabados importados.'
                 });
             }
         }
@@ -1547,6 +1686,47 @@ document.addEventListener('DOMContentLoaded', async () => {
         // This function exists for explicit cleanup if needed
     }
 
+    // --- MARKET DYNAMICS ENGINE (Innovation) ---
+    /**
+     * Simulates real-time market fluctuations for construction materials
+     * based on economic indices (DANE/ICOCED representation).
+     */
+    /**
+     * MASTER MARKET ENGINE v4.0
+     * Simulates periodic market drifts with "Momentum" and "Macro-Drift"
+     */
+    let marketSentiment = 1.0;
+    function simulateMarketFluctuation() {
+        // Momentum calculation: 60% chance to follow previous direction
+        const direction = Math.random() > (marketSentiment > 1.01 ? 0.7 : 0.3) ? 1 : -1;
+        const volatility = 0.008; // 0.8% micro-movements
+        const drift = (Math.random() * volatility) * direction;
+
+        marketSentiment += drift;
+        marketSentiment = Math.max(0.85, Math.min(1.25, marketSentiment)); // Natural bounds
+
+        // Apply drift to global ranges
+        if (CONSTANTS_2026.CONSTRUCTION_COSTS) {
+            Object.keys(CONSTANTS_2026.CONSTRUCTION_COSTS).forEach(level => {
+                const range = CONSTANTS_2026.CONSTRUCTION_COSTS[level];
+                range.min = Math.round(range.min * (1 + drift));
+                range.max = Math.round(range.max * (1 + drift));
+            });
+        }
+
+        const msg = `Señal de Mercado: ${drift > 0 ? '↗️ Alza' : '↘️ Baja'} del ${(Math.abs(drift) * 100).toFixed(2)}% detectada. Índice General: ${(marketSentiment * 100).toFixed(1)} pts.`;
+        console.log(`[MASTER INTEL] ${msg}`);
+
+        // Only toast if movement is significant (>0.5%)
+        if (Math.abs(drift) > 0.005) {
+            setTimeout(() => {
+                if (window.showToast) window.showToast(msg, drift > 0 ? "warning" : "success");
+                recalculate(); // Refresh visuals with new market data
+            }, 3000);
+        }
+    }
+
     // Initialize App
+    simulateMarketFluctuation();
     init();
 });

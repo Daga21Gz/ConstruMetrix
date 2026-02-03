@@ -16,7 +16,7 @@
 
     <!-- SECURITY: Content Security Policy (CSP) -->
     <meta http-equiv="Content-Security-Policy"
-        content="default-src 'self'; script-src 'self' 'unsafe-inline' 'unsafe-eval' https://cdn.tailwindcss.com https://unpkg.com https://cdnjs.cloudflare.com https://cdn.jsdelivr.net https://www.gstatic.com https://*.firebase.com https://*.firebaseio.com https://apis.google.com; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com https://unpkg.com; font-src 'self' https://fonts.gstatic.com; img-src 'self' data: blob: https:; connect-src 'self' https: wss:; frame-src 'self' https://*.firebaseapp.com https://*.firebase.com;">
+        content="default-src 'self'; script-src 'self' 'unsafe-inline' 'unsafe-eval' https://cdn.tailwindcss.com https://unpkg.com https://cdnjs.cloudflare.com https://cdn.jsdelivr.net https://www.gstatic.com https://*.firebase.com https://*.firebaseio.com https://apis.google.com https://browser.sentry-cdn.com; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com https://unpkg.com; font-src 'self' https://fonts.gstatic.com; img-src 'self' data: blob: https:; connect-src 'self' https: wss: https://*.sentry.io; frame-src 'self' https://*.firebaseapp.com https://*.firebase.com;">
 
     <!-- OPEN GRAPH (Social SEO) -->
     <meta property="og:type" content="website">
@@ -36,6 +36,10 @@
         };
     </script>
 
+    <!-- MONITORING & OBSERVABILITY -->
+    <script src="https://browser.sentry-cdn.com/8.0.0/bundle.min.js" crossorigin="anonymous"></script>
+    <script src="monitoring.js"></script>
+
     <!-- Scripts & Frameworks -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -49,6 +53,8 @@
     <script src="https://unpkg.com/esri-leaflet@3.0.12/dist/esri-leaflet.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/proj4js/2.9.2/proj4.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/proj4leaflet/1.0.2/proj4leaflet.min.js"></script>
+    <script src="gis-api-service.js"></script>
+    <script src="performance-optimizer.js"></script>
 
     <script src="https://cdn.tailwindcss.com"></script>
     <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@200;300;400;500;600;700;800&display=swap"
@@ -66,6 +72,7 @@
     <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-auth-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-functions-compat.js"></script>
 
     <script>
         tailwind.config = {
@@ -408,7 +415,7 @@
                     class="absolute -right-4 -top-4 w-20 h-20 bg-brand/10 rounded-full blur-3xl group-hover/sig:bg-brand/20 transition-all duration-700">
                 </div>
 
-                <button id="toggleGisVisor"
+                <button id="toggleGisVisor" aria-label="Cerrar el visor geográfico y volver al panel financiero"
                     class="w-full flex items-center justify-between p-4 rounded-2xl bg-dark-bg/60 border border-brand/30 hover:border-brand/60 transition-all group overflow-hidden relative shadow-[0_8px_32px_rgba(0,0,0,0.3)] backdrop-blur-md">
 
                     <!-- Scanline Effect -->
@@ -1111,8 +1118,13 @@
                             <div>
                                 <h4 class="text-[11px] font-black text-white uppercase tracking-wider">Master
                                     Intelligence Insights</h4>
-                                <p class="text-[9px] text-brand-300/70 font-bold uppercase">Diagnóstico Predictivo
-                                    Activo</p>
+                                <div class="flex items-center gap-2">
+                                    <p class="text-[9px] text-brand-300/70 font-bold uppercase">Diagnóstico Predictivo
+                                        Activo</p>
+                                    <button onclick="openMarketRef()"
+                                        class="text-[8px] bg-brand/20 hover:bg-brand/40 text-brand px-1.5 py-0.5 rounded border border-brand/30 transition-all font-black uppercase">Ref.
+                                        2026</button>
+                                </div>
                             </div>
                         </div>
                         <div id="intelligenceContent" class="space-y-3">
@@ -1307,6 +1319,58 @@
 
             <div class="mt-6 pt-6 border-t border-dark-border text-center">
                 <p class="text-xs text-gray-500">💡 Tip: Usa GUARDAR para crear una nueva plantilla</p>
+            </div>
+        </div>
+    </div>
+
+    <!-- Market Reference 2026 Modal -->
+    <div id="marketRefModal"
+        class="fixed inset-0 bg-black/90 backdrop-blur-md z-[2000] hidden items-center justify-center p-4">
+        <div
+            class="bg-dark-card border border-brand/30 rounded-[2.5rem] p-10 max-w-4xl w-full max-h-[90vh] overflow-y-auto custom-scroll shadow-[0_0_100px_rgba(79,122,255,0.2)]">
+            <div class="flex items-center justify-between mb-8">
+                <div>
+                    <div class="flex items-center gap-3 mb-1">
+                        <i data-lucide="trending-up" class="w-6 h-6 text-brand"></i>
+                        <h3 class="text-3xl font-black text-white font-heading tracking-tighter">REFERENCIA MERCADO 2026
+                        </h3>
+                    </div>
+                    <p class="text-[10px] text-gray-500 font-bold uppercase tracking-[0.2em]">Valores actualizados según
+                        PresuCosto & ConstruMetrix Intelligence</p>
+                </div>
+                <button onclick="closeMarketRef()" class="p-3 rounded-2xl hover:bg-white/5 transition-all group">
+                    <i data-lucide="x" class="w-6 h-6 text-gray-500 group-hover:text-brand"></i>
+                </button>
+            </div>
+
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-8">
+                <!-- Construction Types -->
+                <div class="space-y-6">
+                    <h4 class="text-xs font-black text-brand uppercase tracking-widest border-b border-brand/20 pb-2">
+                        Costos por Metro Cuadrado</h4>
+                    <div id="marketRefResidencial" class="space-y-3">
+                        <!-- Injected via JS -->
+                    </div>
+                </div>
+
+                <!-- Materials & Finishes -->
+                <div class="space-y-6">
+                    <h4
+                        class="text-xs font-black text-emerald-400 uppercase tracking-widest border-b border-emerald-400/20 pb-2">
+                        Materiales & Acabados</h4>
+                    <div id="marketRefMaterials" class="space-y-3">
+                        <!-- Injected via JS -->
+                    </div>
+                </div>
+            </div>
+
+            <div class="mt-10 p-6 rounded-3xl bg-brand/5 border border-brand/10">
+                <p class="text-[10px] text-gray-400 leading-relaxed italic">
+                    <b>Nota Metodológica:</b> Los rangos presentados reflejan el promedio nacional en Colombia
+                    proyectado para el año 2026.
+                    Incluyen materiales, mano de obra básica y equipos. No incluyen terrenos, licencias ni urbanismo
+                    exterior.
+                </p>
             </div>
         </div>
     </div>
@@ -1627,9 +1691,10 @@
             </div>
 
             <!-- Table Container -->
-            <div class="flex-1 overflow-auto custom-scrollbar relative">
-                <table class="w-full text-left border-collapse">
-                    <thead id="gisTableHead" class="bg-dark-bg sticky top-0 z-[60] shadow-lg">
+            <div class="flex-1 overflow-auto custom-scrollbar relative" role="region"
+                aria-label="Tabla de atributos geográficos">
+                <table class="w-full text-left border-collapse" role="grid">
+                    <thead id="gisTableHead" class="bg-dark-bg sticky top-0 z-[60] shadow-lg" role="rowgroup">
                         <!-- Headers injected here -->
                     </thead>
                     <tbody id="gisTableBody">
@@ -1644,7 +1709,11 @@
                     <p class="text-[9px] text-gray-600 font-mono">SELECTED: <span id="gisSelectedCount"
                             class="text-brand">0</span></p>
                 </div>
-                <p class="text-[9px] text-gray-600 font-mono">RENDERING: 50 ROWS (SCROLL FOR MORE)</p>
+
+                <div class="flex items-center gap-6">
+                    <p id="gisRenderingInfo" class="text-[9px] text-gray-600 font-mono">RENDERIZADOS: 0 / 0 REGISTROS
+                        (SCROLL PARA MÁS)</p>
+                </div>
             </div>
         </div>
         <!-- Expression Selection Dialog (Hidden by Default) -->
@@ -1665,6 +1734,7 @@
                 <button onclick="applyExpressionSelection('select')"
                     class="flex-1 py-3 rounded-xl bg-white/5 border border-white/10 text-gray-400 text-[10px] font-black uppercase tracking-widest hover:text-white hover:bg-white/10 transition-all">Seleccionar</button>
                 <button onclick="applyExpressionSelection('filter')"
+                    aria-label="Filtrar la tabla usando la expresión ingresada"
                     class="flex-1 py-3 rounded-xl bg-brand text-white text-[10px] font-black uppercase tracking-widest hover:shadow-[0_0_20px_rgba(79,122,255,0.4)] transition-all">Filtrar
                     Tabla</button>
             </div>
