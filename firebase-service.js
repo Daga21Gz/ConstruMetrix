@@ -97,16 +97,40 @@ function updateAuthUI(user) {
 }
 
 // --- DATABASE ACTIONS (Future Use) ---
+// --- DATABASE ACTIONS ---
 window.saveBudgetToCloud = async function (budgetData) {
-    if (!currentUser || !db) return false;
+    const user = firebase.auth().currentUser;
+    if (!user || !db) return false;
     try {
-        await db.collection('users').doc(currentUser.uid).collection('budgets').add({
+        await db.collection('users').doc(user.uid).collection('budgets').add({
             ...budgetData,
+            source: 'cloud',
             createdAt: firebase.firestore.FieldValue.serverTimestamp()
         });
         return true;
     } catch (e) {
         console.error("Cloud Save Error", e);
         return false;
+    }
+};
+
+window.getCloudBudgets = async function () {
+    const user = firebase.auth().currentUser;
+    if (!user || !db) return [];
+    try {
+        const snapshot = await db.collection('users').doc(user.uid).collection('budgets')
+            .orderBy('createdAt', 'desc')
+            .limit(20)
+            .get();
+
+        return snapshot.docs.map(doc => ({
+            id: doc.id,
+            ...doc.data(),
+            // Ensure date compatibility with local templates
+            date: doc.data().createdAt ? doc.data().createdAt.toDate().toISOString() : new Date().toISOString()
+        }));
+    } catch (e) {
+        console.error("Cloud Fetch Error", e);
+        return [];
     }
 };

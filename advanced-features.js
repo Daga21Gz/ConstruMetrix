@@ -285,7 +285,7 @@ function exportToExcel() {
 }
 
 // ==================== TEMPLATE MANAGEMENT ====================
-function saveTemplate() {
+async function saveTemplate() {
     if (!window.STATE || !window.STATE.budget || window.STATE.budget.length === 0) {
         showToast('No hay nada que guardar', 'error');
         return;
@@ -303,33 +303,70 @@ function saveTemplate() {
         summary: window.STATE.summary
     };
 
+    // 1. CLOUD SAVE (If Logged In)
+    let cloudSaved = false;
+    if (window.firebase && firebase.auth().currentUser) {
+        showToast('☁️ Guardando en la nube...', 'info');
+        cloudSaved = await window.saveBudgetToCloud(template);
+    }
+
+    // 2. LOCAL SAVE (Always as backup/offline)
     const templates = JSON.parse(localStorage.getItem('construmetrix_templates') || '[]');
     templates.push(template);
     localStorage.setItem('construmetrix_templates', JSON.stringify(templates));
 
-    showToast(`✅ Plantilla "${templateName}" guardada`, 'success');
+    if (cloudSaved) {
+        showToast(`✅ Guardado en Nube y Local: "${templateName}"`, 'success');
+    } else {
+        showToast(`✅ Guardado Localmente: "${templateName}"`, 'success');
+    }
 }
 
-function openTemplateModal() {
+// Global memory to hold merged templates for loading
+let MERGED_TEMPLATES = [];
+
+async function openTemplateModal() {
     const modal = document.getElementById('templateModal');
     const templateList = document.getElementById('templateList');
 
     if (!modal || !templateList) return;
 
-    const templates = JSON.parse(localStorage.getItem('construmetrix_templates') || '[]');
+    // 1. Load Local
+    const localTemplates = JSON.parse(localStorage.getItem('construmetrix_templates') || '[]');
+    let cloudTemplates = [];
 
-    if (templates.length === 0) {
+    // 2. Load Cloud (If Logged In)
+    if (window.firebase && firebase.auth().currentUser && window.getCloudBudgets) {
+        templateList.innerHTML = '<div class="text-center py-8"><div class="animate-spin w-8 h-8 border-2 border-brand border-t-transparent rounded-full mx-auto"></div><p class="text-xs text-gray-500 mt-2">Sincronizando Nube...</p></div>';
+        modal.classList.remove('hidden');
+        modal.classList.add('flex');
+
+        cloudTemplates = await window.getCloudBudgets();
+    }
+
+    // 3. Merge Strategies (Simple concatenation for now)
+    // Map to normalized structure
+    const normalizedLocal = localTemplates.map(t => ({ ...t, source: 'local' }));
+    const normalizedCloud = cloudTemplates.map(t => ({ ...t, source: 'cloud' }));
+
+    MERGED_TEMPLATES = [...normalizedCloud, ...normalizedLocal];
+
+    if (MERGED_TEMPLATES.length === 0) {
         templateList.innerHTML = `
             <div class="text-center py-12">
                 <i data-lucide="folder-x" class="w-16 h-16 text-gray-700 mx-auto mb-4"></i>
-                <p class="text-gray-500 text-sm">No tienes plantillas guardadas aún</p>
+                <p class="text-gray-500 text-sm">No tienes plantillas guardadas</p>
                 <p class="text-gray-600 text-xs mt-2">Usa el botón GUARDAR para crear una</p>
             </div>
         `;
     } else {
-        templateList.innerHTML = templates.map((template, index) => `
-            <div class="bg-dark-bg border border-dark-border rounded-xl p-4 hover:border-brand/40 transition-all group">
-                <div class="flex items-start justify-between">
+        templateList.innerHTML = MERGED_TEMPLATES.map((template, index) => `
+            <div class="bg-dark-bg border border-dark-border rounded-xl p-4 hover:border-brand/40 transition-all group relative overflow-hidden">
+                ${template.source === 'cloud'
+                ? '<div class="absolute top-0 right-0 bg-brand/20 text-brand text-[9px] px-2 py-0.5 rounded-bl-lg font-bold">NUBE ☁️</div>'
+                : '<div class="absolute top-0 right-0 bg-gray-700/20 text-gray-400 text-[9px] px-2 py-0.5 rounded-bl-lg font-bold">LOCAL 💾</div>'}
+                
+                <div class="flex items-start justify-between mt-2">
                     <div class="flex-1">
                         <h4 class="font-bold text-white group-hover:text-brand transition-colors">${template.name}</h4>
                         <div class="flex items-center gap-4 mt-2 text-xs text-gray-500">
@@ -339,7 +376,7 @@ function openTemplateModal() {
                             </span>
                             <span class="flex items-center gap-1">
                                 <i data-lucide="shopping-cart" class="w-3 h-3"></i>
-                                ${template.budget.length} ítems
+                                ${template.budget ? template.budget.length : 0} ítems
                             </span>
                             <span class="flex items-center gap-1">
                                 <i data-lucide="dollar-sign" class="w-3 h-3"></i>
@@ -352,10 +389,11 @@ function openTemplateModal() {
                             class="px-3 py-1.5 bg-brand/10 text-brand rounded-lg text-xs font-bold hover:bg-brand/20 transition-colors">
                             Cargar
                         </button>
+                        ${template.source === 'local' ? `
                         <button onclick="deleteTemplate(${index})" 
                             class="px-3 py-1.5 bg-red-500/10 text-red-400 rounded-lg text-xs font-bold hover:bg-red-500/20 transition-colors">
                             <i data-lucide="trash-2" class="w-3 h-3"></i>
-                        </button>
+                        </button>` : ''}
                     </div>
                 </div>
             </div>
@@ -364,7 +402,7 @@ function openTemplateModal() {
 
     modal.classList.remove('hidden');
     modal.classList.add('flex');
-    lucide.createIcons();
+    if (window.lucide) lucide.createIcons();
 }
 
 function closeTemplateModal() {
@@ -376,8 +414,8 @@ function closeTemplateModal() {
 }
 
 function loadTemplate(index) {
-    const templates = JSON.parse(localStorage.getItem('construmetrix_templates') || '[]');
-    const template = templates[index];
+    if (!MERGED_TEMPLATES || MERGED_TEMPLATES.length === 0) return;
+    const template = MERGED_TEMPLATES[index];
 
     if (!template) {
         showToast('Plantilla no encontrada', 'error');
