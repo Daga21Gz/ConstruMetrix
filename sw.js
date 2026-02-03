@@ -47,51 +47,35 @@ self.addEventListener('activate', event => {
 });
 
 // Fetch event - network first, fallback to cache
+// Stale-While-Revalidate Strategy
 self.addEventListener('fetch', event => {
     const { request } = event;
     const url = new URL(request.url);
 
-    // Skip cross-origin requests
-    if (url.origin !== location.origin) {
-        // For CDN resources, cache them runtime
-        if (request.url.includes('cdn') || request.url.includes('googleapis') || request.url.includes('unpkg')) {
-            event.respondWith(
-                caches.open(RUNTIME_CACHE).then(cache => {
-                    return cache.match(request).then(response => {
-                        return response || fetch(request).then(networkResponse => {
-                            cache.put(request, networkResponse.clone());
-                            return networkResponse;
-                        });
-                    });
-                })
-            );
-        }
+    // 1. API / Cloud calls: Network Only
+    if (url.origin !== location.origin && !request.url.includes('cdn') && !request.url.includes('unpkg')) {
         return;
     }
 
-    // Network first, fallback to cache strategy
+    // 2. Static Assets & App Shell: Stale-While-Revalidate
     event.respondWith(
-        fetch(request)
-            .then(response => {
-                // Clone response for cache
-                const responseClone = response.clone();
-                caches.open(RUNTIME_CACHE).then(cache => {
-                    cache.put(request, responseClone);
-                });
-                return response;
-            })
-            .catch(() => {
-                // Network failed, try cache
-                return caches.match(request).then(response => {
-                    if (response) {
-                        return response;
+        caches.open(RUNTIME_CACHE).then(cache => {
+            return cache.match(request).then(cachedResponse => {
+                const fetchPromise = fetch(request).then(networkResponse => {
+                    // Update cache with new version
+                    if (networkResponse && networkResponse.status === 200) {
+                        cache.put(request, networkResponse.clone());
                     }
-                    // If no cache, return offline page or error
-                    if (request.destination === 'document') {
-                        return caches.match('./index.html');
-                    }
+                    return networkResponse;
+                }).catch(() => {
+                    // Start offline fallback if network fails
+                    return cachedResponse;
                 });
-            })
+
+                // Return cached response immediately if available, otherwise wait for network
+                return cachedResponse || fetchPromise;
+            });
+        })
     );
 });
 
