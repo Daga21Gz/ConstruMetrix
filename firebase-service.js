@@ -32,8 +32,10 @@ try {
             currentUser = user;
             updateAuthUI(user);
             if (user) {
-                // Future: Sync templates automatically
                 console.log(`User Logged In: ${user.email}`);
+            } else {
+                // Inject Live Stats into Welcome Screen
+                updateWelcomeStats();
             }
         });
     }
@@ -58,14 +60,35 @@ window.loginWithGoogle = function () {
 window.loginWithMicrosoft = function () {
     if (!auth) return;
     const provider = new firebase.auth.OAuthProvider('microsoft.com');
+
+    // Multi-tenant configuration
+    provider.setCustomParameters({
+        prompt: 'select_account'
+    });
+
     auth.signInWithPopup(provider)
         .then((result) => {
             showToast(`Azure AD: ${result.user.displayName}`, "success");
         }).catch((error) => {
-            console.error(error);
-            showToast("Error Microsoft: " + error.code, "error");
+            console.error("Microsoft Auth Error:", error);
+            if (error.code === 'auth/unauthorized-domain') {
+                showToast("Dominio no autorizado en Firebase Console", "error");
+            } else {
+                showToast("Error Microsoft: " + error.code, "error");
+            }
         });
 };
+
+function updateWelcomeStats() {
+    setTimeout(() => {
+        const statsEl = document.getElementById('liveStatsCount');
+        if (statsEl && window.OFFICIAL_SOURCES) {
+            const count = window.OFFICIAL_SOURCES.length || 12;
+            statsEl.textContent = count;
+            statsEl.parentElement.classList.remove('opacity-0');
+        }
+    }, 1000);
+}
 
 window.loginWithEmail = function () {
     const email = document.getElementById('authEmail').value;
@@ -84,6 +107,50 @@ window.loginWithEmail = function () {
             console.error(error);
             showToast("Credenciales inválidas", "error");
         });
+};
+
+window.registerWithEmail = function () {
+    const email = document.getElementById('authEmail').value;
+    const pass = document.getElementById('authPass').value;
+
+    if (!email || !pass) {
+        showToast("Completa todos los campos", "warning");
+        return;
+    }
+    if (pass.length < 6) {
+        showToast("Mínimo 6 caracteres", "warning");
+        return;
+    }
+
+    auth.createUserWithEmailAndPassword(email, pass)
+        .then((userCredential) => {
+            showToast("Cuenta PRO Creada", "success");
+        })
+        .catch((error) => {
+            console.error(error);
+            showToast(error.message, "error");
+        });
+};
+
+window.toggleAuthMode = function () {
+    const title = document.querySelector('#authOverlay h2 span');
+    const subtitle = document.querySelector('#authOverlay p.uppercase');
+    const mainBtn = document.querySelector('#authOverlay button[onclick^="loginWithEmail"], #authOverlay button[onclick^="registerWithEmail"]');
+    const toggleBtn = document.getElementById('toggleAuthBtn');
+
+    if (mainBtn.getAttribute('onclick').includes('loginWithEmail')) {
+        title.textContent = "REGISTRO";
+        subtitle.textContent = "Crea tu Cuenta Profesional";
+        mainBtn.textContent = "Crear Cuenta PRO";
+        mainBtn.setAttribute('onclick', 'registerWithEmail()');
+        toggleBtn.textContent = "¿Ya tienes cuenta? Entrar";
+    } else {
+        title.textContent = "TÉCNICO";
+        subtitle.textContent = "Seguridad Grado Industrial";
+        mainBtn.textContent = "Ingresar al Sistema";
+        mainBtn.setAttribute('onclick', 'loginWithEmail()');
+        toggleBtn.textContent = "Crear Cuenta PRO";
+    }
 };
 
 window.logout = function () {

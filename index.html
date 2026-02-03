@@ -1690,11 +1690,24 @@
                     Ecosistema Inmobiliario 2026
                 </div>
 
-                <h1 class="text-5xl lg:text-7xl font-black text-white leading-[0.9] tracking-tighter">
+                <h2 class="text-5xl lg:text-7xl font-black text-white leading-[0.9] tracking-tighter">
                     LA PRÓXIMA <br />
                     <span class="text-shimmer">FRONTERA</span> <br />
                     <span class="text-gray-600">DEL AVALÚO.</span>
-                </h1>
+                </h2>
+
+                <div class="flex items-center gap-6 opacity-0 transition-opacity duration-1000">
+                    <div class="flex flex-col">
+                        <span id="liveStatsCount" class="text-2xl font-black text-brand">--</span>
+                        <span class="text-[9px] text-gray-600 uppercase font-bold tracking-widest">Fuentes
+                            Activas</span>
+                    </div>
+                    <div class="w-px h-8 bg-white/10"></div>
+                    <div class="flex flex-col">
+                        <span class="text-2xl font-black text-white">4.5</span>
+                        <span class="text-[9px] text-gray-600 uppercase font-bold tracking-widest">Engine v3.0</span>
+                    </div>
+                </div>
 
                 <p class="text-gray-400 text-lg font-medium max-w-lg leading-relaxed">
                     ConstruMetrix es la plataforma de inteligencia geoespacial diseñada para la ingeniería de precisión
@@ -1772,7 +1785,7 @@
 
                         <button onclick="loginWithMicrosoft()"
                             class="w-full h-14 flex items-center justify-center gap-3 rounded-2xl bg-[#00A4EF]/10 border border-[#00A4EF]/30 text-[#00A4EF] font-black text-xs uppercase tracking-widest hover:bg-[#00A4EF]/20 transition-all">
-                            <i data-lucide="window" class="w-5 h-5"></i>
+                            <i data-lucide="layout-grid" class="w-5 h-5"></i>
                             Microsoft ID
                         </button>
 
@@ -1806,7 +1819,7 @@
                             <button
                                 class="text-[10px] text-gray-600 hover:text-brand transition-colors font-bold uppercase tracking-widest">Recuperar
                                 Token</button>
-                            <button
+                            <button id="toggleAuthBtn" onclick="toggleAuthMode()"
                                 class="text-[10px] text-brand hover:underline transition-all font-bold uppercase tracking-widest font-mono">Crear
                                 Cuenta PRO</button>
                         </div>
