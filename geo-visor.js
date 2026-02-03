@@ -632,9 +632,17 @@
         const tableBody = document.getElementById('gisTableBody');
         const layerTitle = document.getElementById('gisTableTitle');
         const countBadge = document.getElementById('gisTableCount');
+        const filterInput = document.getElementById('gisTableFilter');
 
         if (layerTitle) layerTitle.textContent = GIS_TABLE.activeLayer.toUpperCase();
         if (countBadge) countBadge.textContent = `${GIS_TABLE.filteredData.length} Registros`;
+
+        // Bind Filter Input
+        if (filterInput) {
+            filterInput.value = ''; // Reset search
+            filterInput.oninput = (e) => filterGisTable(e.target.value);
+            filterInput.focus();
+        }
 
         if (GIS_TABLE.data.length === 0) return;
 
@@ -705,6 +713,32 @@
         if (GIS_TABLE.data.length > 0) {
             const keys = Object.keys(GIS_TABLE.data[0]).filter(k => k !== '_gid' && k !== '_geometry' && k !== 'geometry');
             renderTableRows(tableBody, keys);
+        }
+
+        // --- AUTO ZOOM TO RESULTS ---
+        if (query.length > 2 && GIS_TABLE.filteredData.length > 0) {
+            try {
+                // Reconstruct simple GeoJSON from filtered rows
+                const features = GIS_TABLE.filteredData
+                    .filter(d => d._geometry) // Ensure geometry exists
+                    .map(d => ({
+                        type: "Feature",
+                        geometry: d._geometry,
+                        properties: {}
+                    }));
+
+                if (features.length > 0) {
+                    const tempLayer = L.geoJSON({ type: "FeatureCollection", features: features });
+                    const bounds = tempLayer.getBounds();
+                    if (bounds && bounds.isValid()) {
+                        GIS_STATE.map.fitBounds(bounds, { padding: [100, 100], maxZoom: 18, animate: true, duration: 1.5 });
+                    }
+                }
+            } catch (err) {
+                console.warn("Auto-zoom error:", err);
+            }
+        } else if (GIS_TABLE.filteredData.length === 0) {
+            updateGisStatus("⚠️ No se encontraron coincidencias", "error");
         }
     };
 

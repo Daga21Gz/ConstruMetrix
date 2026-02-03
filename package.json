@@ -1,0 +1,22 @@
+{
+    "name": "construmetrix",
+    "version": "5.2.0",
+    "description": "Plataforma de ingeniería para avalúos comerciales y análisis geoespacial.",
+    "scripts": {
+        "start": "npx serve .",
+        "test": "echo \"Error: no test specified\" && exit 1",
+        "build": "echo \"Building project...\""
+    },
+    "keywords": [
+        "construction",
+        "analytics",
+        "gis",
+        "valuation"
+    ],
+    "author": "Albert Daniel G",
+    "license": "ISC",
+    "dependencies": {},
+    "devDependencies": {
+        "serve": "^14.2.1"
+    }
+}

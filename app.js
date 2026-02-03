@@ -693,21 +693,74 @@ document.addEventListener('DOMContentLoaded', async () => {
         barChart.update();
     }
 
-    // --- 5. RENDERERS ---
+    // --- VIRTUALIZATION / INFINITE SCROLL STATE ---
+    let observer;
+    const pageSize = 24;
+    let currentPage = 1;
+    let currentFilteredItems = [];
 
-    function renderGrid() {
-        UI.grid.innerHTML = '';
+    function renderGrid(reset = true) {
+        if (reset) {
+            UI.grid.innerHTML = '';
+            currentPage = 1;
+            window.scrollTo(0, 0); // Optional: reset scroll
+        }
+
         const term = UI.searchInput.value.toLowerCase();
 
-        const filtered = allItems.filter(i => {
-            const matchesChapter = !STATE.activeChapter || i.codigo.startsWith(STATE.activeChapter);
-            const matchesTerm = i.nombre.toLowerCase().includes(term) ||
-                i.codigo.toLowerCase().includes(term) ||
-                i.clase.toLowerCase().includes(term);
-            return matchesChapter && matchesTerm;
-        }).slice(0, 48); // Limit for performance
+        // 1. Filter full dataset once (if reset)
+        if (reset) {
+            currentFilteredItems = allItems.filter(i => {
+                const matchesChapter = !STATE.activeChapter || i.codigo.startsWith(STATE.activeChapter);
+                const matchesTerm = i.nombre.toLowerCase().includes(term) ||
+                    i.codigo.toLowerCase().includes(term) ||
+                    i.clase.toLowerCase().includes(term);
+                return matchesChapter && matchesTerm;
+            });
+        }
 
-        filtered.forEach(item => {
+        // 2. Slice page
+        const start = (currentPage - 1) * pageSize;
+        const end = start + pageSize;
+        const pageItems = currentFilteredItems.slice(start, end);
+
+        // 3. Render Batch
+        loadMoreItems(pageItems);
+
+        // 4. Setup Infinite Scroll Sentinel
+        if (end < currentFilteredItems.length) {
+            setupSentinel();
+        }
+    }
+
+    function setupSentinel() {
+        if (observer) observer.disconnect();
+
+        // Remove old sentinel if exists
+        const oldSentinel = document.getElementById('grid-sentinel');
+        if (oldSentinel) oldSentinel.remove();
+
+        // Create new sentinel
+        const sentinel = document.createElement('div');
+        sentinel.id = 'grid-sentinel';
+        sentinel.className = 'col-span-1 md:col-span-2 xl:col-span-3 2xl:col-span-4 h-20 flex items-center justify-center';
+        sentinel.innerHTML = '<div class="w-6 h-6 border-2 border-brand border-t-transparent rounded-full animate-spin"></div>'; // Loader
+        UI.grid.appendChild(sentinel);
+
+        observer = new IntersectionObserver(entries => {
+            if (entries[0].isIntersecting) {
+                currentPage++;
+                sentinel.remove(); // Remove loader before adding new items
+                renderGrid(false); // Render next batch (no reset)
+            }
+        }, { root: null, rootMargin: '200px' });
+
+        observer.observe(sentinel);
+    }
+
+    function loadMoreItems(items) {
+        // UI.grid is NOT cleared here (append mode)
+        items.forEach(item => {
             const definedPrice = item.precios[STATE.meta.region] || 0;
             const customPrice = STATE.editedPrices[item.codigo];
             const hasCustom = customPrice !== undefined;

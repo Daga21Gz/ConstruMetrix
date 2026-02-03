@@ -57,6 +57,10 @@
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <link rel="stylesheet" href="elite-colors.css">
     <link rel="stylesheet" href="animations.css">
+    <!-- Export Libraries -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.5.31/jspdf.plugin.autotable.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
     <script>
         tailwind.config = {
             darkMode: 'class',
@@ -1095,13 +1099,13 @@
                                 <span
                                     class="text-[8px] font-black text-gray-600 uppercase tracking-widest absolute top-3 left-4">Peso
                                     de Costos</span>
-                                <canvas id="costDoughnutChart"></canvas>
+                                <canvas id="costDoughnut"></canvas>
                             </div>
                             <div class="bg-dark-bg/60 border border-dark-border/40 p-4 rounded-2xl relative h-48">
                                 <span
                                     class="text-[8px] font-black text-gray-600 uppercase tracking-widest absolute top-3 left-4">Top
                                     Capítulos</span>
-                                <canvas id="budgetBarChart"></canvas>
+                                <canvas id="chapterBar"></canvas>
                             </div>
                         </div>
                     </div>
