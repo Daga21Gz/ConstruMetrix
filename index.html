@@ -3,7 +3,7 @@
 
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=5.0">
     <meta name="description"
         content="CONSTRUMETRIX - Plataforma profesional para análisis financiero, avalúos comerciales y valoración técnica de proyectos de construcción.">
     <title>CONSTRUMETRIX | Financial Construction Analytics</title>
@@ -12,6 +12,19 @@
     <meta name="theme-color" content="#f7fc00">
     <meta name="mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <meta name="robots" content="index, follow">
+
+    <!-- SECURITY: Content Security Policy (CSP) -->
+    <meta http-equiv="Content-Security-Policy"
+        content="default-src 'self'; script-src 'self' 'unsafe-inline' 'unsafe-eval' https://cdn.tailwindcss.com https://unpkg.com https://cdnjs.cloudflare.com https://cdn.jsdelivr.net; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com https://unpkg.com; font-src 'self' https://fonts.gstatic.com; img-src 'self' data: blob: https:; connect-src 'self' https:;">
+
+    <!-- OPEN GRAPH (Social SEO) -->
+    <meta property="og:type" content="website">
+    <meta property="og:title" content="CONSTRUMETRIX | Expert Construction Analytics">
+    <meta property="og:description"
+        content="Plataforma de ingeniería para avalúos comerciales, análisis Ross-Heidecke y visualización geoespacial de infraestructura.">
+    <meta property="og:image" content="https://construmetrix.app/og-preview.jpg">
+    <meta property="og:url" content="https://construmetrix.app">
 
     <script>
         // --- PRO PROTECTION: SILENCE WARNINGS ---
@@ -1289,7 +1302,8 @@
                         class="pl-9 pr-4 py-1.5 rounded-lg bg-black/40 border border-white/10 text-xs text-white placeholder-gray-600 focus:border-brand focus:outline-none w-64 transition-all">
                 </div>
                 <button onclick="closeAttributeTable()"
-                    class="p-1.5 rounded hover:bg-white/10 text-gray-400 hover:text-white transition-colors">
+                    class="p-1.5 rounded hover:bg-white/10 text-gray-400 hover:text-white transition-colors"
+                    aria-label="Cerrar Tabla de Atributos">
                     <i data-lucide="x" class="w-4 h-4"></i>
                 </button>
             </div>
@@ -1572,12 +1586,14 @@
             <!-- Map Controls Float -->
             <div
                 class="absolute bottom-10 left-1/2 -translate-x-1/2 z-[100] flex items-center gap-2 p-2 rounded-2xl bg-dark-card/80 border border-white/10 backdrop-blur-xl shadow-2xl">
-                class="px-4 py-2 rounded-xl bg-brand/20 border border-brand/50 text-brand text-[9px] font-black
-                uppercase tracking-widest active">Satélite
-                Hi-Res</button>
-                <button id="btnDarkView"
-                    class="px-4 py-2 rounded-xl hover:bg-white/5 text-gray-500 text-[9px] font-black uppercase tracking-widest">Mapa
-                    Técnico</button>
+                <button id="btnSatView" onclick="setMapStyle('satellite')"
+                    class="px-4 py-2 rounded-xl bg-brand/20 border border-brand/50 text-brand text-[9px] font-black uppercase tracking-widest hover:bg-brand/30 transition-all">
+                    Satélite Hi-Res
+                </button>
+                <button id="btnDarkView" onclick="setMapStyle('dark')"
+                    class="px-4 py-2 rounded-xl hover:bg-white/5 text-gray-500 hover:text-white border border-transparent hover:border-white/10 text-[9px] font-black uppercase tracking-widest transition-all">
+                    Mapa Técnico
+                </button>
             </div>
         </div>
     </div>

@@ -78,7 +78,7 @@
                 renderer: L.canvas() // Restauramos motor Canvas para velocidad
             });
 
-            L.tileLayer('https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}', {
+            GIS_STATE.basemap = L.tileLayer('https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}', {
                 maxZoom: 19
             }).addTo(GIS_STATE.map);
 
@@ -96,8 +96,8 @@
             const towersPane = GIS_STATE.map.createPane('towersPane');
             towersPane.style.zIndex = 650; // Top: Torres
 
-            // Permitir clicks en IGAC pero no en la infraestructura visual si molesta
-            linesPane.style.pointerEvents = towersPane.style.pointerEvents = servPane.style.pointerEvents = 'none';
+            // Permitir clicks (auto) para que funcione el raycast
+            linesPane.style.pointerEvents = towersPane.style.pointerEvents = servPane.style.pointerEvents = 'auto';
 
             // --- CADASTRAL LAYERS INITIALIZATION ---
             setupCadastralLayers();
@@ -598,7 +598,15 @@
 
     // --- ATTRIBUTE TABLE ENGINE (v5.0) ---
     window.openAttributeTable = function (layerKey) {
+        // Feature: Auto-select 'lines' if no layer specified (UX improvement)
+        if (!layerKey) layerKey = 'lines';
+
         if (!GIS_STATE.cache[layerKey]) {
+            // Si la capa 'lines' no está lista, intentar cargar datos básicos o mostrar aviso
+            if (layerKey === 'lines' && !GIS_STATE.cache.lines) {
+                updateGisStatus("⏳ Esperando datos del servidor...", "info");
+                return;
+            }
             updateGisStatus("⚠️ Capa no cargada o sin datos.", "error");
             return;
         }
@@ -733,6 +741,52 @@
         if (p) {
             p.classList.remove('flex');
             p.classList.add('hidden');
+        }
+    };
+
+    // --- MAP STYLE SWITCHER ---
+    window.setMapStyle = function (style) {
+        if (!GIS_STATE.map) return;
+
+        const satBtn = document.getElementById('btnSatView');
+        const darkBtn = document.getElementById('btnDarkView');
+
+        // Helper to update button styles
+        const setActive = (btn, active) => {
+            if (!btn) return;
+            if (active) {
+                // Style Active
+                btn.className = "px-4 py-2 rounded-xl bg-brand/20 border border-brand/50 text-brand text-[9px] font-black uppercase tracking-widest hover:bg-brand/30 transition-all";
+            } else {
+                // Style Inactive
+                btn.className = "px-4 py-2 rounded-xl hover:bg-white/5 text-gray-500 hover:text-white border border-transparent hover:border-white/10 text-[9px] font-black uppercase tracking-widest transition-all";
+            }
+        };
+
+        if (style === 'satellite') {
+            // Switch to Satellite
+            GIS_STATE.basemap.remove();
+            GIS_STATE.basemap = L.tileLayer('https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}', {
+                attribution: 'Tiles &copy; Esri',
+                maxZoom: 19
+            }).addTo(GIS_STATE.map);
+
+            setActive(satBtn, true);
+            setActive(darkBtn, false);
+            updateGisStatus("🌍 Vista Satelital Activada", "success");
+
+        } else {
+            // Switch to Dark / Technical
+            GIS_STATE.basemap.remove();
+            GIS_STATE.basemap = L.tileLayer('https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png', {
+                attribution: '&copy; CartoDB',
+                subdomains: 'abcd',
+                maxZoom: 20
+            }).addTo(GIS_STATE.map);
+
+            setActive(satBtn, false);
+            setActive(darkBtn, true);
+            updateGisStatus("🌑 Mapa Técnico Activado", "info");
         }
     };
 

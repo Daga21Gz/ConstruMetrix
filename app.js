@@ -278,6 +278,25 @@ document.addEventListener('DOMContentLoaded', async () => {
             setupResponsiveListeners();
             setupIntelligenceListeners();
 
+            // Edit Mode Listener
+            if (UI.btnEditMode) {
+                UI.btnEditMode.onclick = () => {
+                    STATE.isEditMode = !STATE.isEditMode;
+                    UI.btnEditMode.setAttribute('data-active', STATE.isEditMode);
+
+                    // Visual feedback
+                    const dot = UI.btnEditMode.querySelector('.toggle-dot');
+                    if (dot) {
+                        dot.style.transform = STATE.isEditMode ? 'translateX(100%)' : 'translateX(0)';
+                        dot.classList.toggle('bg-brand', STATE.isEditMode);
+                        dot.classList.toggle('bg-gray-400', !STATE.isEditMode);
+                    }
+
+                    showToast(STATE.isEditMode ? "🖊️ Modo Edición Activado" : "🔒 Modo Lectura", "info");
+                    renderGrid();
+                };
+            }
+
             // Hide skeletons
             hideSkeletonLoaders();
 
@@ -620,7 +639,7 @@ document.addEventListener('DOMContentLoaded', async () => {
 
             // Visual feedback based on gap
             UI.gisGapPct.className = `px-2 py-1 rounded text-[10px] font-black ${Math.abs(gapPct) < 15 ? 'bg-emerald-500/20 text-emerald-400' :
-                    Math.abs(gapPct) < 40 ? 'bg-yellow-500/20 text-yellow-400' : 'bg-red-500/20 text-red-400'
+                Math.abs(gapPct) < 40 ? 'bg-yellow-500/20 text-yellow-400' : 'bg-red-500/20 text-red-400'
                 }`;
 
             if (gapValue > 0) {
