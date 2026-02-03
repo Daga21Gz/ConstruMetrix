@@ -12,6 +12,10 @@ const STATIC_ASSETS = [
     './blueprints.js',
     './items.json',
     './unidades_construccion.json',
+    './lines.geojson',
+    './towers.geojson',
+    './Servidumbre.geojson',
+    './gis-worker.js',
     './favicon.svg',
     './manifest.json'
 ];

@@ -362,74 +362,43 @@
         }
     }
 
-    // Motor de transformación asíncrona por lotes
+    // Motor de transformación ultra-rápido vía Web Worker (v5.5)
     async function transformGeoJSONAsync(data, label) {
-        if (!window.proj4) return data;
-        const source = GIS_STATE.projections.magna;
-        const dest = 'EPSG:4326';
-        const features = data.features;
-        const batchSize = 2000;
-        let processed = 0;
+        if (!window.Worker) {
+            console.warn("Workers not supported, falling back to main thread.");
+            return data;
+        }
 
         return new Promise((resolve) => {
-            function processBatch() {
-                const limit = Math.min(processed + batchSize, features.length);
-                for (let i = processed; i < limit; i++) {
-                    const f = features[i];
-                    if (!f.geometry || !f.geometry.coordinates) continue;
+            const worker = new Worker('gis-worker.js');
+            const source = GIS_STATE.projections.magna;
+            const dest = 'EPSG:4326';
 
-                    try {
-                        const coords = f.geometry.coordinates;
+            worker.onmessage = function (e) {
+                const { action, current, total, data: transformedData } = e.data;
 
-                        // AUTO-DETECT: Si las coordenadas parecen Lat/Lng (menores a 180), saltar proyección
-                        let sampleCoord = null;
-                        if (f.geometry.type === 'Point') sampleCoord = coords;
-                        else if (f.geometry.type === 'LineString') sampleCoord = coords[0];
-                        else if (f.geometry.type === 'MultiPolygon') sampleCoord = coords[0][0][0];
-                        else if (f.geometry.type === 'Polygon') sampleCoord = coords[0][0];
-
-                        if (sampleCoord && Math.abs(sampleCoord[0]) <= 180 && Math.abs(sampleCoord[1]) <= 90) {
-                            // Ya está en WGS84, no proyectar
-                            continue;
-                        }
-
-                        if (f.geometry.type === 'Point') {
-                            // Soportamos XY y XYZ filtrando para Proj4
-                            const p = proj4(source, dest, [coords[0], coords[1]]);
-                            f.geometry.coordinates = [p[0], p[1]];
-                        } else if (f.geometry.type === 'LineString') {
-                            f.geometry.coordinates = coords.map(pt => {
-                                const p = proj4(source, dest, [pt[0], pt[1]]);
-                                return [p[0], p[1]];
-                            });
-                        } else if (f.geometry.type === 'Polygon') {
-                            f.geometry.coordinates = coords.map(ring => ring.map(pt => {
-                                const p = proj4(source, dest, [pt[0], pt[1]]);
-                                return [p[0], p[1]];
-                            }));
-                        } else if (f.geometry.type === 'MultiPolygon') {
-                            f.geometry.coordinates = coords.map(poly => poly.map(ring => ring.map(pt => {
-                                const p = proj4(source, dest, [pt[0], pt[1]]);
-                                return [p[0], p[1]];
-                            })));
-                        } else if (f.geometry.type === 'MultiLineString') {
-                            f.geometry.coordinates = coords.map(line => line.map(pt => {
-                                const p = proj4(source, dest, [pt[0], pt[1]]);
-                                return [p[0], p[1]];
-                            }));
-                        }
-                    } catch (e) { }
+                if (action === 'progress') {
+                    const percent = Math.round((current / total) * 100);
+                    updateGisStatus(`⚙️ Procesando ${label}: ${percent}%`, "info");
+                } else if (action === 'complete') {
+                    updateGisStatus(`✔ ${label} procesadas: ${transformedData.features.length}`, "success");
+                    worker.terminate();
+                    resolve(transformedData);
                 }
+            };
 
-                processed = limit;
-                if (processed < features.length) {
-                    setTimeout(processBatch, 0);
-                } else {
-                    updateGisStatus(`✔ ${label} procesadas: ${features.length}`, "success");
-                    resolve(data);
-                }
-            }
-            processBatch();
+            worker.onerror = function (err) {
+                console.error("Worker Error:", err);
+                worker.terminate();
+                resolve(data); // Fallback to original
+            };
+
+            worker.postMessage({
+                action: 'transform',
+                data: data,
+                source: source,
+                dest: dest
+            });
         });
     }
 
@@ -487,28 +456,46 @@
         });
 
         // Motor de Etiquetas Dinámicas (LOD + Viewport)
+        // Throttled Label Motor (v5.2) - Avoids UI freezing
+        let labelThrottle = null;
         const updateDynamicLabels = () => {
-            const z = GIS_STATE.map.getZoom();
-            const bounds = GIS_STATE.map.getBounds();
+            if (labelThrottle) return;
+            labelThrottle = setTimeout(() => {
+                const z = GIS_STATE.map.getZoom();
+                const bounds = GIS_STATE.map.getBounds();
 
-            // Torres: Solo procesamos etiquetas si estamos muy cerca (Z17+)
-            if (z >= 17) {
-                GIS_STATE.layers.towers.eachLayer(l => {
-                    const latlng = l.getLatLng();
-                    if (bounds.contains(latlng)) {
-                        if (!l.getTooltip()) {
-                            l.bindTooltip(l.feature.properties.Torre_No.replace('Torre ', 'T-'), {
-                                permanent: true, direction: 'top', className: 'gis-label-expert', offset: [0, -8]
-                            });
+                // Only process labels if zoomed in (Z17+)
+                if (z >= 17) {
+                    // Optimized: Only walk through towers that ARE in the viewport using GIS_TABLE data as reference
+                    const visibleTowers = GIS_TABLE.data.filter(d => {
+                        if (!d._geometry || d._geometry.type !== 'Point') return false;
+                        const coords = d._geometry.coordinates;
+                        // Fast bounds check before anything else
+                        return coords[1] >= bounds.getSouth() && coords[1] <= bounds.getNorth() &&
+                            coords[0] >= bounds.getWest() && coords[0] <= bounds.getEast();
+                    });
+
+                    // Update corresponding Leaflet layers
+                    GIS_STATE.layers.towers.eachLayer(l => {
+                        const fid = l.feature.properties._gid || l.feature.properties.Torre_No;
+                        const isVisible = visibleTowers.some(vt => vt.Torre_No === l.feature.properties.Torre_No);
+
+                        if (isVisible) {
+                            if (!l.getTooltip()) {
+                                l.bindTooltip(l.feature.properties.Torre_No.replace('Torre ', 'T-'), {
+                                    permanent: true, direction: 'top', className: 'gis-label-expert', offset: [0, -8]
+                                });
+                            }
+                        } else if (l.getTooltip()) {
+                            l.unbindTooltip();
                         }
-                    } else if (l.getTooltip()) {
-                        l.unbindTooltip();
-                    }
-                });
-            } else {
-                // Limpieza masiva si nos alejamos
-                GIS_STATE.layers.towers.eachLayer(l => { if (l.getTooltip()) l.unbindTooltip(); });
-            }
+                    });
+                } else {
+                    // Mass cleanup when zooming out
+                    GIS_STATE.layers.towers.eachLayer(l => { if (l.getTooltip()) l.unbindTooltip(); });
+                }
+                labelThrottle = null;
+            }, 500); // 500ms delay to allow scroll to settle
         };
 
         GIS_STATE.map.on('moveend zoomend', updateDynamicLabels);
@@ -723,7 +710,10 @@
             btn.title = "Exportar Vista a CSV";
             btn.onclick = exportGisTableToCSV;
             layerTitle.parentNode.appendChild(btn);
-            if (window.lucide) lucide.createIcons();
+        }
+
+        if (window.lucide) {
+            lucide.createIcons();
         }
 
         if (GIS_TABLE.data.length === 0) return;
@@ -763,30 +753,31 @@
     }
 
     function renderTableRows(tbody, keys) {
-        tbody.innerHTML = '';
-
         const start = (GIS_TABLE.currentPage - 1) * GIS_TABLE.rowsPerPage;
         const end = start + GIS_TABLE.rowsPerPage;
         const pageData = GIS_TABLE.filteredData.slice(start, end);
 
+        let htmlContent = '';
+
         pageData.forEach(row => {
             const isSelected = GIS_TABLE.selectedGids.has(row._gid);
-            const tr = document.createElement('tr');
-            tr.className = `border-b border-gray-800 hover:bg-white/5 transition-colors group ${isSelected ? 'bg-brand/10' : ''}`;
-            tr.innerHTML = `
-                <td class="p-2 text-center border-b border-white/5">
-                    <input type="checkbox" class="row-selector rounded bg-black/40 border-white/10 text-brand focus:ring-brand" data-gid="${row._gid}" ${isSelected ? 'checked' : ''}>
-                </td>
-                <td class="p-2 text-[10px] text-gray-500 font-mono border-b border-white/5">${row._gid}</td>
-                ${keys.map(k => `<td class="p-2 text-[10px] text-gray-300 whitespace-nowrap overflow-hidden text-ellipsis max-w-[150px] border-b border-white/5" title="${row[k]}">${row[k] || '--'}</td>`).join('')}
-                <td class="p-2 text-right border-b border-white/5 border-l border-white/10 sticky right-0 bg-[#0a0c10] z-[50] shadow-[-5px_0_10px_rgba(0,0,0,0.5)]">
-                    <button type="button" class="action-zoom-btn" style="background-color: #2563eb !important; color: #ffffff !important; padding: 6px 14px; border-radius: 6px; font-weight: 900; font-size: 11px; text-transform: uppercase; border: 1px solid rgba(255,255,255,0.3); display: inline-flex; align-items: center; gap: 6px; cursor: pointer; white-space: nowrap;" data-gid="${row._gid}">
-                        🔍 VER
-                    </button>
-                </td>
+            htmlContent += `
+                <tr class="border-b border-gray-800 hover:bg-white/5 transition-colors group ${isSelected ? 'bg-brand/10' : ''}">
+                    <td class="p-2 text-center border-b border-white/5">
+                        <input type="checkbox" class="row-selector rounded bg-black/40 border-white/10 text-brand focus:ring-brand" data-gid="${row._gid}" ${isSelected ? 'checked' : ''}>
+                    </td>
+                    <td class="p-2 text-[10px] text-gray-500 font-mono border-b border-white/5">${row._gid}</td>
+                    ${keys.map(k => `<td class="p-2 text-[10px] text-gray-300 whitespace-nowrap overflow-hidden text-ellipsis max-w-[150px] border-b border-white/5" title="${row[k]}">${row[k] || '--'}</td>`).join('')}
+                    <td class="p-2 text-right border-b border-white/5 border-l border-white/10 sticky right-0 bg-[#0a0c10] z-[50] shadow-[-5px_0_10px_rgba(0,0,0,0.5)]">
+                        <button type="button" class="action-zoom-btn gis-action-btn" style="background-color: #2563eb !important; color: #ffffff !important; padding: 6px 14px; border-radius: 6px; font-weight: 900; font-size: 11px; text-transform: uppercase; border: 1px solid rgba(255,255,255,0.3); display: inline-flex; align-items: center; gap: 6px; cursor: pointer; white-space: nowrap;" data-gid="${row._gid}">
+                            🔍 VER
+                        </button>
+                    </td>
+                </tr>
             `;
-            tbody.appendChild(tr);
         });
+
+        tbody.innerHTML = htmlContent;
 
         // Add event listeners for checkboxes
         document.querySelectorAll('.row-selector').forEach(cb => {
@@ -841,28 +832,38 @@
             }
         }
 
-        // --- AUTO ZOOM TO RESULTS (Smart FlyTo) ---
-        if (query.length > 2 && GIS_TABLE.filteredData.length > 0) {
+        // --- OPTIMIZED AUTO ZOOM ---
+        // Solo hacemos zoom si el resultado es menor a 200 para evitar bloqueos
+        if (query.length > 2 && GIS_TABLE.filteredData.length > 0 && GIS_TABLE.filteredData.length < 200) {
             try {
-                const features = GIS_TABLE.filteredData
-                    .filter(d => d._geometry)
-                    .map(d => ({ type: "Feature", geometry: d._geometry, properties: {} }));
+                let minLat = Infinity, minLng = Infinity, maxLat = -Infinity, maxLng = -Infinity;
+                let found = false;
 
-                if (features.length > 0) {
-                    const tempLayer = L.geoJSON({ type: "FeatureCollection", features: features });
-                    const bounds = tempLayer.getBounds();
+                GIS_TABLE.filteredData.forEach(d => {
+                    if (!d._geometry) return;
+                    const coords = d._geometry.coordinates;
+                    const type = d._geometry.type;
 
-                    if (bounds && bounds.isValid()) {
-                        GIS_STATE.map.flyToBounds(bounds, {
-                            padding: [100, 100],
-                            maxZoom: 18,
-                            duration: 1.5,
-                            easeLinearity: 0.25
-                        });
+                    const processCoord = (c) => {
+                        if (c[1] < minLat) minLat = c[1];
+                        if (c[0] < minLng) minLng = c[0];
+                        if (c[1] > maxLat) maxLat = c[1];
+                        if (c[0] > maxLng) maxLng = c[0];
+                        found = true;
+                    };
+
+                    if (type === 'Point') processCoord(coords);
+                    else if (type === 'LineString' || type === 'Polygon') (type === 'Polygon' ? coords[0] : coords).forEach(processCoord);
+                });
+
+                if (found) {
+                    const bounds = L.latLngBounds([minLat, minLng], [maxLat, maxLng]);
+                    if (bounds.isValid()) {
+                        GIS_STATE.map.flyToBounds(bounds, { padding: [100, 100], maxZoom: 18, duration: 1 });
                     }
                 }
             } catch (err) {
-                console.warn("Auto-zoom error:", err);
+                console.warn("Fast-zoom error:", err);
             }
         } else if (GIS_TABLE.filteredData.length === 0 && query.length > 0) {
             updateGisStatus("⚠️ No se encontraron coincidencias", "error");
