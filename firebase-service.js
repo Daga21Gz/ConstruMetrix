@@ -7,12 +7,13 @@
 // IMPORTANT: Replace these values with your actual Firebase Project keys.
 // Get them from: Firebase Console > Project Settings > General > Your Apps
 const firebaseConfig = {
-    apiKey: "YOUR_API_KEY_HERE",
-    authDomain: "your-project-id.firebaseapp.com",
-    projectId: "your-project-id",
-    storageBucket: "your-project-id.appspot.com",
-    messagingSenderId: "123456789",
-    appId: "1:123456789:web:abcdef123456"
+    apiKey: "AIzaSyAksh0w8PWqAgd_jLJDZfuId971xJjYE78",
+    authDomain: "construmetrix.firebaseapp.com",
+    projectId: "construmetrix",
+    storageBucket: "construmetrix.firebasestorage.app",
+    messagingSenderId: "1065701924260",
+    appId: "1:1065701924260:web:da908ee2cfcf6b2fd8b531",
+    measurementId: "G-Q3MBKXB1C4"
 };
 
 // --- INITIALIZATION ---
