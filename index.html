@@ -1667,60 +1667,157 @@
             });
         }
     </script>
-    <!-- AUTH OVERLAY (Welcome Screen) -->
-    <div id="authOverlay" class="fixed inset-0 z-[10000] bg-dark-bg flex items-center justify-center p-6 hidden">
-        <div class="absolute inset-0 mesh-bg opacity-40"></div>
+    <!-- AUTH OVERLAY (Welcome Screen v5.0) -->
+    <div id="authOverlay"
+        class="fixed inset-0 z-[10000] bg-[#05070a] flex items-center justify-center overflow-hidden hidden">
+        <!-- Cinematic Background -->
+        <div class="absolute inset-0 overflow-hidden pointer-events-none">
+            <div
+                class="absolute top-[-10%] left-[-10%] w-[40%] h-[40%] bg-brand/10 rounded-full blur-[120px] animate-pulse">
+            </div>
+            <div class="absolute bottom-[-10%] right-[-10%] w-[50%] h-[50%] bg-blue-600/5 rounded-full blur-[150px]">
+            </div>
+            <div class="absolute inset-0 mesh-bg opacity-30"></div>
+        </div>
 
-        <div
-            class="max-w-md w-full glass-panel rounded-[2.5rem] p-10 relative overflow-hidden animate-up shadow-[0_0_100px_rgba(79,122,255,0.15)]">
-            <div class="absolute -top-24 -right-24 w-64 h-64 bg-brand/10 rounded-full blur-[100px]"></div>
+        <div class="max-w-6xl w-full mx-auto p-6 flex flex-col lg:flex-row items-center gap-12 relative z-10">
 
-            <div class="text-center mb-10 relative z-10">
+            <!-- Left Side: Value Proposition -->
+            <div class="flex-1 space-y-8 animate-up">
                 <div
-                    class="w-20 h-20 bg-brand rounded-3xl mx-auto flex items-center justify-center shadow-2xl shadow-brand/40 mb-6 rotate-3 hover:rotate-0 transition-transform duration-500">
-                    <i data-lucide="shield-check" class="w-10 h-10 text-white"></i>
+                    class="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-brand/10 border border-brand/20 text-brand text-[10px] font-black uppercase tracking-[0.2em]">
+                    <span class="w-1.5 h-1.5 rounded-full bg-brand animate-ping"></span>
+                    Ecosistema Inmobiliario 2026
                 </div>
-                <h2 class="text-3xl font-black text-white tracking-tighter mb-2">CONSTRU<span
-                        class="text-brand">METRIX</span></h2>
-                <p class="text-gray-500 text-sm font-medium">Plataforma Profesional de Inteligencia Inmobiliaria</p>
+
+                <h1 class="text-5xl lg:text-7xl font-black text-white leading-[0.9] tracking-tighter">
+                    LA PRÓXIMA <br />
+                    <span class="text-shimmer">FRONTERA</span> <br />
+                    <span class="text-gray-600">DEL AVALÚO.</span>
+                </h1>
+
+                <p class="text-gray-400 text-lg font-medium max-w-lg leading-relaxed">
+                    ConstruMetrix es la plataforma de inteligencia geoespacial diseñada para la ingeniería de precisión
+                    y valoración de activos industriales.
+                </p>
+
+                <div class="grid grid-cols-1 sm:grid-cols-2 gap-6 pt-4">
+                    <div class="flex items-start gap-4">
+                        <div class="p-3 rounded-2xl bg-white/5 border border-white/10 text-brand">
+                            <i data-lucide="brain-circuit" class="w-6 h-6"></i>
+                        </div>
+                        <div>
+                            <h4 class="text-white font-bold text-sm uppercase tracking-tight">IA Ross-Heidecke</h4>
+                            <p class="text-[11px] text-gray-500 mt-1">Cálculos automatizados de depreciación y vida
+                                remanente técnica.</p>
+                        </div>
+                    </div>
+                    <div class="flex items-start gap-4">
+                        <div class="p-3 rounded-2xl bg-white/5 border border-white/10 text-emerald-400">
+                            <i data-lucide="map-pinned" class="w-6 h-6"></i>
+                        </div>
+                        <div>
+                            <h4 class="text-white font-bold text-sm uppercase tracking-tight">Comando SIG</h4>
+                            <p class="text-[11px] text-gray-500 mt-1">Intersección de predios IGAC y capas de
+                                infraestructura energética.</p>
+                        </div>
+                    </div>
+                    <div class="flex items-start gap-4">
+                        <div class="p-3 rounded-2xl bg-white/5 border border-white/10 text-amber-400">
+                            <i data-lucide="cloud-lightning" class="w-6 h-6"></i>
+                        </div>
+                        <div>
+                            <h4 class="text-white font-bold text-sm uppercase tracking-tight">Cloud Persistence</h4>
+                            <p class="text-[11px] text-gray-500 mt-1">Tu oficina técnica en la nube, disponible en
+                                cualquier dispositivo offline.</p>
+                        </div>
+                    </div>
+                    <div class="flex items-start gap-4">
+                        <div class="p-3 rounded-2xl bg-white/5 border border-white/10 text-purple-400">
+                            <i data-lucide="file-check" class="w-6 h-6"></i>
+                        </div>
+                        <div>
+                            <h4 class="text-white font-bold text-sm uppercase tracking-tight">Certificación PDF</h4>
+                            <p class="text-[11px] text-gray-500 mt-1">Generación de informes profesionales bajo
+                                normativa NIIF/NIC.</p>
+                        </div>
+                    </div>
+                </div>
             </div>
 
-            <div class="space-y-4 relative z-10">
-                <button onclick="loginWithGoogle()"
-                    class="w-full flex items-center justify-center gap-3 py-4 rounded-2xl bg-white text-black font-black text-sm uppercase tracking-widest hover:bg-gray-200 transition-all shadow-xl shadow-white/5">
-                    <img src="https://www.gstatic.com/firebasejs/ui/2.0.0/images/callback/google.svg" class="w-5 h-5"
-                        alt="Google">
-                    Entrar con Google
-                </button>
+            <!-- Right Side: Auth Card -->
+            <div class="w-full max-w-md animate-up" style="animation-delay: 0.2s">
+                <div
+                    class="glass-panel rounded-[2.5rem] p-10 relative overflow-hidden shadow-[0_0_120px_rgba(0,0,0,0.5)] border-white/5">
+                    <div class="absolute -top-24 -right-24 w-64 h-64 bg-brand/5 rounded-full blur-[100px]"></div>
 
-                <button onclick="loginWithMicrosoft()"
-                    class="w-full flex items-center justify-center gap-3 py-4 rounded-2xl bg-[#2f2f2f] text-white font-black text-sm uppercase tracking-widest hover:bg-[#3f3f3f] border border-white/5 transition-all shadow-xl shadow-black/20">
-                    <i data-lucide="layout-grid" class="w-5 h-5 text-blue-400"></i>
-                    Entrar con Microsoft
-                </button>
+                    <div class="text-center mb-8 relative z-10">
+                        <div
+                            class="w-16 h-16 bg-brand rounded-2xl mx-auto flex items-center justify-center shadow-2xl shadow-brand/40 mb-4 rotate-2">
+                            <i data-lucide="lock" class="w-8 h-8 text-white"></i>
+                        </div>
+                        <h2 class="text-2xl font-black text-white tracking-tight">ACCESO <span
+                                class="text-brand">TÉCNICO</span></h2>
+                        <p class="text-gray-500 text-xs font-medium mt-1 uppercase tracking-[0.1em]">Seguridad Grado
+                            Industrial</p>
+                    </div>
 
-                <div class="flex items-center gap-4 py-4">
-                    <div class="flex-1 h-px bg-white/5"></div>
-                    <span class="text-[10px] font-bold text-gray-600 uppercase tracking-widest">o con cuenta
-                        técnica</span>
-                    <div class="flex-1 h-px bg-white/5"></div>
-                </div>
+                    <div class="space-y-4 relative z-10">
+                        <button onclick="loginWithGoogle()"
+                            class="w-full h-14 flex items-center justify-center gap-3 rounded-2xl bg-white text-black font-black text-xs uppercase tracking-widest hover:bg-gray-200 transition-all shadow-xl shadow-white/5 border-none">
+                            <img src="https://www.gstatic.com/firebasejs/ui/2.0.0/images/callback/google.svg"
+                                class="w-5 h-5" alt="Google">
+                            Google Login
+                        </button>
 
-                <div class="space-y-3">
-                    <input type="email" id="authEmail" placeholder="Correo Electrónico"
-                        class="w-full px-5 py-4 rounded-2xl bg-dark-bg/60 border border-white/10 text-white text-sm focus:border-brand focus:outline-none transition-all">
-                    <input type="password" id="authPass" placeholder="Contraseña Profesional"
-                        class="w-full px-5 py-4 rounded-2xl bg-dark-bg/60 border border-white/10 text-white text-sm focus:border-brand focus:outline-none transition-all">
-                    <button onclick="loginWithEmail()"
-                        class="w-full py-4 rounded-2xl bg-brand/10 border border-brand/30 text-brand font-black text-sm uppercase tracking-widest hover:bg-brand/20 transition-all">
-                        Iniciar Sesión
-                    </button>
+                        <button onclick="loginWithMicrosoft()"
+                            class="w-full h-14 flex items-center justify-center gap-3 rounded-2xl bg-[#00A4EF]/10 border border-[#00A4EF]/30 text-[#00A4EF] font-black text-xs uppercase tracking-widest hover:bg-[#00A4EF]/20 transition-all">
+                            <i data-lucide="window" class="w-5 h-5"></i>
+                            Microsoft ID
+                        </button>
+
+                        <div class="flex items-center gap-4 py-2">
+                            <div class="flex-1 h-px bg-white/5"></div>
+                            <span class="text-[9px] font-bold text-gray-700 uppercase tracking-widest">O entrar con
+                                token</span>
+                            <div class="flex-1 h-px bg-white/5"></div>
+                        </div>
+
+                        <div class="space-y-3">
+                            <div class="relative group">
+                                <i data-lucide="mail"
+                                    class="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-600 transition-colors group-focus-within:text-brand"></i>
+                                <input type="email" id="authEmail" placeholder="Correo Corporativo"
+                                    class="w-full pl-12 pr-5 h-14 rounded-2xl bg-black/40 border border-white/10 text-white text-sm focus:border-brand/50 focus:outline-none transition-all placeholder-gray-700">
+                            </div>
+                            <div class="relative group">
+                                <i data-lucide="key"
+                                    class="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-600 transition-colors group-focus-within:text-brand"></i>
+                                <input type="password" id="authPass" placeholder="Contraseña de Acceso"
+                                    class="w-full pl-12 pr-5 h-14 rounded-2xl bg-black/40 border border-white/10 text-white text-sm focus:border-brand/50 focus:outline-none transition-all placeholder-gray-700">
+                            </div>
+                            <button onclick="loginWithEmail()"
+                                class="w-full h-14 rounded-2xl bg-brand text-white font-black text-xs uppercase tracking-widest hover:shadow-[0_0_30px_rgba(79,122,255,0.4)] transition-all">
+                                Ingresar al Sistema
+                            </button>
+                        </div>
+
+                        <div class="pt-4 flex items-center justify-between">
+                            <button
+                                class="text-[10px] text-gray-600 hover:text-brand transition-colors font-bold uppercase tracking-widest">Recuperar
+                                Token</button>
+                            <button
+                                class="text-[10px] text-brand hover:underline transition-all font-bold uppercase tracking-widest font-mono">Crear
+                                Cuenta PRO</button>
+                        </div>
+                    </div>
+
+                    <p
+                        class="mt-8 text-center text-[9px] text-gray-700 font-bold px-6 leading-relaxed uppercase tracking-tighter">
+                        Autenticación cifrada vía <span class="text-gray-500">Firebase Edge v10.7</span>
+                    </p>
                 </div>
             </div>
-
-            <p class="mt-8 text-center text-[10px] text-gray-600 font-medium px-6">
-                Al continuar, aceptas nuestros términos de servicio y políticas de cifrado de datos industriales 2026.
-            </p>
         </div>
     </div>
 </body>
