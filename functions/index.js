@@ -29,7 +29,7 @@ exports.igacProxy = functions.https.onCall(async (data, context) => {
     }
 
     const cacheRef = db.collection('cache_igac').doc(cedula);
-    const CACHE_TTL_HOURS = 48;
+    const CACHE_TTL_HOURS = 48; // Logic: Enterprise tier may migrate to Redis/MemoryStore for <10ms latency.
 
     try {
         // 2. CHECK CACHE FIRST

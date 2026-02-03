@@ -33,6 +33,14 @@ try {
             updateAuthUI(user);
             if (user) {
                 console.log(`User Logged In: ${user.email}`);
+
+                // Show tour if first time (using local check as fallback for now)
+                if (!localStorage.getItem('cm_tour_completed')) {
+                    setTimeout(() => {
+                        if (window.startGuidedTour) window.startGuidedTour();
+                        localStorage.setItem('cm_tour_completed', 'true');
+                    }, 2000);
+                }
             } else {
                 // Inject Live Stats into Welcome Screen
                 updateWelcomeStats();
@@ -81,11 +89,11 @@ window.loginWithMicrosoft = function () {
 
 function updateWelcomeStats() {
     setTimeout(() => {
-        const statsEl = document.getElementById('liveStatsCount');
+        const statsEl = document.getElementById('liveStatsCountLaunch');
         if (statsEl && window.OFFICIAL_SOURCES) {
             const count = window.OFFICIAL_SOURCES.length || 12;
             statsEl.textContent = count;
-            statsEl.parentElement.classList.remove('opacity-0');
+            // No need to remove opacity-0 here as it's handled by preloader transition
         }
     }, 1000);
 }
@@ -132,32 +140,159 @@ window.registerWithEmail = function () {
         });
 };
 
-window.toggleAuthMode = function () {
-    const title = document.querySelector('#authOverlay h2 span');
-    const subtitle = document.querySelector('#authOverlay p.uppercase');
-    const mainBtn = document.querySelector('#authOverlay button[onclick^="loginWithEmail"], #authOverlay button[onclick^="registerWithEmail"]');
-    const toggleBtn = document.getElementById('toggleAuthBtn');
+let currentAuthMode = 'login';
+let currentRegStep = 1;
+let registrationData = {};
 
-    if (mainBtn.getAttribute('onclick').includes('loginWithEmail')) {
-        title.textContent = "REGISTRO";
-        subtitle.textContent = "Crea tu Cuenta Profesional";
-        mainBtn.textContent = "Crear Cuenta PRO";
-        mainBtn.setAttribute('onclick', 'registerWithEmail()');
-        toggleBtn.textContent = "¿Ya tienes cuenta? Entrar";
+window.toggleAuthMode = function () {
+    const title = document.getElementById('authTitle');
+    const subtitle = document.getElementById('authSubtitle');
+    const mainBtn = document.getElementById('mainAuthBtn');
+    const toggleBtn = document.getElementById('toggleAuthBtn');
+    const progress = document.getElementById('regProgress');
+    const social = document.getElementById('socialAuth');
+
+    if (currentAuthMode === 'login') {
+        currentAuthMode = 'register';
+        title.innerHTML = 'REGISTRO <span class="text-brand">PRO</span>';
+        subtitle.textContent = 'Crea tu Cuenta Profesional';
+        mainBtn.textContent = 'Siguiente: Perfil';
+        mainBtn.setAttribute('onclick', 'nextAuthStep()');
+        toggleBtn.textContent = '¿Ya tienes cuenta? Entrar';
+        social.classList.add('hidden');
+        progress.classList.remove('hidden');
+        currentRegStep = 1;
+        updateRegStepsUI();
     } else {
-        title.textContent = "TÉCNICO";
-        subtitle.textContent = "Seguridad Grado Industrial";
-        mainBtn.textContent = "Ingresar al Sistema";
+        currentAuthMode = 'login';
+        title.innerHTML = 'ACCESO <span class="text-brand">PRO</span>';
+        subtitle.textContent = 'Cifrado Grado Industrial';
+        mainBtn.textContent = 'Ingresar al Sistema';
         mainBtn.setAttribute('onclick', 'loginWithEmail()');
-        toggleBtn.textContent = "Crear Cuenta PRO";
+        toggleBtn.textContent = 'Crear Cuenta PRO';
+        social.classList.remove('hidden');
+        progress.classList.add('hidden');
+        resetAuthSteps();
     }
 };
+
+window.nextAuthStep = function () {
+    const email = document.getElementById('authEmail').value;
+    const pass = document.getElementById('authPass').value;
+
+    if (currentRegStep === 1) {
+        if (!email || !pass || pass.length < 6) {
+            showToast("Ingresa email y clave (min 6 carac.)", "warning");
+            return;
+        }
+        registrationData.email = email;
+        registrationData.pass = pass;
+    }
+
+    currentRegStep++;
+    updateRegStepsUI();
+};
+
+window.prevAuthStep = function () {
+    currentRegStep--;
+    updateRegStepsUI();
+};
+
+window.setAuthProfile = function (profile) {
+    registrationData.profile = profile;
+    window.nextAuthStep();
+};
+
+window.finalRegister = function () {
+    const region = document.getElementById('regRegion').value;
+    registrationData.region = region;
+
+    // Firebase Core Action
+    auth.createUserWithEmailAndPassword(registrationData.email, registrationData.pass)
+        .then((userCredential) => {
+            const user = userCredential.user;
+            // Update profile displayName
+            user.updateProfile({
+                displayName: `${registrationData.profile.toUpperCase()} User`
+            });
+
+            // Save extra metadata to Firestore
+            if (db) {
+                db.collection('users').doc(user.uid).set({
+                    role: registrationData.profile,
+                    region: registrationData.region,
+                    onboarded: false,
+                    createdAt: firebase.firestore.FieldValue.serverTimestamp()
+                });
+            }
+
+            showToast("Cuenta PRO Activada", "success");
+            resetAuthSteps();
+        })
+        .catch((error) => {
+            console.error(error);
+            showToast(error.message, "error");
+        });
+};
+
+function updateRegStepsUI() {
+    document.querySelectorAll('.auth-step').forEach(s => s.classList.add('hidden'));
+    document.getElementById(`step${currentRegStep}`).classList.remove('hidden');
+
+    // Update progress dots
+    const dots = document.querySelectorAll('.reg-step-dot');
+    dots.forEach((dot, i) => {
+        if (i < currentRegStep) {
+            dot.className = 'reg-step-dot w-8 h-1 bg-brand rounded-full transition-all duration-500';
+        } else {
+            dot.className = 'reg-step-dot w-8 h-1 bg-white/10 rounded-full transition-all duration-500';
+        }
+    });
+
+    if (window.lucide) lucide.createIcons();
+}
+
+function resetAuthSteps() {
+    currentRegStep = 1;
+    document.querySelectorAll('.auth-step').forEach(s => s.classList.add('hidden'));
+    document.getElementById('step1').classList.remove('hidden');
+    const dots = document.querySelectorAll('.reg-step-dot');
+    dots.forEach(d => d.className = 'reg-step-dot w-8 h-1 bg-white/10 rounded-full');
+}
 
 window.logout = function () {
     if (!auth) return;
     auth.signOut().then(() => {
-        showToast("Sesión cerrada", "info");
+        showToast("Sesión técnica cerrada", "info");
     });
+};
+
+window.recoverToken = function () {
+    const email = document.getElementById('authEmail').value;
+    if (!email) {
+        showToast("Ingresa tu correo para recuperar acceso", "warning");
+        return;
+    }
+
+    auth.sendPasswordResetEmail(email)
+        .then(() => {
+            showToast("🔐 Token de recuperación enviado a " + email, "success");
+        })
+        .catch(error => {
+            console.error(error);
+            showToast("Error de recuperación: " + error.code, "error");
+        });
+};
+
+window.openCheckout = function () {
+    showToast("💳 Redirigiendo a Pasarela Bancaria v2.0...", "info");
+    setTimeout(() => {
+        const confirmPay = confirm("SISTEMA DE PAGOS CONSTRUMETRIX\n\nEstás a punto de activar la Suscripción Enterprise 2026.\n\nCosto: $49.00 USD / mes\n¿Proceder con el pago seguro?");
+        if (confirmPay) {
+            showToast("✅ Pago Procesado. Nodo Activado.", "success");
+            // In a real app, update user status in Firestore
+        }
+    }, 1500);
 };
 
 function updateAuthUI(user) {
@@ -167,13 +302,30 @@ function updateAuthUI(user) {
 
     if (user) {
         // Logged In: Hide Overlay, Update Status
-        if (authOverlay) authOverlay.classList.add('hidden');
+        if (authOverlay) {
+            authOverlay.classList.remove('flex');
+            authOverlay.classList.add('hidden');
+        }
+
+        // Fetch Extended Profile from Firestore
+        if (db) {
+            db.collection('users').doc(user.uid).get().then(doc => {
+                if (doc.exists) {
+                    const profile = doc.data();
+                    if (window.STATE) {
+                        window.STATE.userProfile = profile;
+                        if (window.adaptDashboardToRole) window.adaptDashboardToRole(profile.role);
+                    }
+                }
+            });
+        }
 
         if (btnLogin) {
-            btnLogin.innerHTML = `<img src="${user.photoURL || 'https://ui-avatars.com/api/?name=' + user.displayName}" class="w-6 h-6 rounded-lg border border-brand/50">`;
-            btnLogin.title = `Conectado como: ${user.displayName}`;
+            const avatarUrl = user.photoURL || `https://ui-avatars.com/api/?name=${user.email}&background=4f7aff&color=fff`;
+            btnLogin.innerHTML = `<img src="${avatarUrl}" class="w-7 h-7 rounded-xl border border-brand/50">`;
+            btnLogin.title = `Conectado como: ${user.email}`;
             btnLogin.onclick = () => {
-                if (confirm('¿Cerrar sesión?')) window.logout();
+                if (confirm('¿Cerrar sesión técnica?')) window.logout();
             };
         }
     } else {

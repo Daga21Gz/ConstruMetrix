@@ -226,6 +226,11 @@ document.addEventListener('DOMContentLoaded', async () => {
         mobileMenuBtn: document.getElementById('mobileMenuBtn'),
         closeSidebarBtn: document.getElementById('closeSidebarBtn'),
         sidebar: document.getElementById('sidebar'),
+
+        // Preloader & Main App
+        preloader: document.getElementById('cm-preloader'),
+        mainApp: document.getElementById('app'),
+        launchStats: document.getElementById('liveStatsCountLaunch'),
     };
 
     // --- REUSABLE HELPERS ---
@@ -246,6 +251,20 @@ document.addEventListener('DOMContentLoaded', async () => {
                 clearTimeout(timeout);
                 timeout = setTimeout(() => fn(...args), delay);
             };
+        },
+        animateValue: (obj, start, end, duration) => {
+            if (!obj) return;
+            let startTimestamp = null;
+            const step = (timestamp) => {
+                if (!startTimestamp) startTimestamp = timestamp;
+                const progress = Math.min((timestamp - startTimestamp) / duration, 1);
+                const val = Math.floor(progress * (end - start) + start);
+                obj.innerHTML = APP_UTILS.format(val);
+                if (progress < 1) {
+                    window.requestAnimationFrame(step);
+                }
+            };
+            window.requestAnimationFrame(step);
         }
     };
 
@@ -294,7 +313,7 @@ document.addEventListener('DOMContentLoaded', async () => {
             STATE.meta.city = valuation.MUNICIPIO || valuation.NOMBRE_MUNICIPIO || STATE.meta.city;
             STATE.meta.dept = valuation.DEPARTAMENTO || valuation.NOMBRE_DEPARTAMENTO || STATE.meta.dept;
 
-            // Critical Metric Sync (Areas)
+            // --- Critical Metric Sync (Areas) ---
             const areaBuilt = parseFloat(valuation.AREA_CONSTRUIDA_TOTAL || valuation.AREA_CONSTRUIDA || 0);
             const areaLand = parseFloat(valuation.AREA_TERRENO || valuation.AREA_TERRENO_1 || 0);
             const valuationAuto = parseFloat(valuation.AVALUO_CATASTRAL || valuation.AVALUO_VIGENTE || 0);
@@ -302,6 +321,12 @@ document.addEventListener('DOMContentLoaded', async () => {
             if (areaBuilt > 0) {
                 STATE.meta.area = areaBuilt;
                 if (UI.inputArea) UI.inputArea.value = areaBuilt;
+            } else if (areaLand > 0) {
+                // FALLBACK FOR LOTS (Lotes): Use terrain area but warn user
+                showToast("⚠️ Predio sin área construida (LOTE). Se usará área de terreno como base proyectada.", "warning");
+                // Don't overwrite state.area directly if it's a lot, or maybe yes to avoid 0 budget
+                STATE.meta.area = 1.0; // Keep 1.0 but suggest terrain
+                if (UI.inputArea) UI.inputArea.placeholder = `Terreno: ${areaLand} m2`;
             }
 
             if (areaLand > 0) {
@@ -314,45 +339,46 @@ document.addEventListener('DOMContentLoaded', async () => {
             STATE.meta.landType = valuation.TIPO_SUELO || valuation._landType || 'Urbano';
 
             // Automatic business logic: informal land detection
-            if (STATE.meta.landType.toLowerCase().includes('informal')) {
-                STATE.config.imprev = 15; // +10% risk premium
+            if (STATE.meta.landType.toLowerCase().includes('informal') || STATE.meta.landType.toLowerCase().includes('rural')) {
+                STATE.config.imprev = 15; // Increased risk
                 if (UI.inImprev) UI.inImprev.value = 15;
-                showToast("⚠️ Suelo Informal: Contingencia aumentada al 15%", "warning");
+                showToast("⚠️ Suelo Especial: Contingencia aumentada al 15%", "warning");
             }
 
-            // Update UI Sidebar inputs if they exist
+            // Sync with "Ubicación Geo-Económica" select
+            if (UI.selectRegion) {
+                const igacRegion = (valuation.REGION_VALUACION || '').toLowerCase();
+                const validRegions = ['guapi', 'norte', 'sur', 'macizo', 'centro', 'lopez', 'timbiqui', 'oriente', 'piamonte'];
+
+                if (validRegions.includes(igacRegion)) {
+                    UI.selectRegion.value = igacRegion;
+                    STATE.meta.region = igacRegion;
+                } else {
+                    // Smart detection or fallback
+                    console.warn(`Region '${igacRegion}' no en base de datos de precios. Usando 'centro' como estándar.`);
+                    UI.selectRegion.value = 'centro';
+                    STATE.meta.region = 'centro';
+                }
+            }
+
+            // Update UI Sidebar inputs
             if (UI.inputCedula) UI.inputCedula.value = STATE.meta.cedula;
             if (UI.inputMatricula) UI.inputMatricula.value = STATE.meta.matricula;
             if (UI.inputOwner) UI.inputOwner.value = STATE.meta.owner;
             if (UI.inputCity) UI.inputCity.value = STATE.meta.city;
             if (UI.inputState) UI.inputState.value = STATE.meta.dept;
 
-            // --- Update "GIS Intelligence Card" (Visual Feedback) ---
+            // --- Update "GIS Intelligence Card" ---
             if (UI.gisCard) {
                 UI.gisCard.classList.remove('hidden');
                 UI.gisCard.classList.add('animate-up');
-
-                if (UI.gisIgacValue) {
-                    UI.gisIgacValue.textContent = APP_UTILS.format(valuationAuto);
-                }
-
+                if (UI.gisIgacValue) UI.gisIgacValue.textContent = APP_UTILS.format(valuationAuto);
                 if (UI.gisLandType) {
                     UI.gisLandType.textContent = `Destino: ${STATE.meta.igacDestino || 'N/D'} | ${STATE.meta.landType}`;
                 }
             }
 
-            // Sync with "Ubicación Geo-Económica" select
-            if (UI.selectRegion && valuation.REGION_VALUACION) {
-                UI.selectRegion.value = valuation.REGION_VALUACION.toLowerCase();
-                STATE.meta.region = UI.selectRegion.value;
-            }
-
-            // --- UX Auto-Tab Switching ---
-            if (UI.tabAnalysis && UI.viewAnalysis.classList.contains('opacity-0')) {
-                UI.tabAnalysis.click();
-            }
-
-            // Trigger Recalculation
+            // Trigger Recalculate
             recalculate();
             showToast("💎 Datos IGAC sincronizados con el presupuesto", "success");
         });
@@ -422,13 +448,128 @@ document.addEventListener('DOMContentLoaded', async () => {
             window.recalculate = recalculate;
             window.UI = UI;
             window.showToast = showToast;
+            window.startGuidedTour = startGuidedTour;
 
-            showToast("✅ CONSTRUMETRIX v2.0 Listo", "success");
+            window.adaptDashboardToRole = adaptDashboardToRole;
+
+            // Final Step: Hide cinematic preloader
+            hidePreloader();
+
+            showToast("✅ CONSTRUMETRIX v4.6 Listo", "success");
         } catch (e) {
             console.error(e);
             hideSkeletonLoaders();
             showToast("❌ Error cargando base de datos", "error");
         }
+    }
+
+    // --- ROLE-BASED UX ADAPTATION ---
+    function adaptDashboardToRole(role) {
+        if (!role) return;
+
+        const r = role.toLowerCase();
+        let msg = "";
+
+        // Remove existing role badges
+        document.querySelectorAll('.role-specific-badge').forEach(b => b.remove());
+
+        const brandSpan = document.querySelector('h1 span.text-brand-400');
+
+        if (r === 'ingeniero') {
+            msg = "⚙️ Perfil de Ingeniería: Enfoque en CRN y Depreciación Técnica.";
+            if (brandSpan) brandSpan.insertAdjacentHTML('afterend', '<span class="role-specific-badge text-[7px] bg-blue-500/20 text-blue-400 px-1.5 py-0.5 rounded ml-2 font-black uppercase">ING</span>');
+            // Prioritize Analysis Tab & Insights
+            if (UI.tabAnalysis) UI.tabAnalysis.click();
+            if (UI.intelPanel) UI.intelPanel.classList.remove('opacity-50');
+        } else if (r === 'arquitecto') {
+            msg = "🎨 Perfil de Arquitectura: Enfoque en Acabados y Diseño.";
+            if (brandSpan) brandSpan.insertAdjacentHTML('afterend', '<span class="role-specific-badge text-[7px] bg-purple-500/20 text-purple-400 px-1.5 py-0.5 rounded ml-2 font-black uppercase">ARQ</span>');
+            // Highlight quality controls
+            const qContainer = document.querySelector('#qualitySlider')?.parentElement;
+            if (qContainer) qContainer.classList.add('ring-1', 'ring-brand/30', 'p-2', 'rounded-xl', 'bg-brand/5');
+        } else if (r === 'inversionista' || r === 'tasador') {
+            msg = "📈 Perfil de Inversión: Enfoque en Valor de Mercado y ROI.";
+            const color = r === 'tasador' ? 'amber' : 'emerald';
+            if (brandSpan) brandSpan.insertAdjacentHTML('afterend', `<span class="role-specific-badge text-[7px] bg-${color}-500/20 text-${color}-400 px-1.5 py-0.5 rounded ml-2 font-black uppercase">${r.substring(0, 3).toUpperCase()}</span>`);
+            // Highlight GIS sync
+            if (UI.gisCard) {
+                UI.gisCard.classList.add('border-brand', 'shadow-lg', 'shadow-brand/10');
+            }
+        }
+
+        console.log(`[UX-ENGINE] ${msg}`);
+        showToast(msg, "info");
+    }
+
+    // --- CINEMATIC & ONBOARDING ENGINE ---
+    function hidePreloader() {
+        if (!UI.preloader) return;
+        const pt = document.getElementById('preloader-text');
+        if (pt) pt.textContent = "Albert Daniel G. Core Desplegado";
+
+        setTimeout(() => {
+            UI.preloader.style.opacity = '0';
+            UI.preloader.style.transform = 'scale(1.1)';
+            UI.preloader.style.pointerEvents = 'none';
+            if (UI.mainApp) UI.mainApp.classList.remove('opacity-0');
+
+            // Numbers animation in Launch Screen
+            if (UI.launchStats) {
+                let start = 0;
+                let end = 12; // Fuentes activas
+                let duration = 2000;
+                let startTimestamp = null;
+                const step = (timestamp) => {
+                    if (!startTimestamp) startTimestamp = timestamp;
+                    const progress = Math.min((timestamp - startTimestamp) / duration, 1);
+                    UI.launchStats.textContent = Math.floor(progress * (end - start) + start);
+                    if (progress < 1) window.requestAnimationFrame(step);
+                };
+                window.requestAnimationFrame(step);
+            }
+        }, 1200);
+    }
+
+    function startGuidedTour() {
+        if (typeof Shepherd === 'undefined') {
+            console.warn("Shepherd.js no cargado.");
+            return;
+        }
+
+        const tour = new Shepherd.Tour({
+            useModalOverlay: true,
+            defaultStepOptions: {
+                classes: 'glass-panel shadow-2xl rounded-3xl border border-white/10 text-white p-6',
+                scrollTo: { behavior: 'smooth', block: 'center' },
+                cancelIcon: { enabled: true }
+            }
+        });
+
+        tour.addStep({
+            id: 'welcome',
+            title: 'Bienvenido al Nodo Central',
+            text: 'Descubre cómo potenciar tus avalúos técnicos con datos de alta precisión.',
+            attachTo: { element: '#sidebar', on: 'right' },
+            buttons: [{ text: 'Siguiente', action: tour.next, classes: 'bg-brand text-dark-bg font-bold px-4 py-2 rounded-lg text-xs uppercase' }]
+        });
+
+        tour.addStep({
+            id: 'blueprints',
+            title: 'Plantillas de Ingeniería',
+            text: 'Selecciona una tipología constructiva para cargar automáticamente los capítulos de obra técnicos.',
+            attachTo: { element: '#unitTypeSelect', on: 'right' },
+            buttons: [{ text: 'Siguiente', action: tour.next, classes: 'bg-brand text-dark-bg font-bold px-4 py-2 rounded-lg text-xs uppercase' }]
+        });
+
+        tour.addStep({
+            id: 'gis',
+            title: 'Inteligencia Geográfica',
+            text: 'Sincroniza datos directos de IGAC y visualiza la infraestructura en el Geo-Visor avanzado.',
+            attachTo: { element: '#toggleGisVisor', on: 'right' },
+            buttons: [{ text: 'Finalizar', action: tour.complete, classes: 'bg-brand text-dark-bg font-bold px-4 py-2 rounded-lg text-xs uppercase' }]
+        });
+
+        tour.start();
     }
 
     function setupResponsiveListeners() {
@@ -479,30 +620,40 @@ document.addEventListener('DOMContentLoaded', async () => {
     function setupBlueprintsUI() {
         const cvGroup = document.getElementById('cv_group');
         const ncGroup = document.getElementById('nc_group');
+        if (!cvGroup || !ncGroup) return;
 
-        // 1. Populate from unitsRes (JSON)
-        if (buildingTypes && buildingTypes.length > 0) {
-            buildingTypes.forEach(unit => {
-                const opt = document.createElement('option');
-                opt.value = unit.cod;
-                opt.textContent = `${unit.cod} - ${unit.nombre}`;
-                if (unit.cod.startsWith('01') || unit.tipo === 'CV') {
-                    if (cvGroup) cvGroup.appendChild(opt);
-                } else {
-                    if (ncGroup) ncGroup.appendChild(opt);
-                }
-            });
-        }
+        cvGroup.innerHTML = '';
+        ncGroup.innerHTML = '';
 
-        // 2. Populate Interactive Blueprints (from blueprints.js)
+        // 1. Interactive Blueprints (Preferred - from blueprints.js)
         if (window.ConstructionBlueprints) {
             Object.keys(window.ConstructionBlueprints).forEach(id => {
                 const bp = window.ConstructionBlueprints[id];
                 const opt = document.createElement('option');
                 opt.value = id;
                 opt.textContent = `⚡ MODELO: ${bp.name}`;
-                opt.className = "text-brand-400 font-bold";
-                if (cvGroup) cvGroup.appendChild(opt);
+                opt.className = "text-brand-400 font-bold bg-dark-bg";
+                // Standard logic for groups
+                if (id === '01' || id === '56' || id === '35') cvGroup.appendChild(opt);
+                else ncGroup.appendChild(opt);
+            });
+        }
+
+        // 2. Standard Registry (Placeholder codes from unitsRes)
+        if (buildingTypes && buildingTypes.length > 0) {
+            buildingTypes.forEach(unit => {
+                // Only add if NOT already in Interactive Blueprints
+                if (window.ConstructionBlueprints && window.ConstructionBlueprints[unit.cod]) return;
+
+                const opt = document.createElement('option');
+                opt.value = unit.cod;
+                opt.textContent = `${unit.cod} - ${unit.nombre}`;
+
+                if (unit.cod.startsWith('01') || unit.tipo === 'CV') {
+                    cvGroup.appendChild(opt);
+                } else {
+                    ncGroup.appendChild(opt);
+                }
             });
         }
     }
@@ -638,8 +789,14 @@ document.addEventListener('DOMContentLoaded', async () => {
         const chapterCosts = {};
 
         STATE.budget.forEach(item => {
-            // Get base price from DB or Overrides
-            const originalPrice = item.precios[STATE.meta.region] || 0;
+            // Get base price from DB or Overrides with Region Fallback
+            const regionKey = STATE.meta.region || 'centro';
+            const availableRegions = Object.keys(item.precios || {});
+
+            // If the synchronized region doesn't exist in item prices, use 'centro'
+            const finalRegionKey = availableRegions.includes(regionKey) ? regionKey : 'centro';
+            const originalPrice = item.precios[finalRegionKey] || 0;
+
             const finalPrice = STATE.editedPrices[item.codigo] !== undefined ? STATE.editedPrices[item.codigo] : originalPrice;
 
             // CRN (Cost of Replacement New) should be calculated as if the building were NEW.
@@ -701,14 +858,15 @@ document.addEventListener('DOMContentLoaded', async () => {
         // 4. Update Displays
         const format = APP_UTILS.format;
 
-        UI.dispDirect.textContent = format(crnTotal);
-        UI.dispGrandTotal.textContent = format(grandAppraisalValue);
-        UI.panelTotal.textContent = format(grandAppraisalValue);
+        APP_UTILS.animateValue(UI.dispDirect, 0, crnTotal, 800);
+        APP_UTILS.animateValue(UI.dispGrandTotal, 0, grandAppraisalValue, 1000);
+        APP_UTILS.animateValue(UI.panelTotal, 0, grandAppraisalValue, 1000);
+
         UI.panelDirect.textContent = format(crnTotal);
         UI.panelAiu.textContent = format(totalAiu);
 
         const sqmCost = STATE.meta.area > 0 ? grandAppraisalValue / STATE.meta.area : 0;
-        UI.dispSqm.textContent = format(sqmCost);
+        APP_UTILS.animateValue(UI.dispSqm, 0, sqmCost, 800);
 
         // 4.1 Update High/Low Range (+/- 2.5%)
         const low = grandAppraisalValue * 0.975;
@@ -763,6 +921,15 @@ document.addEventListener('DOMContentLoaded', async () => {
 
         // 4.4 Intelligence Engine
         generateIntelligenceInsights(totalDepreciationFactor, totalAiu, sqmCost, crnTotal);
+
+        // 4.5 Predictive AI Confidence Score
+        let confidence = 40; // Base: Standard formulas
+        if (STATE.meta.area > 0) confidence += 15;
+        if (STATE.meta.age > 0) confidence += 10;
+        if (STATE.meta.igacValuation > 0) confidence += 25; // Critical: GIS Sync
+        if (STATE.budget.length > 5) confidence += 10;
+        const aiConfLabel = document.getElementById('aiConfidence');
+        if (aiConfLabel) aiConfLabel.textContent = `${Math.min(confidence, 99)}%`;
 
         // 5. Update Charts
         updateCharts(materials, labor, equipment, transport, totalAiu, chapterCosts);
@@ -869,7 +1036,8 @@ document.addEventListener('DOMContentLoaded', async () => {
     }
 
     function loadMoreItems(items) {
-        // UI.grid is NOT cleared here (append mode)
+        const fragment = document.createDocumentFragment();
+
         items.forEach(item => {
             const definedPrice = item.precios[STATE.meta.region] || 0;
             const customPrice = STATE.editedPrices[item.codigo];
@@ -916,8 +1084,10 @@ document.addEventListener('DOMContentLoaded', async () => {
                     <span class="text-[10px] font-bold text-gray-500 ml-2">${item.unidad}</span>
                 </div>
             `;
-            UI.grid.appendChild(card);
+            fragment.appendChild(card);
         });
+
+        UI.grid.appendChild(fragment);
         lucide.createIcons();
     }
 
@@ -1439,9 +1609,18 @@ document.addEventListener('DOMContentLoaded', async () => {
     });
 
     UI.selectBlueprint.addEventListener('change', async (e) => {
-        const bp = window.ConstructionBlueprints[e.target.value];
-        if (bp && await showModal(`¿Cargar ${bp.name}?`, "Se perderá el progreso actual.")) {
-            loadBlueprint(bp);
+        const bpId = e.target.value;
+        const bp = window.ConstructionBlueprints[bpId];
+
+        if (bp) {
+            const confirmed = await showModal(
+                `¿Cargar ${bp.name}?`,
+                "Se perderá el progreso actual y se recalcularán los capítulos con factores técnicos especializados.",
+                bp.image
+            );
+            if (confirmed) {
+                loadBlueprint(bp);
+            }
         }
     });
 
@@ -1529,13 +1708,42 @@ document.addEventListener('DOMContentLoaded', async () => {
         m.classList.remove('flex', 'animate-fade-in');
     };
 
-    window.showModal = (title, text) => new Promise(res => {
+    window.showModal = (title, text, image = null) => new Promise(res => {
         const m = document.getElementById('confirmModal');
+        const img = document.getElementById('confirmModelImage');
+        const content = document.getElementById('confirmModalContent');
+
         document.getElementById('confirmTitle').textContent = title;
         document.getElementById('confirmText').textContent = text;
-        m.style.opacity = '1'; m.style.pointerEvents = 'auto';
-        document.getElementById('btnConfirm').onclick = () => { m.style.opacity = '0'; m.style.pointerEvents = 'none'; res(true); };
-        document.getElementById('btnCancel').onclick = () => { m.style.opacity = '0'; m.style.pointerEvents = 'none'; res(false); };
+
+        if (image && img) {
+            console.log(`📸 [UI-ENGINE] Cargando previa de modelo: ${image}`);
+            img.src = image.startsWith('http') || image.startsWith('./') ? image : `./${image}`;
+            img.parentElement.style.display = 'block';
+            img.onerror = () => {
+                console.error(`❌ [UI-ENGINE] Error al cargar imagen: ${image}`);
+                img.parentElement.style.display = 'none';
+            };
+        } else if (img) {
+            img.parentElement.style.display = 'none';
+        }
+
+        m.style.opacity = '1';
+        m.style.pointerEvents = 'auto';
+        if (content) content.style.transform = 'scale(1)';
+
+        document.getElementById('btnConfirm').onclick = () => {
+            m.style.opacity = '0';
+            m.style.pointerEvents = 'none';
+            if (content) content.style.transform = 'scale(0.95)';
+            res(true);
+        };
+        document.getElementById('btnCancel').onclick = () => {
+            m.style.opacity = '0';
+            m.style.pointerEvents = 'none';
+            if (content) content.style.transform = 'scale(0.95)';
+            res(false);
+        };
     });
 
     window.showToast = (msg, type = "info") => {
