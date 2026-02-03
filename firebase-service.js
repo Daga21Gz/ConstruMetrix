@@ -44,17 +44,45 @@ try {
 // --- AUTH ACTIONS ---
 
 window.loginWithGoogle = function () {
-    if (!auth) {
-        alert("Firebase no está configurado. Por favor edita firebase-service.js con tus keys.");
-        return;
-    }
+    if (!auth) return;
     const provider = new firebase.auth.GoogleAuthProvider();
     auth.signInWithPopup(provider)
         .then((result) => {
             showToast(`Bienvenido ${result.user.displayName}`, "success");
         }).catch((error) => {
             console.error(error);
-            showToast("Error de autenticación", "error");
+            showToast("Error Google: " + error.code, "error");
+        });
+};
+
+window.loginWithMicrosoft = function () {
+    if (!auth) return;
+    const provider = new firebase.auth.OAuthProvider('microsoft.com');
+    auth.signInWithPopup(provider)
+        .then((result) => {
+            showToast(`Azure AD: ${result.user.displayName}`, "success");
+        }).catch((error) => {
+            console.error(error);
+            showToast("Error Microsoft: " + error.code, "error");
+        });
+};
+
+window.loginWithEmail = function () {
+    const email = document.getElementById('authEmail').value;
+    const pass = document.getElementById('authPass').value;
+
+    if (!email || !pass) {
+        showToast("Ingresa correo y contraseña", "warning");
+        return;
+    }
+
+    auth.signInWithEmailAndPassword(email, pass)
+        .then((userCredential) => {
+            showToast("Acceso Técnico Exitoso", "success");
+        })
+        .catch((error) => {
+            console.error(error);
+            showToast("Credenciales inválidas", "error");
         });
 };
 

@@ -1693,6 +1693,12 @@
                     Entrar con Google
                 </button>
 
+                <button onclick="loginWithMicrosoft()"
+                    class="w-full flex items-center justify-center gap-3 py-4 rounded-2xl bg-[#2f2f2f] text-white font-black text-sm uppercase tracking-widest hover:bg-[#3f3f3f] border border-white/5 transition-all shadow-xl shadow-black/20">
+                    <i data-lucide="layout-grid" class="w-5 h-5 text-blue-400"></i>
+                    Entrar con Microsoft
+                </button>
+
                 <div class="flex items-center gap-4 py-4">
                     <div class="flex-1 h-px bg-white/5"></div>
                     <span class="text-[10px] font-bold text-gray-600 uppercase tracking-widest">o con cuenta
@@ -1705,7 +1711,7 @@
                         class="w-full px-5 py-4 rounded-2xl bg-dark-bg/60 border border-white/10 text-white text-sm focus:border-brand focus:outline-none transition-all">
                     <input type="password" id="authPass" placeholder="Contraseña Profesional"
                         class="w-full px-5 py-4 rounded-2xl bg-dark-bg/60 border border-white/10 text-white text-sm focus:border-brand focus:outline-none transition-all">
-                    <button
+                    <button onclick="loginWithEmail()"
                         class="w-full py-4 rounded-2xl bg-brand/10 border border-brand/30 text-brand font-black text-sm uppercase tracking-widest hover:bg-brand/20 transition-all">
                         Iniciar Sesión
                     </button>
