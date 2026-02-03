@@ -54,9 +54,14 @@ function exportToExcel() {
 
         window.STATE.budget.forEach(item => {
             const originalPrice = item.precios[window.STATE.meta.region] || 0;
-            const price = window.STATE.editedPrices && window.STATE.editedPrices[item.codigo] !== undefined
+            const basePrice = window.STATE.editedPrices && window.STATE.editedPrices[item.codigo] !== undefined
                 ? window.STATE.editedPrices[item.codigo]
                 : originalPrice;
+
+            // Apply Expert Multipliers (Consistency with app.js)
+            const stateMult = (window.APP_UTILS && window.APP_UTILS.factors.state[window.STATE.meta.projectState]) || 1.0;
+            const qualityMult = window.STATE.meta.qualityMultiplier || 1.0;
+            const price = basePrice * stateMult * qualityMult;
 
             let qty = item.quantity;
             if (item.calcMode === 'volume') qty *= window.STATE.meta.area * window.STATE.meta.height;
@@ -110,9 +115,14 @@ function exportToExcel() {
             if (!chapterTotals[ch]) chapterTotals[ch] = 0;
 
             const originalPrice = item.precios[window.STATE.meta.region] || 0;
-            const price = window.STATE.editedPrices && window.STATE.editedPrices[item.codigo] !== undefined
+            const basePrice = window.STATE.editedPrices && window.STATE.editedPrices[item.codigo] !== undefined
                 ? window.STATE.editedPrices[item.codigo]
                 : originalPrice;
+
+            // Apply Expert Multipliers
+            const stateMult = (window.APP_UTILS && window.APP_UTILS.factors.state[window.STATE.meta.projectState]) || 1.0;
+            const qualityMult = window.STATE.meta.qualityMultiplier || 1.0;
+            const price = basePrice * stateMult * qualityMult;
 
             let qty = item.quantity;
             if (item.calcMode === 'volume') qty *= window.STATE.meta.area * window.STATE.meta.height;
@@ -356,4 +366,8 @@ if ('IntersectionObserver' in window) {
     document.querySelectorAll('img[data-src]').forEach(img => imageObserver.observe(img));
 }
 
-console.log('%c✨ CONSTRUMETRIX v2.0 - Advanced Features Loaded', 'color: #3b60ff; font-size: 14px; font-weight: bold;');
+// ========================================================
+// 🚀 CONSTRUMETRIX v3.0 - ADVANCED ENTERPRISE FEATURES
+// ========================================================
+
+console.log('✨ CONSTRUMETRIX v3.0 - Advanced Features Loaded');

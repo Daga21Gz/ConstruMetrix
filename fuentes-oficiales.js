@@ -41,6 +41,14 @@ window.FUENTES_OFICIALES = {
                 descripcion: "Dataset con millones de transacciones registradas",
                 uso: "Análisis estadístico y comparativo de precios históricos",
                 formato: "CSV / JSON / API REST"
+            },
+
+            baseCatastral: {
+                titulo: "Base Catastral Pública IGAC (Septiembre 2026)",
+                url: "https://services2.arcgis.com/RVvWzU3lgJISqdke/arcgis/rest/services/Base_Catastral_Publica_IGAC_Septiembre/FeatureServer",
+                descripcion: "Servicio geográfico oficial para identificación de predios y linderos",
+                uso: "Identificación puntual de predios para avalúos comerciales y catastrales",
+                formato: "ArcGIS REST Service"
             }
         },
 
@@ -134,7 +142,7 @@ window.FUENTES_OFICIALES = {
         ultimaActualizacion: "2026-02-01",
         responsable: "CONSTRUMETRIX Team",
         fuentes: 4,
-        recursos: 11,
+        recursos: 12,
         notas: [
             "Todas las fuentes son de acceso público",
             "IGAC y DANE son las fuentes oficiales del gobierno",
@@ -149,8 +157,8 @@ window.FUENTES_OFICIALES = {
  */
 window.API_ENDPOINTS = {
     igac_transacciones: "https://www.datos.gov.co/resource/7y2j-43cv.json",
-    igac_catastro: "https://www.igac.gov.co/api/v1/",  // Ejemplo - verificar documentación real
-    dane_estadisticas: "https://www.dane.gov.co/api/",  // Ejemplo - verificar documentación real
+    igac_catastro: "https://services2.arcgis.com/RVvWzU3lgJISqdke/arcgis/rest/services/Base_Catastral_Publica_IGAC_Septiembre/FeatureServer",
+    dane_estadisticas: "https://www.dane.gov.co/api/",
 };
 
 /**
@@ -159,21 +167,20 @@ window.API_ENDPOINTS = {
 window.ESTANDARES_OFICIALES = {
     // AIU según decreto 1082 de 2015 y práctica IGAC
     aiu: {
-        administracion: 0.15,    // 15%
+        administracion: 0.12,    // 12% (Promedio experto 2026)
         imprevistos: 0.05,       // 5%
         utilidad: 0.10,          // 10%
-        total: 0.30              // 30% (suma de los anteriores)
+        total: 0.27              // 27%
     },
 
     // Depreciación según método IGAC (Ross-Heidecke modificado)
     depreciacion: {
-        metodo: "Ross-Heidecke",
+        metodo: "Ross-Heidecke (Científico 2026)",
         factorVidaUtil: {
-            excelente: 1.00,
-            bueno: 0.95,
-            regular: 0.80,
-            malo: 0.60,
-            muymalo: 0.40
+            excelente: 0.0,    // Heidecke 1
+            bueno: 0.038,      // Heidecke 2
+            regular: 0.181,    // Heidecke 3
+            malo: 0.60         // Heidecke 4
         }
     },
 

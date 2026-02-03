@@ -15,10 +15,10 @@ document.addEventListener('DOMContentLoaded', async () => {
     const STATE = {
         budget: [], // Array of { ...item, quantity, chapter, uuid }
         config: {
-            admin: 15,
-            imprev: 5,
-            util: 5,
-            iva: 19 // IVA sobre utilidad
+            admin: 12, // Administración Sugerida 2026
+            imprev: 5,  // Imprevistos
+            util: 10,  // Utilidad Sugerida
+            iva: 19    // IVA sobre utilidad
         },
         meta: {
             region: 'centro',
@@ -35,9 +35,14 @@ document.addEventListener('DOMContentLoaded', async () => {
             aviso: '',
             tower: '',
             owner: '',
+            cedula: '',
+            matricula: '',
             city: '',
             dept: '',
-            qualityMultiplier: 1.0
+            qualityMultiplier: 1.0,
+            igacValuation: 0,
+            igacDestino: '',
+            landType: 'Urbano' // Detectado por SIG
         },
         editedPrices: {}, // { itemCode: newPrice } map
         summary: {
@@ -59,7 +64,12 @@ document.addEventListener('DOMContentLoaded', async () => {
         AUX_TRANS: 249095,
         PRESTACIONES_FACTOR: 1.5238, // 52.38% extra
         AIU_SUGGESTED: 0.30,
-        SOURCES: ["DANE", "Ministerio del Trabajo", "Camacol", "Homecenter"]
+        SOURCES: ["DANE", "Ministerio del Trabajo", "Camacol", "Homecenter", "PresuCosto"],
+        CONSTRUCTION_COSTS: {
+            BASIC: { min: 1800000, max: 2200000 },
+            MEDIUM: { min: 2500000, max: 3500000 },
+            HIGH: { min: 4000000, max: 6000000 }
+        }
     };
 
     const COLLOQUIAL_MAP = {
@@ -177,6 +187,15 @@ document.addEventListener('DOMContentLoaded', async () => {
         inputOwner: document.getElementById('inputOwner'),
         inputCity: document.getElementById('inputCity'),
         inputState: document.getElementById('inputState'),
+        inputCedula: document.getElementById('inputCedula'),
+        inputMatricula: document.getElementById('inputMatricula'),
+
+        // GIS Intelligence UI
+        gisCard: document.getElementById('gisValuationCard'),
+        gisGapValue: document.getElementById('valuationGapValue'),
+        gisGapPct: document.getElementById('valuationGapPct'),
+        gisIgacValue: document.getElementById('igacValueDisplay'),
+        gisLandType: document.getElementById('igacLandTypeDisplay'),
 
         // Responsive Elements
         mobileMenuBtn: document.getElementById('mobileMenuBtn'),
@@ -188,9 +207,13 @@ document.addEventListener('DOMContentLoaded', async () => {
     const APP_UTILS = {
         format: (n) => new Intl.NumberFormat('es-CO', { style: 'currency', currency: 'COP', maximumFractionDigits: 0 }).format(n),
         factors: {
-            state: { 'malo': 1.15, 'bueno': 1.0, 'excelente': 0.95 },
-            cons: { 'malo': 1.20, 'medio': 1.10, 'regular': 1.05, 'bueno': 1.0, 'excelente': 0.9 },
-            heidecke: { 'malo': 0.35, 'medio': 0.20, 'regular': 0.10, 'bueno': 0.0, 'excelente': -0.05 }
+            state: { 'malo': 0.75, 'bueno': 1.0, 'excelente': 1.25 }, // Multiplicador por estado de acabados (Obra Gris vs Premium)
+            heidecke: {
+                'malo': 0.60,      // Reparaciones importantes (Heidecke 4)
+                'regular': 0.181,  // Regular (Heidecke 3)
+                'bueno': 0.038,    // Bueno (Heidecke 2)
+                'excelente': 0.0   // Excelente/Nuevo (Heidecke 1)
+            }
         },
         debounce: (fn, delay) => {
             let timeout;
@@ -265,6 +288,12 @@ document.addEventListener('DOMContentLoaded', async () => {
             });
 
             lucide.createIcons();
+
+            // EXPOSE CORE FOR GIS INTEROP
+            window.STATE = STATE;
+            window.recalculate = recalculate;
+            window.UI = UI;
+            window.showToast = showToast;
 
             showToast("✅ CONSTRUMETRIX v2.0 Listo", "success");
         } catch (e) {
@@ -469,9 +498,10 @@ document.addEventListener('DOMContentLoaded', async () => {
 
     function recalculate() {
         // 0. Factor Modifiers
+        // stateMultiplier refers to the "Completeness" or "Standard" level (Obra Negra vs Premium)
         const stateMultiplier = APP_UTILS.factors.state[STATE.meta.projectState] || 1.0;
-        const consMultiplier = APP_UTILS.factors.cons[STATE.meta.conservation] || 1.0;
-        const globalProjectMultiplier = stateMultiplier * consMultiplier;
+        const qualityMultiplier = STATE.meta.qualityMultiplier || 1.0;
+        const globalCrnMultiplier = stateMultiplier * qualityMultiplier;
 
         // 1. Calculate Individual Item Costs
         let directCost = 0;
@@ -483,8 +513,9 @@ document.addEventListener('DOMContentLoaded', async () => {
             const originalPrice = item.precios[STATE.meta.region] || 0;
             const finalPrice = STATE.editedPrices[item.codigo] !== undefined ? STATE.editedPrices[item.codigo] : originalPrice;
 
-            // Apply global state multiplier AND quality multiplier
-            const adjustedPrice = finalPrice * globalProjectMultiplier * (STATE.meta.qualityMultiplier || 1.0);
+            // CRN (Cost of Replacement New) should be calculated as if the building were NEW.
+            // We apply completeness (state) and quality but NOT conservation state here.
+            const adjustedPrice = finalPrice * globalCrnMultiplier;
 
             // Calculate effective quantity
             let multiplier = 1;
@@ -498,7 +529,6 @@ document.addEventListener('DOMContentLoaded', async () => {
             directCost += itemTotal;
 
             // Stats (Approximation based on item code/type for demo)
-            // Real apps would have this breakdown per APU. We simulate distributions.
             materials += itemTotal * 0.55;
             labor += itemTotal * 0.30;
             equipment += itemTotal * 0.10;
@@ -520,14 +550,16 @@ document.addEventListener('DOMContentLoaded', async () => {
         const crnTotal = directCost + totalAiu; // Costo de Reposición a Nuevo (CRN)
 
         // 3. Valuation & Depreciation (Ross-Heidecke)
-        // D = CRN * K
-        // K = [(1/2)*(u + u^2)] + Heidecke Adjustment
+        // K = Ross Factor + Heidecke Adjustment
         const age = STATE.meta.age || 0;
         const life = STATE.meta.usefulLife || 50;
         const u = Math.min(age / life, 1.0);
         const rossFactor = 0.5 * (u + (u * u));
 
+        // Scientific Heidecke factors for Colombia
         const heideckeFactor = APP_UTILS.factors.heidecke[STATE.meta.conservation] || 0;
+
+        // Final Depreciation Factor (Total Castigo)
         const totalDepreciationFactor = Math.min(Math.max(rossFactor + heideckeFactor, 0), 1);
 
         const depreciatedValue = crnTotal * (1 - totalDepreciationFactor);
@@ -549,12 +581,12 @@ document.addEventListener('DOMContentLoaded', async () => {
         const sqmCost = STATE.meta.area > 0 ? grandAppraisalValue / STATE.meta.area : 0;
         UI.dispSqm.textContent = format(sqmCost);
 
-        // 4.1 Update High/Low Range (+/- 2.5%) - Enhanced with High-Fidelity Differentiators
+        // 4.1 Update High/Low Range (+/- 2.5%)
         const low = grandAppraisalValue * 0.975;
         const high = grandAppraisalValue * 1.025;
         UI.dispRange.innerHTML = `
-            <span class="text-blue-400 font-bold drop-shadow-sm">${format(low)}</span> 
-            <span class="mx-1 text-gray-700">—</span> 
+            <span class="text-blue-400 font-bold drop-shadow-sm">${format(low)}</span>
+            <span class="mx-1 text-gray-700">—</span>
             <span class="text-emerald-400 font-bold drop-shadow-sm">${format(high)}</span>
         `;
 
@@ -572,10 +604,35 @@ document.addEventListener('DOMContentLoaded', async () => {
         if (UI.marketBadge) {
             const mFactor = STATE.meta.marketMultiplier || 1.0;
             UI.marketBadge.textContent = mFactor > 1.0 ? `Plusvalía (${mFactor}x)` : mFactor < 1.0 ? `Descuento (${mFactor}x)` : `Neutral (${mFactor}x)`;
-            UI.marketBadge.className = `px-3 py-1 text-[10px] font-black rounded-full border transition-all ${mFactor > 1.0 ? 'bg-emerald-500/10 text-emerald-400 border-emerald-500/20' : mFactor < 1.0 ? 'bg-red-500/10 text-red-400 border-red-500/20' : 'bg-brand/10 text-brand border-brand/20'}`;
         }
 
-        // 4.4 Intelligence Engine (Diagnóstico)
+        // 4.4 GIS VALUATION ENGINE (IGAC GAP ANALYSIS)
+        if (STATE.meta.igacValuation > 0 && UI.gisCard) {
+            UI.gisCard.classList.remove('hidden');
+            UI.gisIgacValue.textContent = format(STATE.meta.igacValuation);
+            UI.gisLandType.textContent = STATE.meta.landType || 'No especificado';
+
+            const gapValue = grandAppraisalValue - STATE.meta.igacValuation;
+            const gapPct = (gapValue / STATE.meta.igacValuation) * 100;
+
+            UI.gisGapValue.textContent = format(Math.abs(gapValue));
+            UI.gisGapPct.textContent = `${gapPct > 0 ? '+' : ''}${gapPct.toFixed(1)}%`;
+
+            // Visual feedback based on gap
+            UI.gisGapPct.className = `px-2 py-1 rounded text-[10px] font-black ${Math.abs(gapPct) < 15 ? 'bg-emerald-500/20 text-emerald-400' :
+                    Math.abs(gapPct) < 40 ? 'bg-yellow-500/20 text-yellow-400' : 'bg-red-500/20 text-red-400'
+                }`;
+
+            if (gapValue > 0) {
+                UI.gisGapValue.previousElementSibling.textContent = "Potencial de Plusvalía (vs IGAC)";
+            } else {
+                UI.gisGapValue.previousElementSibling.textContent = "Brecha de Subvaloración";
+            }
+        } else if (UI.gisCard) {
+            UI.gisCard.classList.add('hidden');
+        }
+
+        // 4.4 Intelligence Engine
         generateIntelligenceInsights(totalDepreciationFactor, totalAiu, sqmCost, crnTotal);
 
         // 5. Update Charts
@@ -713,7 +770,8 @@ document.addEventListener('DOMContentLoaded', async () => {
                 const originalPrice = item.precios[STATE.meta.region] || 0;
                 const price = STATE.editedPrices[item.codigo] !== undefined ? STATE.editedPrices[item.codigo] : originalPrice;
 
-                const multiplier = (APP_UTILS.factors.state[STATE.meta.projectState] || 1.0) * (APP_UTILS.factors.cons[STATE.meta.conservation] || 1.0);
+                // Consistent Multiplier logic: Status (Completeness) * Quality
+                const multiplier = (APP_UTILS.factors.state[STATE.meta.projectState] || 1.0) * (STATE.meta.qualityMultiplier || 1.0);
                 const finalPrice = price * multiplier;
 
                 let qtyDisplay = item.quantity;
@@ -978,12 +1036,14 @@ document.addEventListener('DOMContentLoaded', async () => {
         };
 
         expertField(65, "Propietario / Responsable", meta.owner);
-        expertField(81, "Ref. Geográfica", `${meta.city || '--'}, ${meta.dept || '--'}`);
-        expertField(94, "Aviso / Identificación", meta.aviso);
-        expertField(107, "Línea / Torre", meta.tower);
-        expertField(123, "Atributos Base", `ÁREA: ${meta.area}M² | ALTURA: ${meta.height}M`);
-        expertField(139, "Edad y Vida Útil", `${meta.age}A / ${meta.usefulLife}A (V)`);
-        expertField(155, "Metodología", "IVS STANDARD 2026");
+        expertField(81, "Cédula Catastral", meta.cedula || '--');
+        expertField(94, "Matrícula Inmob.", meta.matricula || '--');
+        expertField(107, "Ref. Geográfica", `${meta.city || '--'}, ${meta.dept || '--'}`);
+        expertField(120, "Aviso / Identificación", meta.aviso);
+        expertField(133, "Línea / Torre", meta.tower);
+        expertField(146, "Atributos Base", `ÁREA: ${meta.area}M² | ALTURA: ${meta.height}M`);
+        expertField(159, "Edad y Vida Útil", `${meta.age}A / ${meta.usefulLife}A (V)`);
+        expertField(172, "Metodología", "IVS STANDARD 2026");
 
         // --- II. FINANCIAL CONSOLIDATION (SUPREME LEDGER STYLE) ---
         const mainX = 78;
@@ -1084,7 +1144,7 @@ document.addEventListener('DOMContentLoaded', async () => {
             if (it.calcMode === 'volume') q *= (STATE.meta.area * STATE.meta.height);
             else if (it.calcMode === 'area') q *= STATE.meta.area;
             const p = STATE.editedPrices[it.codigo] || it.precios[STATE.meta.region] || 0;
-            const mult = (factors.state[STATE.meta.projectState] || 1) * (factors.cons[meta.conservation] || 1);
+            const mult = (factors.state[STATE.meta.projectState] || 1) * (STATE.meta.qualityMultiplier || 1);
             return [
                 it.codigo,
                 getSimpleName(it.nombre).toUpperCase(),
@@ -1152,8 +1212,34 @@ document.addEventListener('DOMContentLoaded', async () => {
     UI.inputAviso.addEventListener('input', (e) => { STATE.meta.aviso = e.target.value; saveToStorage(); });
     UI.inputTower.addEventListener('input', (e) => { STATE.meta.tower = e.target.value; saveToStorage(); });
     UI.inputOwner.addEventListener('input', (e) => { STATE.meta.owner = e.target.value; saveToStorage(); });
+    UI.inputCedula.addEventListener('input', (e) => { STATE.meta.cedula = e.target.value; saveToStorage(); });
+    UI.inputMatricula.addEventListener('input', (e) => { STATE.meta.matricula = e.target.value; saveToStorage(); });
     UI.inputCity.addEventListener('input', (e) => { STATE.meta.city = e.target.value; saveToStorage(); });
     UI.inputState.addEventListener('input', (e) => { STATE.meta.dept = e.target.value; saveToStorage(); });
+
+    // GIS SYNC: El cerebro que recibe la carga del mapa
+    document.addEventListener('gisSync', (e) => {
+        const meta = e.detail;
+        if (UI.inputCedula) UI.inputCedula.value = meta.cedula || '';
+        if (UI.inputArea) {
+            UI.inputArea.value = meta.area || 0;
+            STATE.meta.area = parseFloat(meta.area) || 1.0;
+        }
+
+        // Inyectar inteligencia IGAC al estado
+        if (meta.igacValuation) STATE.meta.igacValuation = meta.igacValuation;
+        if (meta.igacDestino) STATE.meta.igacDestino = meta.igacDestino;
+        if (meta.landType) STATE.meta.landType = meta.landType;
+
+        // Lógica de Negocio: Si el suelo es INFORMAL, aumentamos imprevistos automáticamente
+        if (meta.landType && meta.landType.toLowerCase().includes('informal')) {
+            STATE.config.imprev = 15; // Sube del 5% al 15% por riesgo jurídico
+            if (UI.inImprev) UI.inImprev.value = 15;
+            showToast("⚠️ Suelo Informal detectado: Contingencia legal aumentada al 15%", "info");
+        }
+
+        recalculate();
+    });
 
     UI.btnClear.addEventListener('click', async () => {
         if (await showModal("¿Reiniciar Proyecto?", "Se borrarán todos los ítems y configuraciones.")) {
@@ -1234,6 +1320,8 @@ document.addEventListener('DOMContentLoaded', async () => {
             if (UI.inputAviso) UI.inputAviso.value = STATE.meta.aviso || '';
             if (UI.inputTower) UI.inputTower.value = STATE.meta.tower || '';
             if (UI.inputOwner) UI.inputOwner.value = STATE.meta.owner || '';
+            if (UI.inputCedula) UI.inputCedula.value = STATE.meta.cedula || '';
+            if (UI.inputMatricula) UI.inputMatricula.value = STATE.meta.matricula || '';
             if (UI.inputCity) UI.inputCity.value = STATE.meta.city || '';
             if (UI.inputState) UI.inputState.value = STATE.meta.dept || '';
         }
@@ -1319,13 +1407,20 @@ document.addEventListener('DOMContentLoaded', async () => {
 
         // 3. Eficiencia de Costo por m2
         if (sqmCost > 0) {
-            const avgSqm = 2500000; // Referencia base
-            if (sqmCost > avgSqm * 2) {
+            const avgSqm = CONSTANTS_2026.CONSTRUCTION_COSTS.MEDIUM.min; // Referencia base 2026
+            if (sqmCost > avgSqm * 1.5) {
                 insights.push({
                     icon: 'award',
                     color: 'text-purple-400',
                     title: 'Proyecto de Alta Gama / Lujo',
-                    desc: 'El valor por m² indica un estándar superior. El mercado objetivo debe ser Prime para asegurar el retorno.'
+                    desc: 'El valor por m² indica un estándar superior (Premium). El mercado objetivo debe ser Prime para asegurar el retorno.'
+                });
+            } else if (sqmCost < CONSTANTS_2026.CONSTRUCTION_COSTS.BASIC.min) {
+                insights.push({
+                    icon: 'trending-down',
+                    color: 'text-emerald-400',
+                    title: 'Alta Eficiencia de Costos',
+                    desc: 'El valor por m² está por debajo del promedio básico. Ideal para proyectos de inversión o Vivienda de Interés Social.'
                 });
             }
         }
