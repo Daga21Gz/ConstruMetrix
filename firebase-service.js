@@ -68,31 +68,31 @@ window.logout = function () {
 function updateAuthUI(user) {
     const btnLogin = document.getElementById('btnLogin');
     const btnLogout = document.getElementById('btnLogout');
-    const userStatus = document.getElementById('userStatus');
-    const userEmail = document.getElementById('userEmail');
-
-    if (!btnLogin) return;
+    const authOverlay = document.getElementById('authOverlay');
 
     if (user) {
-        // Logged In State
-        userStatus.textContent = user.displayName || "Usuario";
-        userEmail.textContent = user.email;
-        userEmail.classList.remove('hidden');
-        btnLogin.onclick = null; // Disable login click on profile
-        btnLogin.classList.add('cursor-default');
+        // Logged In: Hide Overlay, Update Status
+        if (authOverlay) authOverlay.classList.add('hidden');
 
-        // Show Logout
-        if (btnLogout) btnLogout.classList.remove('hidden');
-
+        if (btnLogin) {
+            btnLogin.innerHTML = `<img src="${user.photoURL || 'https://ui-avatars.com/api/?name=' + user.displayName}" class="w-6 h-6 rounded-lg border border-brand/50">`;
+            btnLogin.title = `Conectado como: ${user.displayName}`;
+            btnLogin.onclick = () => {
+                if (confirm('¿Cerrar sesión?')) window.logout();
+            };
+        }
     } else {
-        // Logged Out State
-        userStatus.textContent = "Iniciar Sesión";
-        userEmail.textContent = "";
-        userEmail.classList.add('hidden');
-        btnLogin.onclick = window.loginWithGoogle;
-        btnLogin.classList.remove('cursor-default');
+        // Logged Out: Show Overlay
+        if (authOverlay) {
+            authOverlay.classList.remove('hidden');
+            authOverlay.classList.add('flex');
+        }
 
-        if (btnLogout) btnLogout.classList.add('hidden');
+        if (btnLogin) {
+            btnLogin.innerHTML = `<i data-lucide="user" class="w-4 h-4 text-gray-400 group-hover:text-brand"></i>`;
+            btnLogin.onclick = window.loginWithGoogle;
+            if (window.lucide) lucide.createIcons();
+        }
     }
 }
 

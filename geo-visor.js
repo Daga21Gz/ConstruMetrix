@@ -639,9 +639,28 @@
 
         // Bind Filter Input
         if (filterInput) {
-            filterInput.value = ''; // Reset search
-            filterInput.oninput = (e) => filterGisTable(e.target.value);
+            // Smart Filter: Clear on focus if empty, bind real-time
+            filterInput.value = '';
+            filterInput.oninput = (e) => {
+                const val = e.target.value;
+                // Debounce slightly for performance on huge datasets
+                if (window._filterTimeout) clearTimeout(window._filterTimeout);
+                window._filterTimeout = setTimeout(() => filterGisTable(val), 300);
+            };
             filterInput.focus();
+        }
+
+        // Add CSV Export Button if not exists
+        const headerActions = document.getElementById('gisHeaderActions'); // Ensure this ID exists in HTML or create dynamically
+        if (!document.getElementById('btnExportGisCsv') && layerTitle) {
+            const btn = document.createElement('button');
+            btn.id = 'btnExportGisCsv';
+            btn.className = "p-1.5 rounded hover:bg-white/10 text-brand-400 hover:text-white transition-colors ml-2";
+            btn.innerHTML = '<i data-lucide="download" class="w-4 h-4"></i>';
+            btn.title = "Exportar Vista a CSV";
+            btn.onclick = exportGisTableToCSV;
+            layerTitle.parentNode.appendChild(btn);
+            if (window.lucide) lucide.createIcons();
         }
 
         if (GIS_TABLE.data.length === 0) return;
@@ -651,11 +670,21 @@
 
         tableHead.innerHTML = `
             <tr>
-                <th class="p-3 text-left font-bold text-brand uppercase text-xs tracking-wider sticky top-0 bg-dark-800 z-10 w-10">#</th>
-                ${keys.map(k => `<th class="p-3 text-left font-bold text-gray-300 uppercase text-xs tracking-wider sticky top-0 bg-dark-800 z-10 cursor-pointer hover:text-white" onclick="sortGisTable('${k}')">${k}</th>`).join('')}
-                <th class="p-3 text-right font-bold text-gray-300 uppercase text-xs tracking-wider sticky top-0 right-0 bg-dark-800 z-50 border-l border-white/10 shadow-[-5px_0_10px_rgba(0,0,0,0.5)]">ACCION</th>
+                <th class="p-3 text-left font-bold text-brand uppercase text-xs tracking-wider sticky top-0 bg-dark-800 z-10 w-10 border-b border-brand/20">
+                    <i data-lucide="hash" class="w-3 h-3"></i>
+                </th>
+                ${keys.map(k => `
+                    <th class="p-3 text-left font-bold text-gray-300 uppercase text-xs tracking-wider sticky top-0 bg-dark-800 z-10 cursor-pointer hover:text-white hover:bg-white/5 border-b border-brand/20 transition-colors group" onclick="sortGisTable('${k}')">
+                        <div class="flex items-center gap-2">
+                            ${k}
+                            <i data-lucide="arrow-up-down" class="w-3 h-3 opacity-30 group-hover:opacity-100"></i>
+                        </div>
+                    </th>
+                `).join('')}
+                <th class="p-3 text-right font-bold text-gray-300 uppercase text-xs tracking-wider sticky top-0 right-0 bg-dark-800 z-50 border-l border-white/10 border-b border-brand/20 shadow-[-5px_0_10px_rgba(0,0,0,0.5)]">ACCION</th>
             </tr>
         `;
+        if (window.lucide) lucide.createIcons();
 
         renderTableRows(tableBody, keys);
     }
@@ -715,31 +744,67 @@
             renderTableRows(tableBody, keys);
         }
 
-        // --- AUTO ZOOM TO RESULTS ---
+        // --- AUTO ZOOM TO RESULTS (Smart FlyTo) ---
         if (query.length > 2 && GIS_TABLE.filteredData.length > 0) {
             try {
-                // Reconstruct simple GeoJSON from filtered rows
                 const features = GIS_TABLE.filteredData
-                    .filter(d => d._geometry) // Ensure geometry exists
-                    .map(d => ({
-                        type: "Feature",
-                        geometry: d._geometry,
-                        properties: {}
-                    }));
+                    .filter(d => d._geometry)
+                    .map(d => ({ type: "Feature", geometry: d._geometry, properties: {} }));
 
                 if (features.length > 0) {
                     const tempLayer = L.geoJSON({ type: "FeatureCollection", features: features });
                     const bounds = tempLayer.getBounds();
+
                     if (bounds && bounds.isValid()) {
-                        GIS_STATE.map.fitBounds(bounds, { padding: [100, 100], maxZoom: 18, animate: true, duration: 1.5 });
+                        GIS_STATE.map.flyToBounds(bounds, {
+                            padding: [100, 100],
+                            maxZoom: 18,
+                            duration: 1.5,
+                            easeLinearity: 0.25
+                        });
                     }
                 }
             } catch (err) {
                 console.warn("Auto-zoom error:", err);
             }
-        } else if (GIS_TABLE.filteredData.length === 0) {
+        } else if (GIS_TABLE.filteredData.length === 0 && query.length > 0) {
             updateGisStatus("⚠️ No se encontraron coincidencias", "error");
         }
+    };
+
+    // Export Helper
+    window.exportGisTableToCSV = function () {
+        if (!GIS_TABLE.filteredData.length) {
+            showToast("No hay datos para exportar", "error");
+            return;
+        }
+
+        // Extract headers from first row (excluding internal fields)
+        const sample = GIS_TABLE.filteredData[0];
+        const headers = Object.keys(sample).filter(k => k !== '_gid' && k !== '_geometry' && k !== 'geometry');
+
+        // Build CSV Content
+        let csvContent = headers.join(",") + "\n";
+
+        GIS_TABLE.filteredData.forEach(row => {
+            const rowData = headers.map(header => {
+                const val = row[header] ? String(row[header]).replace(/,/g, " ").replace(/"/g, '""') : "--";
+                return `"${val}"`;
+            });
+            csvContent += rowData.join(",") + "\n";
+        });
+
+        // Trigger Download
+        const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
+        const url = URL.createObjectURL(blob);
+        const link = document.createElement("a");
+        link.setAttribute("href", url);
+        link.setAttribute("download", `gis_export_${GIS_TABLE.activeLayer}_${new Date().getTime()}.csv`);
+        document.body.appendChild(link);
+        link.click();
+        document.body.removeChild(link);
+
+        showToast("📊 Datos Exportados a CSV", "success");
     };
 
     window.zoomToGisFeature = function (gid) {
