@@ -15,7 +15,8 @@
             towers: null,
             lines: null,
             servidumbre: null,
-            satellite: null
+            satellite: null,
+            selection: null
         },
         urls: {
             urban: "https://services2.arcgis.com/RVvWzU3lgJISqdke/arcgis/rest/services/Base_Catastral_Publica_IGAC_Septiembre/FeatureServer/7",
@@ -39,12 +40,14 @@
         currentPage: 1,
         rowsPerPage: 50,
         sortField: null,
-        sortAsc: true
+        sortAsc: true,
+        selectedGids: new Set()
     };
 
     const UI_GIS = {
         overlay: document.getElementById('gisVisorOverlay'),
-        mapContainer: document.getElementById('mainMap'),
+        mapElement: document.getElementById('mainMap'),
+        mapParent: document.getElementById('mapContainer'),
         toggleBtn: document.getElementById('toggleGisVisor'),
         closeBtn: document.getElementById('closeGisVisor'),
         infoPanel: document.getElementById('gisSelectionInfo'),
@@ -69,13 +72,19 @@
             return;
         }
 
+        const mapEl = document.getElementById('mainMap');
+        if (!mapEl) {
+            console.error("🚨 Critical: GIS Map container (#mainMap) not found in DOM.");
+            return;
+        }
+
         try {
-            GIS_STATE.map = L.map('mainMap', {
+            GIS_STATE.map = L.map(mapEl, {
                 center: [4.6, -74.0],
                 zoom: 12,
                 zoomControl: false,
                 attributionControl: false,
-                renderer: L.canvas() // Restauramos motor Canvas para velocidad
+                renderer: L.canvas()
             });
 
             GIS_STATE.basemap = L.tileLayer('https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}', {
@@ -95,6 +104,16 @@
 
             const towersPane = GIS_STATE.map.createPane('towersPane');
             towersPane.style.zIndex = 650; // Top: Torres
+
+            const selectPane = GIS_STATE.map.createPane('selectPane');
+            selectPane.style.zIndex = 800;
+            selectPane.style.pointerEvents = 'none';
+
+            GIS_STATE.layers.selection = L.geoJSON(null, {
+                pane: 'selectPane',
+                style: { color: '#fbbf24', weight: 4, opacity: 0.8, fillOpacity: 0.4, fillColor: '#fbbf24' },
+                pointToLayer: (f, ll) => L.circleMarker(ll, { radius: 10, color: '#fbbf24', fillColor: '#fbbf24', weight: 2, opacity: 0.9 })
+            }).addTo(GIS_STATE.map);
 
             // Permitir clicks (auto) para que funcione el raycast
             linesPane.style.pointerEvents = towersPane.style.pointerEvents = servPane.style.pointerEvents = 'auto';
@@ -599,7 +618,7 @@
     // --- ATTRIBUTE TABLE ENGINE (v5.0) ---
     window.openAttributeTable = function (layerKey) {
         // Feature: Auto-select 'lines' if no layer specified (UX improvement)
-        if (!layerKey) layerKey = 'lines';
+        if (!layerKey) layerKey = 'towers';
 
         // 1. Check for Local Cache (Infrastructure)
         if (GIS_STATE.cache[layerKey]) {
@@ -638,6 +657,8 @@
                     GIS_TABLE.data = rawData.map((f, idx) => ({ ...f.properties, _gid: idx, _geometry: f.geometry }));
                     GIS_TABLE.filteredData = [...GIS_TABLE.data];
                     GIS_TABLE.currentPage = 1;
+                    GIS_TABLE.selectedGids.clear(); // Clear selection when changing layer
+                    updateSelectionCounter();
 
                     renderTableUI();
                     updateGisStatus(`✅ ${rawData.length} predios cargados en tabla.`, "success");
@@ -653,7 +674,12 @@
         if (!container) return;
 
         container.classList.remove('hidden');
-        container.classList.add('flex'); // Activar flex para layout
+        container.classList.add('flex');
+
+        // Trigger map resize after UI shift
+        if (GIS_STATE.map) {
+            setTimeout(() => GIS_STATE.map.invalidateSize(), 300);
+        }
 
         // Render Headers
         const tableHead = document.getElementById('gisTableHead');
@@ -707,20 +733,30 @@
 
         tableHead.innerHTML = `
             <tr>
-                <th class="p-3 text-left font-bold text-brand uppercase text-xs tracking-wider sticky top-0 bg-dark-800 z-10 w-10 border-b border-brand/20">
-                    <i data-lucide="hash" class="w-3 h-3"></i>
+                <th class="p-3 text-left font-bold text-brand uppercase text-xs tracking-wider sticky top-0 bg-dark-bg z-10 w-10 border-b border-brand/20">
+                    <input type="checkbox" id="gisTableSelectAll" class="rounded bg-black/40 border-white/10 text-brand focus:ring-brand">
+                </th>
+                <th class="p-3 text-left font-bold text-brand uppercase text-xs tracking-wider sticky top-0 bg-dark-bg z-10 w-10 border-b border-brand/20">
+                    ID
                 </th>
                 ${keys.map(k => `
-                    <th class="p-3 text-left font-bold text-gray-300 uppercase text-xs tracking-wider sticky top-0 bg-dark-800 z-10 cursor-pointer hover:text-white hover:bg-white/5 border-b border-brand/20 transition-colors group" onclick="sortGisTable('${k}')">
+                    <th class="p-3 text-left font-bold text-gray-300 uppercase text-xs tracking-wider sticky top-0 bg-dark-bg z-10 cursor-pointer hover:text-white hover:bg-white/5 border-b border-brand/20 transition-colors group" onclick="sortGisTable('${k}')">
                         <div class="flex items-center gap-2">
                             ${k}
                             <i data-lucide="arrow-up-down" class="w-3 h-3 opacity-30 group-hover:opacity-100"></i>
                         </div>
                     </th>
                 `).join('')}
-                <th class="p-3 text-right font-bold text-gray-300 uppercase text-xs tracking-wider sticky top-0 right-0 bg-dark-800 z-50 border-l border-white/10 border-b border-brand/20 shadow-[-5px_0_10px_rgba(0,0,0,0.5)]">ACCION</th>
+                <th class="p-3 text-right font-bold text-gray-300 uppercase text-xs tracking-wider sticky top-0 right-0 bg-dark-bg z-[70] border-l border-white/10 border-b border-brand/20 shadow-[-5px_0_10px_rgba(0,0,0,0.5)]">ACCION</th>
             </tr>
         `;
+
+        // Bind Select All
+        const selectAll = document.getElementById('gisTableSelectAll');
+        if (selectAll) {
+            selectAll.checked = GIS_TABLE.filteredData.length > 0 && GIS_TABLE.filteredData.every(d => GIS_TABLE.selectedGids.has(d._gid));
+            selectAll.onchange = (e) => toggleSelectAll(e.target.checked);
+        }
         if (window.lucide) lucide.createIcons();
 
         renderTableRows(tableBody, keys);
@@ -734,9 +770,13 @@
         const pageData = GIS_TABLE.filteredData.slice(start, end);
 
         pageData.forEach(row => {
+            const isSelected = GIS_TABLE.selectedGids.has(row._gid);
             const tr = document.createElement('tr');
-            tr.className = "border-b border-gray-800 hover:bg-white/5 transition-colors group";
+            tr.className = `border-b border-gray-800 hover:bg-white/5 transition-colors group ${isSelected ? 'bg-brand/10' : ''}`;
             tr.innerHTML = `
+                <td class="p-2 text-center border-b border-white/5">
+                    <input type="checkbox" class="row-selector rounded bg-black/40 border-white/10 text-brand focus:ring-brand" data-gid="${row._gid}" ${isSelected ? 'checked' : ''}>
+                </td>
                 <td class="p-2 text-[10px] text-gray-500 font-mono border-b border-white/5">${row._gid}</td>
                 ${keys.map(k => `<td class="p-2 text-[10px] text-gray-300 whitespace-nowrap overflow-hidden text-ellipsis max-w-[150px] border-b border-white/5" title="${row[k]}">${row[k] || '--'}</td>`).join('')}
                 <td class="p-2 text-right border-b border-white/5 border-l border-white/10 sticky right-0 bg-[#0a0c10] z-[50] shadow-[-5px_0_10px_rgba(0,0,0,0.5)]">
@@ -746,6 +786,15 @@
                 </td>
             `;
             tbody.appendChild(tr);
+        });
+
+        // Add event listeners for checkboxes
+        document.querySelectorAll('.row-selector').forEach(cb => {
+            cb.onclick = (e) => {
+                e.stopPropagation();
+                const gid = parseInt(cb.getAttribute('data-gid'));
+                toggleRowSelection(gid, cb.checked);
+            };
         });
 
         // Add event listeners manually to avoid inline onclick issues
@@ -761,14 +810,19 @@
     }
 
     window.filterGisTable = function (query) {
-        query = query.toLowerCase();
-        if (!query) {
+        const terms = query.toLowerCase().split(/\s+/).filter(t => t.length > 0);
+
+        if (terms.length === 0) {
             GIS_TABLE.filteredData = [...GIS_TABLE.data];
         } else {
             GIS_TABLE.filteredData = GIS_TABLE.data.filter(row => {
-                return Object.values(row).some(val => String(val).toLowerCase().includes(query));
+                const rowValues = Object.values(row).map(v => String(v).toLowerCase());
+                return terms.every(term =>
+                    rowValues.some(val => val.includes(term))
+                );
             });
         }
+
         GIS_TABLE.currentPage = 1;
 
         // Re-render body only
@@ -779,6 +833,12 @@
         if (GIS_TABLE.data.length > 0) {
             const keys = Object.keys(GIS_TABLE.data[0]).filter(k => k !== '_gid' && k !== '_geometry' && k !== 'geometry');
             renderTableRows(tableBody, keys);
+
+            // Update Select All checkbox state
+            const selectAll = document.getElementById('gisTableSelectAll');
+            if (selectAll) {
+                selectAll.checked = GIS_TABLE.filteredData.length > 0 && GIS_TABLE.filteredData.every(d => GIS_TABLE.selectedGids.has(d._gid));
+            }
         }
 
         // --- AUTO ZOOM TO RESULTS (Smart FlyTo) ---
@@ -877,6 +937,9 @@
         if (p) {
             p.classList.remove('flex');
             p.classList.add('hidden');
+            if (GIS_STATE.map) {
+                setTimeout(() => GIS_STATE.map.invalidateSize(), 300);
+            }
         }
     };
 
@@ -930,4 +993,184 @@
         // Simple logic for footer if needed
     }
 
+    // --- SELECTION ENGINE (v5.1) ---
+    window.toggleRowSelection = function (gid, selected) {
+        if (selected) GIS_TABLE.selectedGids.add(gid);
+        else GIS_TABLE.selectedGids.delete(gid);
+
+        updateSelectionCounter();
+        updateSelectionHighlight();
+
+        // Update row visual state
+        const rows = document.querySelectorAll('.row-selector');
+        rows.forEach(cb => {
+            if (parseInt(cb.getAttribute('data-gid')) === gid) {
+                cb.closest('tr').classList.toggle('bg-brand/10', selected);
+            }
+        });
+    };
+
+    window.toggleSelectAll = function (selected) {
+        GIS_TABLE.filteredData.forEach(d => {
+            if (selected) GIS_TABLE.selectedGids.add(d._gid);
+            else GIS_TABLE.selectedGids.delete(d._gid);
+        });
+
+        const tableBody = document.getElementById('gisTableBody');
+        const keys = Object.keys(GIS_TABLE.data[0] || {}).filter(k => k !== '_gid' && k !== '_geometry' && k !== 'geometry');
+        renderTableRows(tableBody, keys);
+
+        updateSelectionCounter();
+        updateSelectionHighlight();
+    };
+
+    function updateSelectionCounter() {
+        const span = document.getElementById('gisSelectedCount');
+        if (span) span.textContent = GIS_TABLE.selectedGids.size;
+    }
+
+    function updateSelectionHighlight() {
+        if (!GIS_STATE.layers.selection) return;
+        GIS_STATE.layers.selection.clearLayers();
+
+        if (GIS_TABLE.selectedGids.size === 0) return;
+
+        const features = [];
+        GIS_TABLE.selectedGids.forEach(gid => {
+            const item = GIS_TABLE.data.find(d => d._gid === gid);
+            if (item && item._geometry) {
+                features.push({
+                    type: "Feature",
+                    geometry: item._geometry,
+                    properties: item
+                });
+            }
+        });
+
+        if (features.length > 0) {
+            GIS_STATE.layers.selection.addData({
+                type: "FeatureCollection",
+                features: features
+            });
+        }
+    }
+
+    window.clearGisSelection = function () {
+        GIS_TABLE.selectedGids.clear();
+        const tableBody = document.getElementById('gisTableBody');
+        if (GIS_TABLE.data.length > 0) {
+            const keys = Object.keys(GIS_TABLE.data[0]).filter(k => k !== '_gid' && k !== '_geometry' && k !== 'geometry');
+            renderTableRows(tableBody, keys);
+        }
+        updateSelectionCounter();
+        updateSelectionHighlight();
+    };
+
+    // --- EXPRESSION SELECTOR ---
+    window.openExpressionDialog = function () {
+        const dialog = document.getElementById('gisExpressionDialog');
+        if (dialog) dialog.classList.remove('hidden');
+    };
+
+    window.closeExpressionDialog = function () {
+        const dialog = document.getElementById('gisExpressionDialog');
+        if (dialog) dialog.classList.add('hidden');
+    };
+
+    window.toggleSelectionFilter = function () {
+        const btn = document.getElementById('btnToggleSelectionFilter');
+        if (!btn) return;
+
+        const isFiltering = btn.classList.contains('text-brand');
+
+        if (!isFiltering) {
+            // Activating filter: Show ONLY selected
+            if (GIS_TABLE.selectedGids.size === 0) {
+                if (window.showToast) window.showToast("Primero selecciona algunos elementos", "info");
+                return;
+            }
+            GIS_TABLE.filteredData = GIS_TABLE.data.filter(d => GIS_TABLE.selectedGids.has(d._gid));
+            btn.classList.replace('text-gray-500', 'text-brand');
+            btn.classList.add('bg-brand/10', 'border-brand/30');
+        } else {
+            // Deactivating filter: Show all
+            GIS_TABLE.filteredData = [...GIS_TABLE.data];
+            btn.classList.replace('text-brand', 'text-gray-500');
+            btn.classList.remove('bg-brand/10', 'border-brand/30');
+        }
+
+        GIS_TABLE.currentPage = 1;
+        const tableBody = document.getElementById('gisTableBody');
+        const countBadge = document.getElementById('gisTableCount');
+        if (countBadge) countBadge.textContent = `${GIS_TABLE.filteredData.length} Registros`;
+
+        if (GIS_TABLE.data.length > 0) {
+            const keys = Object.keys(GIS_TABLE.data[0]).filter(k => k !== '_gid' && k !== '_geometry' && k !== 'geometry');
+            renderTableRows(tableBody, keys);
+        }
+    };
+
+    window.applyExpressionSelection = function (mode = 'select') {
+        const expr = document.getElementById('gisExpressionInput').value;
+        if (!expr) return;
+
+        try {
+            const createPredicate = (expression) => {
+                if (expression.includes('window') || expression.includes('document') || expression.includes('fetch')) {
+                    throw new Error("Expresión no permitida");
+                }
+                return new Function('props', `with(props) { return (${expression}); }`);
+            };
+
+            const predicate = createPredicate(expr);
+
+            if (mode === 'filter') {
+                GIS_TABLE.filteredData = GIS_TABLE.data.filter(row => {
+                    try { return predicate(row); } catch (e) { return false; }
+                });
+
+                if (GIS_TABLE.filteredData.length > 0) {
+                    GIS_TABLE.currentPage = 1;
+                    const tableBody = document.getElementById('gisTableBody');
+                    const countBadge = document.getElementById('gisTableCount');
+                    if (countBadge) countBadge.textContent = `${GIS_TABLE.filteredData.length} Registros`;
+
+                    const keys = Object.keys(GIS_TABLE.data[0]).filter(k => k !== '_gid' && k !== '_geometry' && k !== 'geometry');
+                    renderTableRows(tableBody, keys);
+                    updateGisStatus(`✔ Tabla filtrada: ${GIS_TABLE.filteredData.length} registros.`, "success");
+                    closeExpressionDialog();
+                } else {
+                    updateGisStatus("ℹ️ Ningún elemento coincide con el filtro.", "info");
+                }
+            } else {
+                let count = 0;
+                GIS_TABLE.data.forEach(row => {
+                    try {
+                        if (predicate(row)) {
+                            GIS_TABLE.selectedGids.add(row._gid);
+                            count++;
+                        }
+                    } catch (e) { }
+                });
+
+                if (count > 0) {
+                    updateGisStatus(`✔ Seleccionados ${count} elementos por expresión.`, "success");
+                    const tableBody = document.getElementById('gisTableBody');
+                    const keys = Object.keys(GIS_TABLE.data[0]).filter(k => k !== '_gid' && k !== '_geometry' && k !== 'geometry');
+                    renderTableRows(tableBody, keys);
+                    updateSelectionCounter();
+                    updateSelectionHighlight();
+                    closeExpressionDialog();
+                } else {
+                    updateGisStatus("ℹ️ Ningún elemento coincide con la expresión.", "info");
+                }
+            }
+
+        } catch (err) {
+            console.error("Expression Error:", err);
+            updateGisStatus("⚠️ Error de sintaxis en expresión.", "error");
+        }
+    };
+
+    console.log("✅ GIS Engine v3.1: All modules (Selection, Filtering, Expressions) loaded.");
 })();

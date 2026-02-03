@@ -1297,85 +1297,7 @@
         </div>
     </div>
 
-    <!-- ATTRIBUTE TABLE PANEL (v5.0) -->
-    <div id="gisAttributeTablePanel"
-        class="hidden absolute bottom-0 left-0 right-0 h-[40vh] bg-[#0a0c10]/95 backdrop-blur-xl border-t border-white/10 z-[3000] flex flex-col transition-all duration-300">
-        <!-- Header -->
-        <div class="h-12 border-b border-white/10 flex items-center justify-between px-6 bg-white/5">
-            <div class="flex items-center gap-4">
-                <div class="flex items-center gap-2">
-                    <i data-lucide="database" class="w-4 h-4 text-brand"></i>
-                    <h3 id="gisTableTitle" class="text-xs font-black text-white uppercase tracking-widest">DATA GRID
-                    </h3>
-                </div>
-                <span id="gisTableCount" class="px-2 py-0.5 rounded bg-white/10 text-[9px] font-bold text-gray-400">0
-                    Registros</span>
-            </div>
 
-            <div class="flex items-center gap-4">
-                <div class="relative">
-                    <i data-lucide="search" class="absolute left-3 top-1/2 -translate-y-1/2 w-3 h-3 text-gray-500"></i>
-                    <input type="text" id="gisTableFilter" name="gisTableFilter" onkeyup="filterGisTable(this.value)"
-                        placeholder="Filtrar atributos..."
-                        class="pl-9 pr-4 py-1.5 rounded-lg bg-black/40 border border-white/10 text-xs text-white placeholder-gray-600 focus:border-brand focus:outline-none w-64 transition-all">
-                </div>
-                <button onclick="closeAttributeTable()"
-                    class="p-1.5 rounded hover:bg-white/10 text-gray-400 hover:text-white transition-colors"
-                    aria-label="Cerrar Tabla de Atributos">
-                    <i data-lucide="x" class="w-4 h-4"></i>
-                </button>
-            </div>
-        </div>
-
-        <!-- Table Container -->
-        <div class="flex-1 overflow-auto custom-scrollbar">
-            <table class="w-full text-left border-collapse">
-                <thead id="gisTableHead" class="bg-dark-bg sticky top-0 shadow-lg">
-                    <!-- Headers injected here -->
-                </thead>
-                <tbody id="gisTableBody">
-                    <!-- Rows injected here -->
-                </tbody>
-            </table>
-        </div>
-
-        <!-- Footer / Pagination -->
-        <div class="h-8 border-t border-white/10 bg-black/40 flex items-center justify-between px-6">
-            <p class="text-[9px] text-gray-600 font-mono">RENDERING: 50 ROWS (SCROLL FOR MORE)</p>
-            <div class="flex gap-2">
-                <!-- Simple pagination controls could go here -->
-            </div>
-        </div>
-    </div>
-
-    <!-- PWA Install Prompt -->
-    <div id="pwaInstallBanner"
-        class="fixed bottom-6 right-6 bg-gradient-to-r from-brand to-purple-600 text-white p-4 rounded-2xl shadow-2xl shadow-brand/50 z-[998] hidden max-w-sm">
-        <div class="flex items-start gap-3">
-            <div class="p-2 bg-white/20 rounded-lg">
-                <i data-lucide="download-cloud" class="w-5 h-5"></i>
-            </div>
-            <div class="flex-1">
-                <h4 class="font-bold text-sm mb-1">Instalar CONSTRUMETRIX</h4>
-                <p class="text-xs opacity-90 mb-3">Úsala sin conexión, como una app nativa</p>
-                <div class="flex gap-2">
-                    <button onclick="installPWA()"
-                        class="px-3 py-1.5 bg-white text-brand rounded-lg text-xs font-bold hover:scale-105 transition-transform">
-                        Instalar Ahora
-                    </button>
-                    <button onclick="dismissPWAPrompt()"
-                        class="px-3 py-1.5 bg-white/20 rounded-lg text-xs font-medium hover:bg-white/30 transition-colors">
-                        Más tarde
-                    </button>
-                </div>
-            </div>
-            <button onclick="dismissPWAPrompt()" class="text-white/70 hover:text-white transition-colors">
-                <i data-lucide="x" class="w-4 h-4"></i>
-            </button>
-        </div>
-    </div>
-
-    </div>
 
     <!-- Master Intelligence Toast -->
     <div id="toast"
@@ -1404,222 +1326,334 @@
     <!-- Official Data Sources -->
     <script src="fuentes-oficiales.js"></script>
 
-    <!-- GIS COMMAND CENTER OVERLAY -->
+    <!-- GIS COMMAND CENTER OVERLAY (v5.1 - QGIS Docking Mode) -->
     <div id="gisVisorOverlay"
-        class="fixed inset-0 z-[100] bg-dark-bg flex hidden opacity-0 transition-all duration-700">
-        <!-- Close Overlay -->
-        <button id="closeGisVisor"
-            class="absolute top-6 right-6 z-[110] p-4 rounded-full bg-white/5 border border-white/10 text-white hover:bg-red-500/20 hover:border-red-500/50 transition-all group backdrop-blur-xl">
-            <i data-lucide="x" class="w-6 h-6 group-hover:rotate-90 transition-transform duration-500"></i>
-        </button>
+        class="fixed inset-0 z-[100] bg-dark-bg flex flex-col hidden opacity-0 transition-all duration-700">
 
-        <!-- Left: Intelligence Panel -->
-        <div
-            class="w-96 border-r border-white/5 bg-[#0a0c10]/95 backdrop-blur-3xl flex flex-col p-6 overflow-y-auto relative z-[105] shadow-2xl">
+        <div class="flex-1 flex overflow-hidden relative"> <!-- Top Section: Panel + Map -->
 
-            <!-- Header Section -->
-            <div class="mb-8">
-                <div class="flex items-center gap-3 mb-2">
-                    <span
-                        class="px-2 py-0.5 rounded bg-brand text-[8px] font-black text-white uppercase animate-pulse shadow-[0_0_10px_rgba(79,122,255,0.5)]">
-                        Live Radar
-                    </span>
-                    <h2 class="text-xl font-black tracking-tighter text-white">ANÁLISIS <span
-                            class="text-brand">DIMENSIONAL</span></h2>
-                </div>
-                <p class="text-[10px] text-gray-500 font-bold uppercase tracking-widest border-b border-white/5 pb-4">
-                    Cruces Catastrales IGAC • Septiembre 2026
-                </p>
-            </div>
+            <!-- Close Overlay -->
+            <button id="closeGisVisor"
+                class="absolute top-6 right-6 z-[110] p-4 rounded-full bg-white/5 border border-white/10 text-white hover:bg-red-500/20 hover:border-red-500/50 transition-all group backdrop-blur-xl">
+                <i data-lucide="x" class="w-6 h-6 group-hover:rotate-90 transition-transform duration-500"></i>
+            </button>
 
-            <!-- Status Logs -->
-            <div id="gisStatusList" class="space-y-2 mb-6 max-h-32 overflow-y-auto custom-scrollbar pr-2">
-                <!-- Logs injected dynamically -->
-            </div>
-
-            <!-- LAYER STACK MANAGER (v4.0) -->
+            <!-- Left: Intelligence Panel -->
             <div
-                class="mb-6 p-4 rounded-xl bg-gradient-to-br from-white/5 to-transparent border border-white/10 relative overflow-hidden group/layers hover:border-brand/30 transition-all">
+                class="w-96 border-r border-white/5 bg-[#0a0c10]/95 backdrop-blur-3xl flex flex-col p-6 overflow-y-auto relative z-[105] shadow-2xl">
 
-                <!-- Section Header -->
-                <div class="flex items-center justify-between mb-4">
-                    <p class="text-[10px] font-black text-gray-400 uppercase tracking-widest flex items-center gap-2">
-                        <i data-lucide="layers" class="w-3 h-3 text-brand"></i> Jerarquía de Capas
+                <!-- Header Section -->
+                <div class="mb-8">
+                    <div class="flex items-center gap-3 mb-2">
+                        <span
+                            class="px-2 py-0.5 rounded bg-brand text-[8px] font-black text-white uppercase animate-pulse shadow-[0_0_10px_rgba(79,122,255,0.5)]">
+                            Live Radar
+                        </span>
+                        <h2 class="text-xl font-black tracking-tighter text-white">ANÁLISIS <span
+                                class="text-brand">DIMENSIONAL</span></h2>
+                    </div>
+                    <p
+                        class="text-[10px] text-gray-500 font-bold uppercase tracking-widest border-b border-white/5 pb-4">
+                        Cruces Catastrales IGAC • Septiembre 2026
                     </p>
-                    <span id="layerPriorityTag"
-                        class="text-[8px] bg-brand/20 text-brand px-2 py-1 rounded font-black border border-brand/20">
-                        AUTO MODE
-                    </span>
                 </div>
 
-                <div class="space-y-2">
-                    <!-- Infrastructure Tier -->
-                    <div
-                        class="flex items-center justify-between p-3 rounded-lg bg-black/40 border border-white/5 hover:border-brand/50 transition-all group/tier">
-                        <div class="flex items-center gap-3">
-                            <div class="w-2 h-2 rounded-full bg-amber-400 shadow-[0_0_8px_rgba(251,191,36,0.6)]"></div>
-                            <div>
-                                <p
-                                    class="text-[10px] font-bold text-gray-200 group-hover/tier:text-white transition-colors">
-                                    Infraestructura</p>
-                                <p class="text-[8px] text-gray-500 font-medium uppercase">Torres + Líneas</p>
+                <!-- Status Logs -->
+                <div id="gisStatusList" class="space-y-2 mb-6 max-h-32 overflow-y-auto custom-scrollbar pr-2">
+                    <!-- Logs injected dynamically -->
+                </div>
+
+                <!-- LAYER STACK MANAGER (v4.0) -->
+                <div
+                    class="mb-6 p-4 rounded-xl bg-gradient-to-br from-white/5 to-transparent border border-white/10 relative overflow-hidden group/layers hover:border-brand/30 transition-all">
+
+                    <!-- Section Header -->
+                    <div class="flex items-center justify-between mb-4">
+                        <p
+                            class="text-[10px] font-black text-gray-400 uppercase tracking-widest flex items-center gap-2">
+                            <i data-lucide="layers" class="w-3 h-3 text-brand"></i> Jerarquía de Capas
+                        </p>
+                        <span id="layerPriorityTag"
+                            class="text-[8px] bg-brand/20 text-brand px-2 py-1 rounded font-black border border-brand/20">
+                            AUTO MODE
+                        </span>
+                    </div>
+
+                    <div class="space-y-2">
+                        <!-- Infrastructure Tier -->
+                        <div
+                            class="flex items-center justify-between p-3 rounded-lg bg-black/40 border border-white/5 hover:border-brand/50 transition-all group/tier">
+                            <div class="flex items-center gap-3">
+                                <div class="w-2 h-2 rounded-full bg-amber-400 shadow-[0_0_8px_rgba(251,191,36,0.6)]">
+                                </div>
+                                <div>
+                                    <p
+                                        class="text-[10px] font-bold text-gray-200 group-hover/tier:text-white transition-colors">
+                                        Infraestructura</p>
+                                    <p class="text-[8px] text-gray-500 font-medium uppercase">Torres + Líneas</p>
+                                </div>
+                            </div>
+                            <div class="flex gap-1" role="group" aria-label="Order Controls">
+                                <button onclick="openAttributeTable('towers')"
+                                    class="p-1.5 rounded hover:bg-white/10 text-brand-400 hover:text-white transition-all"
+                                    aria-label="Open Infrastructure Table">
+                                    <i data-lucide="table" class="w-3.5 h-3.5"></i>
+                                </button>
+                                <button onclick="changeLayerOrder('infra', 'up')"
+                                    class="p-1.5 rounded hover:bg-white/10 text-gray-500 hover:text-white transition-all"
+                                    aria-label="Bring Infrastructure Forward">
+                                    <i data-lucide="chevron-up" class="w-3.5 h-3.5"></i>
+                                </button>
+                                <button onclick="changeLayerOrder('infra', 'down')"
+                                    class="p-1.5 rounded hover:bg-white/10 text-gray-500 hover:text-white transition-all"
+                                    aria-label="Send Infrastructure Backward">
+                                    <i data-lucide="chevron-down" class="w-3.5 h-3.5"></i>
+                                </button>
                             </div>
                         </div>
-                        <div class="flex gap-1" role="group" aria-label="Order Controls">
-                            <button onclick="openAttributeTable('lines')"
-                                class="p-1.5 rounded hover:bg-white/10 text-brand-400 hover:text-white transition-all"
-                                aria-label="Open Infrastructure Table">
-                                <i data-lucide="table" class="w-3.5 h-3.5"></i>
-                            </button>
-                            <button onclick="changeLayerOrder('infra', 'up')"
-                                class="p-1.5 rounded hover:bg-white/10 text-gray-500 hover:text-white transition-all"
-                                aria-label="Bring Infrastructure Forward">
-                                <i data-lucide="chevron-up" class="w-3.5 h-3.5"></i>
-                            </button>
-                            <button onclick="changeLayerOrder('infra', 'down')"
-                                class="p-1.5 rounded hover:bg-white/10 text-gray-500 hover:text-white transition-all"
-                                aria-label="Send Infrastructure Backward">
-                                <i data-lucide="chevron-down" class="w-3.5 h-3.5"></i>
-                            </button>
+
+                        <!-- Cadastral Tier -->
+                        <div
+                            class="flex items-center justify-between p-3 rounded-lg bg-black/40 border border-white/5 hover:border-emerald-500/50 transition-all group/tier">
+                            <div class="flex items-center gap-3">
+                                <div class="w-2 h-2 rounded-full bg-emerald-500 shadow-[0_0_8px_rgba(16,185,129,0.6)]">
+                                </div>
+                                <div>
+                                    <p
+                                        class="text-[10px] font-bold text-gray-200 group-hover/tier:text-white transition-colors">
+                                        Catastro IGAC</p>
+                                    <p class="text-[8px] text-gray-500 font-medium uppercase">Predios + Rural</p>
+                                </div>
+                            </div>
+                            <div class="flex gap-1" role="group" aria-label="Order Controls">
+                                <button onclick="openAttributeTable('urban')"
+                                    class="p-1.5 rounded hover:bg-white/10 text-emerald-400 hover:text-white transition-all"
+                                    aria-label="Open Cadastral Table">
+                                    <i data-lucide="table" class="w-3.5 h-3.5"></i>
+                                </button>
+                                <button onclick="changeLayerOrder('igac', 'up')"
+                                    class="p-1.5 rounded hover:bg-white/10 text-gray-500 hover:text-white transition-all"
+                                    aria-label="Bring Cadastre Forward">
+                                    <i data-lucide="chevron-up" class="w-3.5 h-3.5"></i>
+                                </button>
+                                <button onclick="changeLayerOrder('igac', 'down')"
+                                    class="p-1.5 rounded hover:bg-white/10 text-gray-500 hover:text-white transition-all"
+                                    aria-label="Send Cadastre Backward">
+                                    <i data-lucide="chevron-down" class="w-3.5 h-3.5"></i>
+                                </button>
+                            </div>
                         </div>
                     </div>
 
-                    <!-- Cadastral Tier -->
+                    <!-- Technical Footer -->
                     <div
-                        class="flex items-center justify-between p-3 rounded-lg bg-black/40 border border-white/5 hover:border-emerald-500/50 transition-all group/tier">
-                        <div class="flex items-center gap-3">
-                            <div class="w-2 h-2 rounded-full bg-emerald-500 shadow-[0_0_8px_rgba(16,185,129,0.6)]">
-                            </div>
-                            <div>
-                                <p
-                                    class="text-[10px] font-bold text-gray-200 group-hover/tier:text-white transition-colors">
-                                    Catastro IGAC</p>
-                                <p class="text-[8px] text-gray-500 font-medium uppercase">Predios + Rural</p>
-                            </div>
-                        </div>
-                        <div class="flex gap-1" role="group" aria-label="Order Controls">
-                            <button onclick="openAttributeTable('urban')"
-                                class="p-1.5 rounded hover:bg-white/10 text-emerald-400 hover:text-white transition-all"
-                                aria-label="Open Cadastral Table">
-                                <i data-lucide="table" class="w-3.5 h-3.5"></i>
-                            </button>
-                            <button onclick="changeLayerOrder('igac', 'up')"
-                                class="p-1.5 rounded hover:bg-white/10 text-gray-500 hover:text-white transition-all"
-                                aria-label="Bring Cadastre Forward">
-                                <i data-lucide="chevron-up" class="w-3.5 h-3.5"></i>
-                            </button>
-                            <button onclick="changeLayerOrder('igac', 'down')"
-                                class="p-1.5 rounded hover:bg-white/10 text-gray-500 hover:text-white transition-all"
-                                aria-label="Send Cadastre Backward">
-                                <i data-lucide="chevron-down" class="w-3.5 h-3.5"></i>
-                            </button>
+                        class="mt-3 pt-3 border-t border-dashed border-white/10 flex items-center justify-between px-1">
+                        <p class="text-[7px] text-gray-600 font-bold uppercase italic">Z-Index Engine Active</p>
+                        <div class="flex items-center gap-1.5">
+                            <div class="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse"></div>
+                            <p class="text-[7px] text-emerald-500 font-bold uppercase tracking-tighter">Live Sync</p>
                         </div>
                     </div>
                 </div>
 
-                <!-- Technical Footer -->
-                <div class="mt-3 pt-3 border-t border-dashed border-white/10 flex items-center justify-between px-1">
-                    <p class="text-[7px] text-gray-600 font-bold uppercase italic">Z-Index Engine Active</p>
-                    <div class="flex items-center gap-1.5">
-                        <div class="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse"></div>
-                        <p class="text-[7px] text-emerald-500 font-bold uppercase tracking-tighter">Live Sync</p>
+                <!-- SELECTION INFO PANEL -->
+                <div id="gisSelectionInfo"
+                    class="mt-auto pt-6 border-t border-white/10 animate-up opacity-0 translate-y-4 transition-all duration-500">
+                    <div class="flex items-center gap-2 mb-4">
+                        <i data-lucide="check-circle" class="w-4 h-4 text-emerald-400"></i>
+                        <p class="text-[10px] font-black text-emerald-400 uppercase tracking-widest">Predio Detectado
+                        </p>
+                    </div>
+
+                    <div class="space-y-4">
+                        <!-- Main ID -->
+                        <div class="space-y-2">
+                            <div class="group cursor-pointer">
+                                <p
+                                    class="text-[8px] text-gray-500 uppercase font-bold group-hover:text-brand transition-colors">
+                                    Cédula Catastral</p>
+                                <p id="gisCedula"
+                                    class="text-[11px] font-mono font-bold text-white truncate hover:underline decoration-brand/50 decoration-2">
+                                    --</p>
+                            </div>
+                            <div>
+                                <p class="text-[8px] text-gray-500 uppercase font-bold">Dirección / Nombre</p>
+                                <p id="gisAddress" class="text-[11px] font-bold text-gray-300">Seleccione un predio</p>
+                            </div>
+                        </div>
+
+                        <!-- Dimension Stats -->
+                        <div
+                            class="grid grid-cols-2 gap-3 p-3 rounded-xl bg-white/5 border border-white/5 hover:bg-white/10 transition-colors">
+                            <div>
+                                <p class="text-[8px] text-gray-500 uppercase font-bold mb-1">Área Terreno</p>
+                                <p id="gisArea" class="text-[11px] font-mono font-bold text-white">--</p>
+                            </div>
+                            <div>
+                                <p class="text-[8px] text-gray-500 uppercase font-bold mb-1">Área Const.</p>
+                                <p id="gisBuiltArea" class="text-[11px] font-mono font-bold text-brand">--</p>
+                            </div>
+                        </div>
+
+                        <!-- Meta Stats -->
+                        <div class="grid grid-cols-2 gap-3">
+                            <div>
+                                <p class="text-[8px] text-gray-500 uppercase font-bold">Ubicación</p>
+                                <p id="gisLocation" class="text-[9px] font-bold text-gray-400">--</p>
+                            </div>
+                            <div>
+                                <p class="text-[8px] text-gray-500 uppercase font-bold">Zonificación</p>
+                                <p id="gisZones" class="text-[9px] font-bold text-gray-400">--</p>
+                            </div>
+                        </div>
+
+                        <!-- Tech Details Grid -->
+                        <div id="gisTechDetails"
+                            class="grid grid-cols-3 gap-2 py-3 border-y border-white/5 bg-black/20 rounded-lg px-2 my-2">
+                            <div class="text-center">
+                                <p class="text-[7px] text-gray-500 uppercase font-black">Hab.</p>
+                                <p id="gisHabitaciones" class="text-xs font-bold text-gray-200">0</p>
+                            </div>
+                            <div class="text-center border-x border-white/5">
+                                <p class="text-[7px] text-gray-500 uppercase font-black">Baños</p>
+                                <p id="gisBanos" class="text-xs font-bold text-gray-200">0</p>
+                            </div>
+                            <div class="text-center">
+                                <p class="text-[7px] text-gray-500 uppercase font-black">Pisos</p>
+                                <p id="gisPisos" class="text-xs font-bold text-gray-200">0</p>
+                            </div>
+                        </div>
+
+                        <div id="gisValuationContext" class="space-y-2">
+                            <!-- Valuation data injected here -->
+                        </div>
+
+                        <button id="gisSyncBtn"
+                            class="w-full mt-2 py-3 rounded-xl bg-gradient-to-r from-brand to-blue-600 text-white text-[10px] font-black uppercase tracking-widest shadow-lg shadow-brand/20 hover:shadow-brand/40 hover:scale-[1.02] transition-all">
+                            Inyectar al Avalúo
+                        </button>
                     </div>
                 </div>
             </div>
 
-            <!-- SELECTION INFO PANEL -->
-            <div id="gisSelectionInfo"
-                class="mt-auto pt-6 border-t border-white/10 animate-up opacity-0 translate-y-4 transition-all duration-500">
-                <div class="flex items-center gap-2 mb-4">
-                    <i data-lucide="check-circle" class="w-4 h-4 text-emerald-400"></i>
-                    <p class="text-[10px] font-black text-emerald-400 uppercase tracking-widest">Predio Detectado</p>
-                </div>
+            <div id="mapContainer" class="flex-1 relative cursor-crosshair">
+                <div id="mainMap" class="absolute inset-0 bg-[#0b0e14]"></div>
 
-                <div class="space-y-4">
-                    <!-- Main ID -->
-                    <div class="space-y-2">
-                        <div class="group cursor-pointer">
-                            <p
-                                class="text-[8px] text-gray-500 uppercase font-bold group-hover:text-brand transition-colors">
-                                Cédula Catastral</p>
-                            <p id="gisCedula"
-                                class="text-[11px] font-mono font-bold text-white truncate hover:underline decoration-brand/50 decoration-2">
-                                --</p>
-                        </div>
-                        <div>
-                            <p class="text-[8px] text-gray-500 uppercase font-bold">Dirección / Nombre</p>
-                            <p id="gisAddress" class="text-[11px] font-bold text-gray-300">Seleccione un predio</p>
-                        </div>
-                    </div>
-
-                    <!-- Dimension Stats -->
-                    <div
-                        class="grid grid-cols-2 gap-3 p-3 rounded-xl bg-white/5 border border-white/5 hover:bg-white/10 transition-colors">
-                        <div>
-                            <p class="text-[8px] text-gray-500 uppercase font-bold mb-1">Área Terreno</p>
-                            <p id="gisArea" class="text-[11px] font-mono font-bold text-white">--</p>
-                        </div>
-                        <div>
-                            <p class="text-[8px] text-gray-500 uppercase font-bold mb-1">Área Const.</p>
-                            <p id="gisBuiltArea" class="text-[11px] font-mono font-bold text-brand">--</p>
-                        </div>
-                    </div>
-
-                    <!-- Meta Stats -->
-                    <div class="grid grid-cols-2 gap-3">
-                        <div>
-                            <p class="text-[8px] text-gray-500 uppercase font-bold">Ubicación</p>
-                            <p id="gisLocation" class="text-[9px] font-bold text-gray-400">--</p>
-                        </div>
-                        <div>
-                            <p class="text-[8px] text-gray-500 uppercase font-bold">Zonificación</p>
-                            <p id="gisZones" class="text-[9px] font-bold text-gray-400">--</p>
-                        </div>
-                    </div>
-
-                    <!-- Tech Details Grid -->
-                    <div id="gisTechDetails"
-                        class="grid grid-cols-3 gap-2 py-3 border-y border-white/5 bg-black/20 rounded-lg px-2 my-2">
-                        <div class="text-center">
-                            <p class="text-[7px] text-gray-500 uppercase font-black">Hab.</p>
-                            <p id="gisHabitaciones" class="text-xs font-bold text-gray-200">0</p>
-                        </div>
-                        <div class="text-center border-x border-white/5">
-                            <p class="text-[7px] text-gray-500 uppercase font-black">Baños</p>
-                            <p id="gisBanos" class="text-xs font-bold text-gray-200">0</p>
-                        </div>
-                        <div class="text-center">
-                            <p class="text-[7px] text-gray-500 uppercase font-black">Pisos</p>
-                            <p id="gisPisos" class="text-xs font-bold text-gray-200">0</p>
-                        </div>
-                    </div>
-
-                    <div id="gisValuationContext" class="space-y-2">
-                        <!-- Valuation data injected here -->
-                    </div>
-
-                    <button id="gisSyncBtn"
-                        class="w-full mt-2 py-3 rounded-xl bg-gradient-to-r from-brand to-blue-600 text-white text-[10px] font-black uppercase tracking-widest shadow-lg shadow-brand/20 hover:shadow-brand/40 hover:scale-[1.02] transition-all">
-                        Inyectar al Avalúo
+                <!-- Map Controls Float -->
+                <div
+                    class="absolute bottom-10 left-1/2 -translate-x-1/2 z-[100] flex items-center gap-2 p-2 rounded-2xl bg-dark-card/80 border border-white/10 backdrop-blur-xl shadow-2xl">
+                    <button id="btnSatView" onclick="setMapStyle('satellite')"
+                        class="px-4 py-2 rounded-xl bg-brand/20 border border-brand/50 text-brand text-[9px] font-black uppercase tracking-widest hover:bg-brand/30 transition-all">
+                        Satélite Hi-Res
+                    </button>
+                    <button id="btnDarkView" onclick="setMapStyle('dark')"
+                        class="px-4 py-2 rounded-xl hover:bg-white/5 text-gray-500 hover:text-white border border-transparent hover:border-white/10 text-[9px] font-black uppercase tracking-widest transition-all">
+                        Mapa Técnico
                     </button>
                 </div>
             </div>
-        </div>
+        </div> <!-- End flex-1 flex (Top Section) -->
 
-        <div id="mapContainer" class="flex-1 relative cursor-crosshair">
-            <div id="mainMap" class="absolute inset-0 bg-[#0b0e14]"></div>
+        <!-- ATTRIBUTE TABLE PANEL (v5.1 - QGIS Mode) -->
+        <div id="gisAttributeTablePanel"
+            class="hidden bg-[#0a0c10] border-t border-white/10 z-[105] flex flex-col transition-all duration-300 h-96 shrink-0 relative">
 
-            <!-- Map Controls Float -->
+            <!-- Resizer Handle (Pseudo-implementation via CSS or drag logic in JS) -->
             <div
-                class="absolute bottom-10 left-1/2 -translate-x-1/2 z-[100] flex items-center gap-2 p-2 rounded-2xl bg-dark-card/80 border border-white/10 backdrop-blur-xl shadow-2xl">
-                <button id="btnSatView" onclick="setMapStyle('satellite')"
-                    class="px-4 py-2 rounded-xl bg-brand/20 border border-brand/50 text-brand text-[9px] font-black uppercase tracking-widest hover:bg-brand/30 transition-all">
-                    Satélite Hi-Res
-                </button>
-                <button id="btnDarkView" onclick="setMapStyle('dark')"
-                    class="px-4 py-2 rounded-xl hover:bg-white/5 text-gray-500 hover:text-white border border-transparent hover:border-white/10 text-[9px] font-black uppercase tracking-widest transition-all">
-                    Mapa Técnico
-                </button>
+                class="absolute -top-1 left-0 right-0 h-1 cursor-ns-resize bg-brand/40 opacity-0 hover:opacity-100 transition-opacity">
+            </div>
+
+            <!-- Header -->
+            <div class="h-12 border-b border-white/10 flex items-center justify-between px-6 bg-white/5">
+                <div class="flex items-center gap-4">
+                    <div class="flex items-center gap-2">
+                        <i data-lucide="database" class="w-4 h-4 text-brand"></i>
+                        <h3 id="gisTableTitle" class="text-xs font-black text-white uppercase tracking-widest">DATA GRID
+                        </h3>
+                    </div>
+                    <span id="gisTableCount"
+                        class="px-2 py-0.5 rounded bg-white/10 text-[9px] font-bold text-gray-400">0
+                        Registros</span>
+
+                    <div class="h-4 w-px bg-white/10 mx-2"></div>
+
+                    <!-- Selection Tools -->
+                    <div class="flex items-center gap-1">
+                        <button onclick="clearGisSelection()"
+                            class="p-1.5 rounded hover:bg-white/10 text-gray-500 hover:text-white transition-colors"
+                            title="Deseleccionar Todo">
+                            <i data-lucide="minus-square" class="w-4 h-4"></i>
+                        </button>
+                        <button id="btnToggleSelectionFilter" onclick="toggleSelectionFilter()"
+                            class="p-1.5 rounded hover:bg-white/10 text-gray-500 hover:text-white transition-colors"
+                            title="Mostrar solo Seleccionados">
+                            <i data-lucide="filter" class="w-4 h-4"></i>
+                        </button>
+                        <button onclick="openExpressionDialog()"
+                            class="p-1.5 rounded hover:bg-white/10 text-brand-400 hover:text-white transition-all transform hover:scale-110"
+                            title="Seleccionar por Expresión">
+                            <i data-lucide="terminal" class="w-4 h-4"></i>
+                        </button>
+                    </div>
+                </div>
+
+                <div class="flex items-center gap-4">
+                    <div class="relative">
+                        <i data-lucide="search"
+                            class="absolute left-3 top-1/2 -translate-y-1/2 w-3 h-3 text-gray-500"></i>
+                        <input type="text" id="gisTableFilter" name="gisTableFilter"
+                            onkeyup="filterGisTable(this.value)" placeholder="Filtrar atributos..."
+                            class="pl-9 pr-4 py-1.5 rounded-lg bg-black/40 border border-white/10 text-xs text-white placeholder-gray-600 focus:border-brand focus:outline-none w-64 transition-all">
+                    </div>
+                    <button onclick="closeAttributeTable()"
+                        class="p-1.5 rounded hover:bg-white/10 text-gray-400 hover:text-white transition-colors"
+                        aria-label="Cerrar Tabla de Atributos">
+                        <i data-lucide="x" class="w-4 h-4"></i>
+                    </button>
+                </div>
+            </div>
+
+            <!-- Table Container -->
+            <div class="flex-1 overflow-auto custom-scrollbar relative">
+                <table class="w-full text-left border-collapse">
+                    <thead id="gisTableHead" class="bg-dark-bg sticky top-0 z-[60] shadow-lg">
+                        <!-- Headers injected here -->
+                    </thead>
+                    <tbody id="gisTableBody">
+                        <!-- Rows injected here -->
+                    </tbody>
+                </table>
+            </div>
+
+            <!-- Footer / Pagination -->
+            <div class="h-8 border-t border-white/10 bg-black/40 flex items-center justify-between px-6 shrink-0">
+                <div class="flex items-center gap-4">
+                    <p class="text-[9px] text-gray-600 font-mono">SELECTED: <span id="gisSelectedCount"
+                            class="text-brand">0</span></p>
+                </div>
+                <p class="text-[9px] text-gray-600 font-mono">RENDERING: 50 ROWS (SCROLL FOR MORE)</p>
+            </div>
+        </div>
+        <!-- Expression Selection Dialog (Hidden by Default) -->
+        <div id="gisExpressionDialog"
+            class="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 z-[4000] w-96 bg-[#0f1115] border border-white/10 rounded-2xl shadow-2xl p-6 hidden animate-up">
+            <div class="flex items-center justify-between mb-4">
+                <h4 class="text-xs font-black text-white uppercase tracking-widest">Filtrar por Expresión</h4>
+                <button onclick="closeExpressionDialog()" class="text-gray-500 hover:text-white"><i data-lucide="x"
+                        class="w-4 h-4"></i></button>
+            </div>
+            <p class="text-[10px] text-gray-500 mb-4">Usa sintaxis JS: <code>ID_Linea == 'L-405'</code> o
+                <code>PISOS > 2</code>
+            </p>
+            <textarea id="gisExpressionInput"
+                class="w-full h-24 bg-black/40 border border-white/10 rounded-xl p-3 text-xs text-brand-300 font-mono focus:border-brand focus:outline-none mb-4"
+                placeholder="Atributo == 'Valor'"></textarea>
+            <div class="flex gap-3">
+                <button onclick="applyExpressionSelection('select')"
+                    class="flex-1 py-3 rounded-xl bg-white/5 border border-white/10 text-gray-400 text-[10px] font-black uppercase tracking-widest hover:text-white hover:bg-white/10 transition-all">Seleccionar</button>
+                <button onclick="applyExpressionSelection('filter')"
+                    class="flex-1 py-3 rounded-xl bg-brand text-white text-[10px] font-black uppercase tracking-widest hover:shadow-[0_0_20px_rgba(79,122,255,0.4)] transition-all">Filtrar
+                    Tabla</button>
             </div>
         </div>
     </div>

@@ -1,7 +1,7 @@
 // CONSTRUMETRIX Service Worker v2.0
 // Offline-First PWA Strategy
 
-const CACHE_NAME = 'construmetrix-v2.2';
+const CACHE_NAME = 'construmetrix-v2.3';
 const RUNTIME_CACHE = 'construmetrix-runtime';
 
 // Assets to cache immediately
