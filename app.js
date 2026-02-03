@@ -265,6 +265,11 @@ document.addEventListener('DOMContentLoaded', async () => {
                 }
             };
             window.requestAnimationFrame(step);
+        },
+        copyToClipboard: (text) => {
+            navigator.clipboard.writeText(text).then(() => {
+                if (window.showToast) window.showToast("🔗 Enlace copiado al portapapeles", "success");
+            });
         }
     };
 
@@ -516,7 +521,7 @@ document.addEventListener('DOMContentLoaded', async () => {
             // Numbers animation in Launch Screen
             if (UI.launchStats) {
                 let start = 0;
-                let end = 12; // Fuentes activas
+                let end = window.FUENTES_OFICIALES ? Object.keys(window.FUENTES_OFICIALES).length - 1 : 12; // Fuentes activas (menos metadata)
                 let duration = 2000;
                 let startTimestamp = null;
                 const step = (timestamp) => {
@@ -566,6 +571,14 @@ document.addEventListener('DOMContentLoaded', async () => {
             title: 'Inteligencia Geográfica',
             text: 'Sincroniza datos directos de IGAC y visualiza la infraestructura en el Geo-Visor avanzado.',
             attachTo: { element: '#toggleGisVisor', on: 'right' },
+            buttons: [{ text: 'Siguiente', action: tour.next, classes: 'bg-brand text-dark-bg font-bold px-4 py-2 rounded-lg text-xs uppercase' }]
+        });
+
+        tour.addStep({
+            id: 'fuentes',
+            title: 'Trazabilidad & Fuentes',
+            text: 'Accede al repositorio maestro de fuentes oficiales. Documentación directa de IGAC, DANE y normativas vigentes para sustentar tus avalúos.',
+            attachTo: { element: 'button[onclick="openSourcesModal()"]', on: 'right' },
             buttons: [{ text: 'Finalizar', action: tour.complete, classes: 'bg-brand text-dark-bg font-bold px-4 py-2 rounded-lg text-xs uppercase' }]
         });
 
@@ -1226,7 +1239,10 @@ document.addEventListener('DOMContentLoaded', async () => {
         const legalSection = document.createElement('div');
         legalSection.className = 'mt-6 pt-6 border-t border-dark-border/50';
         legalSection.innerHTML = `
-            <h4 class="text-[9px] font-black text-gray-500 uppercase tracking-[0.2em] mb-4">Referencias Técnicas 2026</h4>
+            <div class="flex items-center justify-between mb-4">
+                <h4 class="text-[9px] font-black text-gray-500 uppercase tracking-[0.2em]">Referencias Técnicas 2026</h4>
+                <button onclick="openSourcesModal()" class="text-[8px] text-brand-400 font-black uppercase hover:underline">Ver Repositorio Legal</button>
+            </div>
             <div class="grid grid-cols-2 gap-3">
                 <div class="bg-dark-bg border border-dark-border/30 p-3 rounded-xl">
                     <span class="text-[9px] text-gray-500 block mb-1 uppercase">SMLV Proyectado</span>
@@ -1311,21 +1327,49 @@ document.addEventListener('DOMContentLoaded', async () => {
                 doc.text("CONSTRUMETRIX PLUS", pageW / 2, pageH / 2, { align: 'center', angle: 45 });
                 doc.restoreGraphicsState();
 
-                // Enterprise Footer Configuration
+                // Enterprise Footer Configuration (v4.0 Clickable)
                 doc.setFont("helvetica", "normal");
                 doc.setFontSize(6.5);
-                doc.setTextColor(...brand.slate);
+                doc.setDrawColor(241, 245, 249);
+                doc.line(margin + 4, pageH - 22, pageW - margin - 4, pageH - 22);
 
                 const footerY = pageH - 14;
-                doc.text(`CONSTRUMETRIX BUSINESS PLUS | ID: ${certID}`, margin + 6, footerY);
-                doc.text(`FUENTES: DANE / CAMACOL / MINTRABAJO 2026 | AUDITORÍA TÉCNICA NIVEL 1`, margin + 6, footerY + 4);
+                doc.setTextColor(...brand.slate);
+
+                // Link 1: Brand & Verification
+                const brandT = "CONSTRUMETRIX BUSINESS PLUS";
+                doc.textWithLink(brandT, margin + 6, footerY, { url: 'https://construmetrix.github.io/' });
+                doc.setTextColor(...brand.slate);
+                doc.text(` | CERTIFICADO ID: ${certID}`, margin + 6 + doc.getTextWidth(brandT), footerY);
+
+                // Link 2: Technical Authority Traceability
+                doc.text(`VALIDEZ TÉCNICA: `, margin + 6, footerY + 4);
+                let curX = margin + 6 + doc.getTextWidth(`VALIDEZ TÉCNICA: `);
+
+                const parts = [
+                    { t: 'DANE', l: 'https://www.dane.gov.co/index.php/estadisticas-por-tema/precios-y-costos/indice-de-costos-de-la-construccion-de-edificaciones-icoced' },
+                    { t: ' / ', n: true },
+                    { t: 'CAMACOL', l: 'https://camacol.co/coordenada-urbana' },
+                    { t: ' / ', n: true },
+                    { t: 'MINTRABAJO', l: 'https://www.mintrabajo.gov.co' }
+                ];
+
+                parts.forEach(p => {
+                    if (p.n) {
+                        doc.setTextColor(...brand.slate);
+                        doc.text(p.t, curX, footerY + 4);
+                    } else {
+                        doc.setTextColor(...brand.expert);
+                        doc.textWithLink(p.t, curX, footerY + 4, { url: p.l });
+                    }
+                    curX += doc.getTextWidth(p.t);
+                });
+
+                doc.setTextColor(...brand.slate);
+                doc.text(` 2026 | AUDITORÍA TÉCNICA NIVEL 1`, curX, footerY + 4);
 
                 doc.setFont("helvetica", "bold");
                 doc.text(`EXPEDIENTE ANALÍTICO PÁG. ${i} DE ${total}`, pageW - margin - 6, footerY + 2, { align: 'right' });
-
-                // Professional Signature/Stamp Placeholder Line
-                doc.setDrawColor(241, 245, 249);
-                doc.line(margin + 4, pageH - 22, pageW - margin - 4, pageH - 22);
             }
         };
 
@@ -1525,9 +1569,86 @@ document.addEventListener('DOMContentLoaded', async () => {
             alternateRowStyles: { fillColor: [251, 252, 254] }
         });
 
+        /** PAGE 3: KNOWLEDGE HUB & LEGAL ANNEX **/
+        doc.addPage();
+
+        // Header
+        doc.setFillColor(...brand.navy);
+        doc.rect(0, 0, pageW, 40, 'F');
+        doc.setFillColor(...brand.gold);
+        doc.rect(0, 38, pageW, 2, 'F');
+
+        doc.setTextColor(255);
+        doc.setFontSize(22);
+        doc.setFont('helvetica', 'bold');
+        doc.text('ANEXO DE TRAZABILIDAD', 15, 22);
+
+        doc.setFontSize(8);
+        doc.setFont('helvetica', 'normal');
+        doc.setTextColor(180, 200, 255);
+        doc.text('REPOSITORIO MAESTRO DE FUENTES OFICIALES & MARCO LEGAL VIGENTE 2026', 15, 29);
+
+        let sy = 55;
+        const sources = window.FUENTES_OFICIALES;
+
+        if (sources) {
+            Object.keys(sources).forEach(key => {
+                if (key === 'metadata') return;
+                const source = sources[key];
+
+                // Entity Card
+                doc.setFillColor(248, 250, 254);
+                doc.rect(15, sy - 5, pageW - 30, 8, 'F');
+
+                doc.setFont('helvetica', 'bold');
+                doc.setFontSize(9);
+                doc.setTextColor(...brand.navy);
+                doc.text(source.nombre.toUpperCase(), 20, sy);
+                sy += 8;
+
+                // Resources
+                Object.keys(source.recursos).forEach(rKey => {
+                    if (sy > 260) { doc.addPage(); sy = 25; }
+                    const res = source.recursos[rKey];
+
+                    doc.setFillColor(...brand.gold);
+                    doc.circle(22, sy - 1, 0.7, 'F');
+
+                    doc.setFont('helvetica', 'bold');
+                    doc.setFontSize(8);
+                    doc.setTextColor(...brand.navy);
+                    doc.text(res.titulo, 25, sy);
+
+                    doc.setTextColor(...brand.expert);
+                    doc.textWithLink('[CONSULTAR FUENTE]', pageW - 45, sy, { url: res.url });
+
+                    sy += 4;
+                    doc.setFont('helvetica', 'normal');
+                    doc.setFontSize(7);
+                    doc.setTextColor(...brand.slate);
+                    const resDesc = doc.splitTextToSize(`USO: ${res.uso} | DESCRIPCIÓN: ${res.descripcion}`, pageW - 55);
+                    doc.text(resDesc, 25, sy);
+                    sy += (resDesc.length * 4) + 4;
+                });
+                sy += 6;
+            });
+        }
+
+        // Final Legality Notice
+        doc.setFont('helvetica', 'bold');
+        doc.setFontSize(8);
+        doc.setTextColor(...brand.navy);
+        doc.text("FUNDAMENTO TÉCNICO-LEGAL:", 15, sy + 10);
+        doc.setFont('helvetica', 'normal');
+        doc.setFontSize(6.5);
+        doc.setTextColor(...brand.slate);
+        const legalNotice = "Este dictamen técnico ha sido estructurado bajo los preceptos de la Resolución 620 de 2008 (IGAC), el Decreto 148 de 2020 (Catastro Multipropósito) y las normas internacionales de valuación IVS. La trazabilidad de indicadores económicos está garantizada por sincronización con Bases de Datos oficiales 2026.";
+        doc.text(doc.splitTextToSize(legalNotice, pageW - 30), 15, sy + 15);
+
+        // Terminate Template & Frame All Pages
         applyPlusTemplate();
 
-        doc.save(`CERT_CONSTRUMETRIX_${meta.aviso || 'PLUS'}.pdf`);
+        doc.save(`CERT_CONSTRUMETRIX_PLUS_${certID}.pdf`);
         showToast("Certificado Business Plus Generado", "success");
     };
 
@@ -1706,6 +1827,178 @@ document.addEventListener('DOMContentLoaded', async () => {
         const m = document.getElementById('marketRefModal');
         m.classList.add('hidden');
         m.classList.remove('flex', 'animate-fade-in');
+    };
+
+    let activeSourceCategory = 'all';
+
+    window.openSourcesModal = () => {
+        const m = document.getElementById('sourcesModal');
+        const content = document.getElementById('sourcesModalContent');
+        if (!m || !content) return;
+
+        m.style.opacity = '1';
+        m.style.pointerEvents = 'auto';
+        content.style.transform = 'scale(1)';
+
+        // Initialize state
+        activeSourceCategory = 'all';
+        renderSources();
+
+        // One-time listeners for search
+        const searchInput = document.getElementById('sourceSearch');
+        if (searchInput && !searchInput.dataset.listener) {
+            searchInput.addEventListener('input', APP_UTILS.debounce((e) => {
+                renderSources(e.target.value);
+            }, 300));
+            searchInput.dataset.listener = 'true';
+        }
+    };
+
+    window.closeSourcesModal = () => {
+        const m = document.getElementById('sourcesModal');
+        const content = document.getElementById('sourcesModalContent');
+        if (m) m.style.opacity = '0';
+        if (m) m.style.pointerEvents = 'none';
+        if (content) content.style.transform = 'scale(0.95)';
+    };
+
+    /** USER MODAL CONTROLS **/
+    window.openUserModal = () => {
+        const m = document.getElementById('userModal');
+        const content = document.getElementById('userModalContent');
+        if (!m || !content) return;
+
+        m.style.opacity = '1';
+        m.style.pointerEvents = 'auto';
+        content.style.transform = 'scale(1)';
+        lucide.createIcons();
+    };
+
+    window.closeUserModal = () => {
+        const m = document.getElementById('userModal');
+        const content = document.getElementById('userModalContent');
+        if (m) m.style.opacity = '0';
+        if (m) m.style.pointerEvents = 'none';
+        if (content) content.style.transform = 'scale(0.95)';
+    };
+
+    function renderSources(filter = '') {
+        const container = document.getElementById('sourcesDataContainer');
+        const nav = document.getElementById('sourcesNav');
+        if (!container || !nav || !window.FUENTES_OFICIALES) return;
+
+        const sources = window.FUENTES_OFICIALES;
+        const q = filter.toLowerCase();
+
+        // 1. Render Navigation Sidebar
+        let navHtml = `
+            <button onclick="setSourceCategory('all')" 
+                class="w-full flex items-center gap-3 p-3.5 rounded-2xl transition-all ${activeSourceCategory === 'all' ? 'bg-brand/20 text-brand border border-brand/20' : 'text-gray-500 hover:bg-white/5 hover:text-white border border-transparent'}">
+                <i data-lucide="grid-3x3" class="w-4 h-4"></i>
+                <span class="text-[10px] font-black uppercase tracking-widest">Todos</span>
+            </button>
+        `;
+
+        Object.keys(sources).forEach(key => {
+            if (key === 'metadata') return;
+            const s = sources[key];
+            navHtml += `
+                <button onclick="setSourceCategory('${key}')" 
+                    class="w-full flex items-center gap-3 p-3.5 rounded-2xl transition-all ${activeSourceCategory === key ? 'bg-brand/20 text-brand border border-brand/20' : 'text-gray-500 hover:bg-white/5 hover:text-white border border-transparent'}">
+                    <i data-lucide="${s.logo_icon || 'database'}" class="w-4 h-4"></i>
+                    <span class="text-[10px] font-black uppercase tracking-widest">${s.sigla || key.toUpperCase()}</span>
+                </button>
+            `;
+        });
+        nav.innerHTML = navHtml;
+
+        // 2. Render Grid Content
+        let gridHtml = '';
+        Object.keys(sources).forEach(key => {
+            if (key === 'metadata') return;
+            if (activeSourceCategory !== 'all' && activeSourceCategory !== key) return;
+
+            const source = sources[key];
+            const recursos = Object.keys(source.recursos)
+                .map(rKey => source.recursos[rKey])
+                .filter(res => {
+                    if (!q) return true;
+                    return res.titulo.toLowerCase().includes(q) ||
+                        res.descripcion.toLowerCase().includes(q) ||
+                        res.uso.toLowerCase().includes(q);
+                });
+
+            if (recursos.length === 0 && q) return;
+
+            gridHtml += `
+                <div class="space-y-8 mb-16 animate-fade-in">
+                    <div class="flex items-center gap-4">
+                        <div class="p-3 rounded-2xl bg-${source.color || 'brand'}/10 border border-${source.color || 'brand'}/20">
+                            <i data-lucide="${source.logo_icon || 'database'}" class="w-6 h-6 text-${source.color || 'brand'}"></i>
+                        </div>
+                        <div>
+                            <h4 class="text-xl font-black text-white uppercase tracking-tighter">${source.nombre}</h4>
+                            <p class="text-[10px] text-gray-500 font-bold uppercase tracking-widest">${source.descripcion}</p>
+                        </div>
+                    </div>
+
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                        ${recursos.map(res => `
+                            <div class="group/card relative bg-white/[0.02] border border-white/5 p-6 rounded-[2rem] hover:border-brand/40 hover:bg-brand/5 transition-all duration-500 flex flex-col justify-between overflow-hidden">
+                                <!-- Status Badge -->
+                                <div class="absolute top-6 right-6 px-2 py-0.5 rounded bg-white/5 border border-white/10 text-[7px] text-gray-500 font-black uppercase tracking-widest">
+                                    ${res.estado || 'Auditado'}
+                                </div>
+
+                                <div class="space-y-4">
+                                    <div class="flex items-center gap-3">
+                                        <div class="p-2 rounded-xl bg-white/5 text-brand group-hover/card:scale-110 transition-transform">
+                                            <i data-lucide="file-text" class="w-4 h-4"></i>
+                                        </div>
+                                        <h5 class="text-[11px] font-black text-white uppercase tracking-widest leading-tight">${res.titulo}</h5>
+                                    </div>
+                                    <p class="text-[10px] text-gray-400 leading-relaxed font-medium">${res.descripcion}</p>
+                                </div>
+
+                                <div class="mt-8">
+                                    <div class="bg-black/20 p-3 rounded-xl mb-4 border border-white/5">
+                                        <span class="text-[8px] text-gray-600 font-black uppercase tracking-tighter block mb-1">Impacto en Avalúo:</span>
+                                        <p class="text-[9px] text-gray-500 font-bold italic line-clamp-2">${res.uso}</p>
+                                    </div>
+                                    
+                                    <div class="flex items-center gap-2">
+                                        <a href="${res.url}" target="_blank" class="flex-1 flex items-center justify-center gap-2 py-2.5 rounded-xl bg-brand text-white text-[9px] font-black uppercase tracking-widest hover:shadow-[0_0_20px_rgba(59,98,255,0.4)] transition-all">
+                                            Consultar Fuente <i data-lucide="external-link" class="w-3 h-3"></i>
+                                        </a>
+                                        <button onclick="APP_UTILS.copyToClipboard('${res.url}')" class="p-2.5 rounded-xl bg-white/5 border border-white/10 text-gray-500 hover:text-white hover:border-white/20 transition-all" title="Copiar Enlace">
+                                            <i data-lucide="copy" class="w-3.5 h-3.5"></i>
+                                        </button>
+                                    </div>
+                                </div>
+                            </div>
+                        `).join('')}
+                    </div>
+                </div>
+            `;
+        });
+
+        if (!gridHtml) {
+            gridHtml = `
+                <div class="h-64 flex flex-col items-center justify-center text-gray-600 border border-dashed border-white/10 rounded-[3rem]">
+                    <i data-lucide="search-x" class="w-12 h-12 mb-4 opacity-20"></i>
+                    <p class="text-xs font-black uppercase tracking-widest">No se encontraron recursos</p>
+                    <button onclick="document.getElementById('sourceSearch').value=''; renderSources();" class="mt-4 text-[10px] text-brand font-bold uppercase hover:underline">Limpiar Filtros</button>
+                </div>
+            `;
+        }
+
+        container.innerHTML = gridHtml;
+        if (window.lucide) lucide.createIcons();
+    }
+
+    window.setSourceCategory = (cat) => {
+        activeSourceCategory = cat;
+        renderSources(document.getElementById('sourceSearch')?.value || '');
     };
 
     window.showModal = (title, text, image = null) => new Promise(res => {

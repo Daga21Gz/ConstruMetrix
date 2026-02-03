@@ -1,213 +1,169 @@
 /**
- * CONSTRUMETRIX v2.0 - FUENTES OFICIALES COLOMBIANAS
- * Actualizado: Febrero 2026
- * 
- * Fuentes de datos gubernamentales y sectoriales para avalúos,
- * costos de construcción y análisis del mercado inmobiliario.
+ * CONSTRUMETRIX - MASTER DATA GOVERNANCE
+ * v4.0 - Repositorio de Fuentes Oficiales (Auditado 2026)
  */
 
-window.FUENTES_OFICIALES = {
-
+const FUENTES_OFICIALES = {
     // ===== IGAC - INSTITUTO GEOGRÁFICO AGUSTÍN CODAZZI =====
     igac: {
         nombre: "Instituto Geográfico Agustín Codazzi (IGAC)",
-        descripcion: "Entidad oficial encargada del catastro nacional y avalúos",
+        sigla: "IGAC",
+        descripcion: "Autoridad máxima en catastro, cartografía y avalúos comerciales e institucionales en Colombia.",
+        institucion_url: "https://www.igac.gov.co/",
+        logo_icon: "map",
+        color: "brand",
 
         recursos: {
             principal: {
-                titulo: "IGAC - Catastro & Avalúos",
+                titulo: "Portal Principal IGAC",
                 url: "https://www.igac.gov.co/",
-                descripcion: "Portal principal con información catastral y avalúos de predios",
-                uso: "Consulta de valores catastrales y estimaciones comerciales oficiales"
+                descripcion: "Sede electrónica para trámites catastrales y consulta de normativa nacional.",
+                uso: "Consulta de base normativa y gestión predial",
+                estado: "Operativo"
             },
 
-            avaluos: {
-                titulo: "Subdirección de Avalúos",
-                url: "https://www.igac.gov.co/el-igac/areas-estrategicas/direccion-de-gestion-catastral/subdireccion-de-avaluos",
-                descripcion: "Métodos técnicos oficiales para avalúos comerciales",
-                uso: "Entender cómo se calculan los valores de inmuebles"
+            metodologias: {
+                titulo: "Normativa de Avalúos (Resolución 1137 de 2024)",
+                url: "https://igac.gov.co/normatividad/resolucion-1137-de-2024",
+                descripcion: "Criterios técnicos para la determinación de valores comerciales en el territorio nacional.",
+                uso: "Marco técnico para cálculos de reposición y mercado",
+                estado: "Actualizado 2024"
+            },
+
+            avaluos_masivos: {
+                titulo: "Metodología de Actualización Masiva (Res. 1912)",
+                url: "https://igac.gov.co/normatividad/resolucion-1912-de-2024",
+                descripcion: "Metodología para la actualización de valores catastrales rezagados en zonas rurales y urbanas.",
+                uso: "Ajuste de índices de valoración local",
+                estado: "Vigente"
             },
 
             observatorio: {
                 titulo: "Observatorio Inmobiliario Catastral (OIC)",
-                url: "https://www.igac.gov.co/el-igac/areas-estrategicas/direccion-de-investigacion-prospectiva/observatorio-inmobiliario-catastral",
-                descripcion: "Estadísticas de transacciones y dinámicas del mercado",
-                uso: "Análisis de tendencias, comparar transacciones y precios reales"
+                url: "https://oic.igac.gov.co/",
+                descripcion: "Herramienta de monitoreo de la dinámica del mercado inmobiliario y transacciones reales.",
+                uso: "Referencia de precios de cierre y ofertas",
+                estado: "En Vivo"
             },
 
-            transacciones: {
-                titulo: "Registro de Transacciones Inmobiliarias",
-                url: "https://www.datos.gov.co/Vivienda-Ciudad-y-Territorio/Registro-de-transacciones-inmobiliarias-en-Colombi/7y2j-43cv",
-                descripcion: "Dataset con millones de transacciones registradas",
-                uso: "Análisis estadístico y comparativo de precios históricos",
-                formato: "CSV / JSON / API REST"
-            },
-
-            baseCatastral: {
-                titulo: "Base Catastral Pública IGAC (Septiembre 2026)",
-                url: "https://services2.arcgis.com/RVvWzU3lgJISqdke/arcgis/rest/services/Base_Catastral_Publica_IGAC_Septiembre/FeatureServer",
-                descripcion: "Servicio geográfico oficial para identificación de predios y linderos",
-                uso: "Identificación puntual de predios para avalúos comerciales y catastrales",
-                formato: "ArcGIS REST Service"
+            visor_catastral: {
+                titulo: "Visor Geográfico de Predios (Dicat)",
+                url: "https://dicat.igac.gov.co/visor_p",
+                descripcion: "Plataforma para la identificación espacial de linderos, áreas y números prediales.",
+                uso: "Verificación de áreas y colindancias en campo",
+                estado: "Operativo"
             }
         },
-
         actualizacion: "Mensual",
-        confiabilidad: "Oficial - 100%"
+        confiabilidad: "100% Oficial"
     },
 
     // ===== DANE - DEPARTAMENTO ADMINISTRATIVO NACIONAL DE ESTADÍSTICA =====
     dane: {
         nombre: "Departamento Administrativo Nacional de Estadística (DANE)",
-        descripcion: "Entidad oficial de estadísticas nacionales",
+        sigla: "DANE",
+        descripcion: "Entidad responsable de la planeación, recolección y análisis de la estadística nacional.",
+        institucion_url: "https://www.dane.gov.co/",
+        logo_icon: "bar-chart-3",
+        color: "emerald",
 
         recursos: {
             icoced: {
-                titulo: "Índice de Costos de la Construcción de Edificaciones (ICOCED)",
+                titulo: "ICOCED - Índice de Costos de Construcción",
                 url: "https://www.dane.gov.co/index.php/estadisticas-por-tema/precios-y-costos/indice-de-costos-de-la-construccion-de-edificaciones-icoced",
-                descripcion: "Estadísticas de costos de construcción actualizadas",
-                uso: "Estimaciones confiables de costo por m² de construcción",
-                periodicidad: "Mensual",
-                ciudades: "Principales ciudades de Colombia"
+                descripcion: "Seguimiento a la variación de precios de materiales, mano de obra y maquinaria.",
+                uso: "Factor fundamental para cálculo de CRN (Reposición)",
+                estado: "Mensual"
             },
 
             ivp: {
-                titulo: "Índice de Valoración Predial (IVP)",
-                url: "https://www.dane.gov.co/index.php/en/estadisticas-por-tema-2/construccion/indice-de-valoracioon-predial",
-                descripcion: "Variación del valor predial en 22 ciudades",
-                uso: "Medir cómo cambia el valor de mercado con el tiempo",
-                periodicidad: "Trimestral",
-                cobertura: "22 ciudades principales"
+                titulo: "IVP - Índice de Valoración Predial",
+                url: "https://www.dane.gov.co/index.php/estadisticas-por-tema/construccion/indice-de-valoracioon-predial",
+                descripcion: "Estudio sobre la evolución del valor de los predios en las ciudades principales.",
+                uso: "Análisis histórico de valorización territorial",
+                estado: "Trimestral"
             },
 
-            normativa1170: {
-                titulo: "Decreto 1170 de 2015",
-                url: "https://www.dane.gov.co/index.php/acerca-del-dane/informacion-institucional/normatividad/decreto-1170-del-2015",
-                descripcion: "Definiciones legales de avalúos y valor comercial",
-                uso: "Marco legal para valoraciones inmobiliarias"
+            ipvn: {
+                titulo: "IPVN - Índice de Precios de Vivienda Nueva",
+                url: "https://www.dane.gov.co/index.php/estadisticas-por-tema/construccion/indice-de-precios-de-vivienda-nueva-ipvn",
+                descripcion: "Medición de los precios de venta de bienes inmuebles residenciales recién construidos.",
+                uso: "Referencia para el mercado de vivienda 2026",
+                estado: "Actualizado"
             }
         },
-
-        actualizacion: "Mensual (ICOCED) / Trimestral (IVP)",
-        confiabilidad: "Oficial - 100%"
+        actualizacion: "Mensual",
+        confiabilidad: "100% Oficial"
     },
 
-    // ===== NORMATIVA Y DECRETOS =====
-    normativa: {
-        nombre: "Marco Legal Colombiano - Avalúos y Construcción",
-        descripcion: "Decretos y normativas oficiales",
-
-        recursos: {
-            decreto148: {
-                titulo: "Decreto 148 de 2020",
-                url: "https://actualicese.com/archivo/decreto-148-de-04-02-2020/",
-                descripcion: "Métodos de valoración oficial para avalúos",
-                uso: "Criterios técnicos y métodos legales de valoración",
-                vigencia: "Actual"
-            },
-
-            decreto1170: {
-                titulo: "Decreto 1170 de 2015",
-                url: "https://www.dane.gov.co/index.php/acerca-del-dane/informacion-institucional/normatividad/decreto-1170-del-2015",
-                descripcion: "Definiciones de valor comercial y catastral",
-                uso: "Conceptos legales fundamentales"
-            }
-        },
-
-        confiabilidad: "Legal - Oficial"
-    },
-
-    // ===== CAMACOL - SECTOR PRIVADO =====
+    // ===== CAMACOL - SECTOR PRIVADO / GREMIAL =====
     camacol: {
-        nombre: "Cámara Colombiana de la Construcción (CAMACOL)",
-        descripcion: "Gremio del sector constructor",
+        nombre: "Cámara Colombiana de la Construcción",
+        sigla: "CAMACOL",
+        descripcion: "Gremio que representa la cadena de valor de la edificación y el desarrollo urbano.",
+        institucion_url: "https://camacol.co/",
+        logo_icon: "building-2",
+        color: "amber",
 
         recursos: {
-            principal: {
-                titulo: "Información Económica CAMACOL",
+            coordenada_urbana: {
+                titulo: "Coordenada Urbana",
+                url: "https://camacol.co/coordenada-urbana",
+                descripcion: "Sistema georreferenciado de oferta privada de vivienda y proyectos en preventa.",
+                uso: "Referencia de precios de mercado masivo",
+                estado: "Premium"
+            },
+            macro_tendencias: {
+                titulo: "Informes de Economía y Construcción",
                 url: "https://camacol.co/informacion-economica",
-                descripcion: "Informes, análisis y tendencias del mercado constructor",
-                uso: "Estimaciones sectoriales, costos y tendencias de mercado",
-                acceso: "Público (reportes) / Asociados (datos detallados)"
+                descripcion: "Análisis macroeconómico del sector constructor y proyecciones de inversión.",
+                uso: "Contextualización del riesgo de mercado",
+                estado: "Público"
             }
         },
-
-        actualizacion: "Mensual / Trimestral",
-        confiabilidad: "Sectorial - Alta (no oficial)"
+        actualizacion: "Trimestral",
+        confiabilidad: "Sectorial / Gremial"
     },
 
-    // ===== METADATA =====
+    // ===== MARCO LEGAL COMPLEMENTARIO =====
+    legal: {
+        nombre: "Marco Legal y Normativo",
+        sigla: "LEGAL",
+        descripcion: "Leyes y decretos que rigen la actividad valuatoria y catastral en la República de Colombia.",
+        logo_icon: "gavel",
+        color: "purple",
+
+        recursos: {
+            ley1673: {
+                titulo: "Ley 1673 de 2013 (Avaluadores)",
+                url: "https://www.funcionpublica.gov.co/eva/gestornormativo/norma.php?i=53874",
+                descripcion: "Ley que reglamenta la actividad del avaluador y crea el Registro Abierto de Avaluadores.",
+                uso: "Cumplimiento de requisitos de idoneidad técnica",
+                estado: "Vigente"
+            },
+            decreto148: {
+                titulo: "Decreto 148 de 2020 (Catastro)",
+                url: "https://www.suin-juriscol.gov.co/viewDocument.asp?ruta=Decretos/30038827",
+                descripcion: "Modernización del catastro hacia el enfoque multipropósito y valoración.",
+                uso: "Integración de datos SIG y valor comercial",
+                estado: "Ley de la República"
+            },
+            res620: {
+                titulo: "Resolución 620 de 2008 (Técnica)",
+                url: "https://www.igac.gov.co/sites/igac.gov.co/files/resolucion_620_de_2008.pdf",
+                descripcion: "Manual de procedimientos técnicos para la ejecución de avalúos comerciales urbanos.",
+                uso: "Base procedimental de esta plataforma",
+                estado: "Histórico Vigente"
+            }
+        },
+        confiabilidad: "Oficial / Jurídica"
+    },
+
     metadata: {
-        version: "2.0",
-        ultimaActualizacion: "2026-02-01",
-        responsable: "CONSTRUMETRIX Team",
-        fuentes: 4,
-        recursos: 12,
-        notas: [
-            "Todas las fuentes son de acceso público",
-            "IGAC y DANE son las fuentes oficiales del gobierno",
-            "CAMACOL complementa con análisis sectorial privado",
-            "Se recomienda contrastar múltiples fuentes para mayor precisión"
-        ]
+        ultimo_audit: "2026-02-03",
+        auditor: "Albert Daniel G. (ConstruMetrix AI)",
+        version: "4.0.1"
     }
 };
 
-/**
- * URLs DE APIS Y DATOS ABIERTOS
- */
-window.API_ENDPOINTS = {
-    igac_transacciones: "https://www.datos.gov.co/resource/7y2j-43cv.json",
-    igac_catastro: "https://services2.arcgis.com/RVvWzU3lgJISqdke/arcgis/rest/services/Base_Catastral_Publica_IGAC_Septiembre/FeatureServer",
-    dane_estadisticas: "https://www.dane.gov.co/api/",
-};
-
-/**
- * CONSTANTES DE CÁLCULO SEGÚN ESTÁNDARES IGAC/DANE
- */
-window.ESTANDARES_OFICIALES = {
-    // AIU según decreto 1082 de 2015 y práctica IGAC
-    aiu: {
-        administracion: 0.12,    // 12% (Promedio experto 2026)
-        imprevistos: 0.05,       // 5%
-        utilidad: 0.10,          // 10%
-        total: 0.27              // 27%
-    },
-
-    // Depreciación según método IGAC (Ross-Heidecke modificado)
-    depreciacion: {
-        metodo: "Ross-Heidecke (Científico 2026)",
-        factorVidaUtil: {
-            excelente: 0.0,    // Heidecke 1
-            bueno: 0.038,      // Heidecke 2
-            regular: 0.181,    // Heidecke 3
-            malo: 0.60         // Heidecke 4
-        }
-    },
-
-    // Valores de terreno según zona (ejemplo - actualizar con datos locales)
-    valorTerreno: {
-        estrato1: 150000,   // COP por m²
-        estrato2: 250000,
-        estrato3: 400000,
-        estrato4: 650000,
-        estrato5: 950000,
-        estrato6: 1500000
-    }
-};
-
-/**
- * HELPER PARA LOGGING Y TRAZABILIDAD
- */
-function logFuenteOficial(fuente, recurso) {
-    console.log(`📊 Fuente oficial: ${fuente} - ${recurso} %cCONSULTADO`,
-        'color: #f7fc00; font-weight: bold;');
-}
-
-// Exportar para uso global
-if (window) {
-    window.logFuenteOficial = logFuenteOficial;
-}
-
-console.log('%c📚 FUENTES OFICIALES CARGADAS', 'color: #f7fc00; font-size: 14px; font-weight: bold;');
-console.log('IGAC, DANE, Normativa Legal, CAMACOL');
-console.log('Total de recursos: ' + window.FUENTES_OFICIALES.metadata.recursos);
+window.FUENTES_OFICIALES = FUENTES_OFICIALES;

@@ -498,38 +498,120 @@
                 class="lg:hidden absolute top-6 right-6 p-2 rounded-lg bg-white/5 text-gray-400">
                 <i data-lucide="x" class="w-5 h-5"></i>
             </button>
-            <!-- Brand -->
-            <div class="h-20 flex items-center justify-between px-6 border-b border-dark-border/50">
+            <!-- SIDEBAR HEADER (Brand Only) -->
+            <div
+                class="h-24 flex items-center px-6 border-b border-white/[0.03] bg-gradient-to-b from-white/[0.02] to-transparent">
                 <div class="flex items-center gap-3">
                     <div
-                        class="w-11 h-11 bg-brand-600 rounded-xl flex items-center justify-center shadow-[0_0_20px_-5px_rgba(59,96,255,0.5)] ring-1 ring-white/20 relative group overflow-hidden">
-                        <div class="absolute inset-0 bg-gradient-to-tr from-brand-400/20 to-transparent"></div>
-                        <i data-lucide="layout-grid"
+                        class="w-12 h-12 bg-brand rounded-2xl flex items-center justify-center shadow-[0_0_30px_rgba(79,122,255,0.3)] border border-white/20 relative group overflow-hidden">
+                        <div class="absolute inset-0 bg-gradient-to-tr from-white/20 to-transparent"></div>
+                        <i data-lucide="building-2"
                             class="text-white w-6 h-6 relative z-10 group-hover:scale-110 transition-transform"></i>
                     </div>
                     <div>
-                        <h1 class="font-black text-xl leading-none tracking-tight font-heading">CONSTRU<span
-                                class="text-brand-400">METRIX</span></h1>
+                        <h1 class="font-black text-xl leading-none tracking-tight font-heading text-white">CONSTRU<span
+                                class="text-brand">METRIX</span></h1>
                         <div class="flex items-center gap-1.5 mt-1">
-                            <span class="w-1.5 h-1.5 rounded-full bg-brand-400 animate-pulse"></span>
-                            <p class="text-[9px] text-gray-400 uppercase font-bold tracking-[0.15em]">Business Plus</p>
+                            <span class="w-1.5 h-1.5 rounded-full bg-brand animate-pulse"></span>
+                            <p class="text-[9px] text-gray-500 uppercase font-black tracking-[0.2em]">Business Plus v4.6
+                            </p>
                         </div>
                     </div>
                 </div>
+            </div>
 
-                <!-- SIDEBAR ACTIONS -->
-                <div class="flex gap-2">
-                    <button onclick="startGuidedTour()"
-                        class="p-2 rounded-xl bg-white/5 border border-white/10 hover:border-brand/50 transition-all group"
-                        title="Iniciar Tour Guiado">
-                        <i data-lucide="help-circle" class="w-4 h-4 text-gray-400 group-hover:text-brand"></i>
-                    </button>
+            <!-- KNOWLEDGE HUB: FUENTES OFICIALES (v4.0 Premium) -->
+            <div id="sourcesModal"
+                class="fixed inset-0 z-[500] flex items-center justify-center bg-black/98 backdrop-blur-3xl opacity-0 pointer-events-none transition-all duration-700">
+                <div class="bg-[#0b0e14] border border-white/10 rounded-[4rem] shadow-[0_60px_150px_rgba(0,0,0,0.95)] max-w-[1440px] w-[95vw] h-[88vh] transform scale-95 transition-all duration-700 overflow-hidden flex flex-col"
+                    id="sourcesModalContent">
 
-                    <button id="btnLogin"
-                        class="p-2 rounded-xl bg-white/5 border border-white/10 hover:border-brand/50 transition-all group"
-                        title="Perfil de Usuario">
-                        <i data-lucide="user" class="w-4 h-4 text-gray-400 group-hover:text-brand"></i>
-                    </button>
+                    <!-- Premium Header -->
+                    <div
+                        class="p-10 border-b border-white/5 flex items-center justify-between bg-gradient-to-r from-brand/10 via-transparent to-transparent relative">
+                        <div class="flex items-center gap-6 relative z-10">
+                            <div
+                                class="w-16 h-16 bg-brand/10 rounded-[2rem] flex items-center justify-center border border-brand/30 shadow-[0_0_30px_rgba(79,122,255,0.2)]">
+                                <i data-lucide="shield-check" class="w-8 h-8 text-brand"></i>
+                            </div>
+                            <div>
+                                <h3 class="text-3xl font-black text-white font-heading tracking-tight uppercase">
+                                    Gobernanza de Datos</h3>
+                                <div class="flex items-center gap-3 mt-1.5">
+                                    <span class="w-2 h-2 rounded-full bg-emerald-500 animate-pulse"></span>
+                                    <p class="text-[10px] text-gray-500 font-bold uppercase tracking-[0.4em]">
+                                        Repositorio Maestro • Auditado 2026</p>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Search & Close -->
+                        <div class="flex items-center gap-4 relative z-10">
+                            <div class="relative group">
+                                <i data-lucide="search"
+                                    class="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-600 group-focus-within:text-brand transition-colors"></i>
+                                <input type="text" id="sourceSearch"
+                                    placeholder="Buscar normativa, decreto o indicador..."
+                                    class="bg-white/5 border border-white/10 rounded-2xl pl-12 pr-6 py-3.5 text-xs text-white placeholder-gray-600 focus:outline-none focus:border-brand/40 w-80 transition-all">
+                            </div>
+                            <button onclick="closeSourcesModal()"
+                                class="p-4 rounded-full hover:bg-white/5 transition-all group">
+                                <i data-lucide="x"
+                                    class="w-7 h-7 text-gray-500 group-hover:text-white transition-all transform group-hover:rotate-90"></i>
+                            </button>
+                        </div>
+                    </div>
+
+                    <!-- Layout Body -->
+                    <div class="flex-1 flex overflow-hidden">
+                        <!-- Sidebar: Categories -->
+                        <div class="w-72 border-r border-white/5 p-8 flex flex-col gap-6 bg-black/20">
+                            <p class="text-[9px] font-black text-gray-600 uppercase tracking-widest pl-2">Entidades Nodo
+                            </p>
+                            <nav id="sourcesNav" class="space-y-2">
+                                <!-- Dynamic nav items injected by app.js -->
+                            </nav>
+
+                            <div class="mt-auto p-5 rounded-3xl bg-dark-bg/60 border border-white/5">
+                                <p class="text-[8px] text-gray-500 font-bold uppercase tracking-widest leading-relaxed">
+                                    Todos los datos financieros y de valoración en esta plataforma están anclados a
+                                    estos datasets oficiales para cumplimiento legal.
+                                </p>
+                            </div>
+                        </div>
+
+                        <!-- Content Grid -->
+                        <div class="flex-1 overflow-y-auto p-12 custom-scroll bg-gradient-to-b from-transparent to-black/30"
+                            id="sourcesDataContainer">
+                            <!-- Cards Injected Dynamically -->
+                        </div>
+                    </div>
+
+                    <!-- Footer -->
+                    <div class="p-8 border-t border-white/5 bg-black/40 flex items-center justify-between">
+                        <div class="flex items-center gap-6">
+                            <div class="flex flex-col">
+                                <span
+                                    class="text-[8px] text-gray-600 font-black uppercase tracking-widest">Protocolo</span>
+                                <span class="text-[10px] text-gray-400 font-bold">AES-256 Sincronización</span>
+                            </div>
+                            <div class="w-px h-6 bg-white/5"></div>
+                            <div class="flex flex-col">
+                                <span class="text-[8px] text-gray-600 font-black uppercase tracking-widest">Estado
+                                    Servidor</span>
+                                <span class="text-[10px] text-emerald-500 font-bold">ONLINE (0.2ms Latency)</span>
+                            </div>
+                        </div>
+                        <div class="flex items-center gap-4">
+                            <p class="text-[9px] text-gray-600 uppercase font-black mr-4">Portales de Referencia:</p>
+                            <a href="https://www.datos.gov.co" target="_blank"
+                                class="p-2 px-4 rounded-xl bg-brand/10 border border-brand/20 text-[9px] text-brand-400 font-black uppercase hover:bg-brand/20 transition-all">Datos
+                                Abiertos</a>
+                            <a href="https://www.igac.gov.co" target="_blank"
+                                class="p-2 px-4 rounded-xl bg-white/5 border border-white/10 text-[9px] text-gray-400 font-black uppercase hover:bg-white/10 transition-all">Portal
+                                IGAC</a>
+                        </div>
+                    </div>
                 </div>
             </div>
 
@@ -809,24 +891,50 @@
 
             </div>
 
-            <!-- System Status -->
-            <div class="p-6 border-t border-dark-border bg-dark-bg/80 backdrop-blur">
-                <div class="flex items-center justify-between mb-3">
-                    <span
-                        class="flex items-center gap-1.5 text-[9px] text-emerald-500 font-black uppercase tracking-widest">
-                        <span class="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse"></span>
-                        Nodo Activo
-                    </span>
-                    <span id="pwaStatusBadge"
-                        class="hidden px-2 py-0.5 bg-brand/10 text-brand rounded border border-brand/20 text-[8px] font-bold">
-                        📱 PWA v4.6
-                    </span>
+            <!-- SYSTEM WIDGET & USER CORE -->
+            <div class="p-6 border-t border-white/5 bg-gradient-to-t from-black/40 to-transparent backdrop-blur-xl">
+                <!-- Intelligence Bar -->
+                <div
+                    class="flex items-center justify-between mb-6 p-1.5 rounded-2xl bg-white/[0.02] border border-white/5">
+                    <button onclick="openSourcesModal()"
+                        class="flex-1 flex items-center justify-center gap-2 py-2.5 rounded-xl hover:bg-white/5 transition-all group"
+                        title="Fuentes de Información y Bases de Datos">
+                        <i data-lucide="book-open" class="w-3.5 h-3.5 text-gray-500 group-hover:text-brand"></i>
+                        <span
+                            class="text-[8px] font-black text-gray-600 uppercase tracking-widest group-hover:text-white">Fuentes</span>
+                    </button>
+                    <div class="w-px h-4 bg-white/5"></div>
+                    <button onclick="startGuidedTour()"
+                        class="flex-1 flex items-center justify-center gap-2 py-2.5 rounded-xl hover:bg-white/5 transition-all group"
+                        title="Iniciar Tour Guiado">
+                        <i data-lucide="help-circle" class="w-3.5 h-3.5 text-gray-500 group-hover:text-brand"></i>
+                        <span
+                            class="text-[8px] font-black text-gray-600 uppercase tracking-widest group-hover:text-white">Tutorial</span>
+                    </button>
                 </div>
-                <div class="space-y-1">
-                    <p class="text-[10px] font-black text-white uppercase tracking-tighter">Albert Daniel G.</p>
-                    <p class="text-[8px] text-gray-600 font-bold uppercase tracking-[0.2em] leading-none">Ing Des.
-                        Territorial</p>
-                </div>
+
+                <!-- User Account Switcher -->
+                <button onclick="openUserModal()" id="btnUserWidget"
+                    class="w-full flex items-center gap-4 p-4 rounded-3xl bg-white/[0.03] border border-white/10 hover:border-brand/40 hover:bg-brand/5 transition-all group"
+                    title="Conectado como: clauger2109@gmail.com">
+                    <div class="relative">
+                        <img src="https://lh3.googleusercontent.com/a/ACg8ocI_0iYp42iZIRDqFhK_AdfAcytuwUeyEIfa1W9WDQzNVrr-iS5mNA=s96-c"
+                            class="w-10 h-10 rounded-2xl border-2 border-brand/20 group-hover:border-brand transition-colors"
+                            alt="Profile">
+                        <span
+                            class="absolute -bottom-1 -right-1 w-4 h-4 rounded-full bg-emerald-500 border-2 border-[#0b0e14] flex items-center justify-center">
+                            <span class="w-1.5 h-1.5 rounded-full bg-white animate-pulse"></span>
+                        </span>
+                    </div>
+                    <div class="text-left flex-1 min-w-0">
+                        <p class="text-xs font-black text-white uppercase tracking-tighter leading-none truncate">Albert
+                            Daniel G.</p>
+                        <p class="text-[7px] text-gray-500 font-bold uppercase tracking-widest mt-1 truncate">
+                            clauger2109@gmail.com</p>
+                    </div>
+                    <i data-lucide="more-vertical"
+                        class="w-4 h-4 text-gray-700 group-hover:text-brand transition-all"></i>
+                </button>
             </div>
         </aside>
 
@@ -1443,6 +1551,9 @@
                     proyectado para el año 2026.
                     Incluyen materiales, mano de obra básica y equipos. No incluyen terrenos, licencias ni urbanismo
                     exterior.
+                    <button onclick="openSourcesModal()"
+                        class="text-brand-400 font-bold hover:underline not-italic ml-1">Ver Bases Técnicas Oficiales
+                        &raquo;</button>
                 </p>
             </div>
         </div>
@@ -1909,8 +2020,10 @@
                 </div>
 
                 <p class="text-gray-400 text-xl font-medium max-w-xl leading-relaxed opacity-80">
-                    Sincronización avanzada de datos catastrales IGAC e Inteligencia Artificial para ingeniería de
-                    precisión.
+                    Sincronización avanzada de datos catastrales <span
+                        class="text-white border-b border-brand/50">IGAC</span>, indicadores <span
+                        class="text-white border-b border-brand/50">DANE</span> e Inteligencia Artificial para
+                    ingeniería de precisión con trazabilidad legal completa.
                 </p>
 
                 <!-- Professional Signature -->
@@ -2093,6 +2206,86 @@
                         NODO CENTRAL v4.6 <span class="text-gray-800">•</span> ACCESO MONITOREADO
                     </p>
                 </div>
+            </div>
+        </div>
+    </div>
+    <!-- USER MODAL: ACCOUNT & SETTINGS (v4.0 Premium) -->
+    <div id="userModal"
+        class="fixed inset-0 z-[600] flex items-center justify-center bg-black/95 backdrop-blur-3xl opacity-0 pointer-events-none transition-all duration-500">
+        <div class="bg-[#0b0e14] border border-white/10 rounded-[4rem] shadow-[0_60px_150px_rgba(0,0,0,0.95)] max-w-lg w-full transform scale-95 transition-all duration-500 overflow-hidden"
+            id="userModalContent">
+
+            <!-- Modal Cover -->
+            <div class="h-32 bg-gradient-to-r from-brand to-purple-600 relative">
+                <div
+                    class="absolute inset-0 bg-[url('https://www.transparenttextures.com/patterns/carbon-fibre.png')] opacity-20">
+                </div>
+                <button onclick="closeUserModal()"
+                    class="absolute top-6 right-6 p-3 rounded-full bg-black/20 hover:bg-black/40 text-white transition-all">
+                    <i data-lucide="x" class="w-5 h-5"></i>
+                </button>
+            </div>
+
+            <div class="px-10 pb-10 -mt-12 relative z-10 text-center">
+                <!-- Large Avatar -->
+                <div class="inline-block relative">
+                    <img src="https://lh3.googleusercontent.com/a/ACg8ocI_0iYp42iZIRDqFhK_AdfAcytuwUeyEIfa1W9WDQzNVrr-iS5mNA=s96-c"
+                        class="w-24 h-24 rounded-[2.5rem] border-4 border-[#0b0e14] shadow-2xl mx-auto"
+                        alt="Profile Photo">
+                    <div class="absolute bottom-1 right-1 p-2 rounded-xl bg-emerald-500 border-4 border-[#0b0e14]">
+                        <i data-lucide="check" class="w-3 h-3 text-white"></i>
+                    </div>
+                </div>
+
+                <div class="mt-6">
+                    <h3 class="text-2xl font-black text-white font-heading tracking-tight uppercase">Albert Daniel G.
+                    </h3>
+                    <p class="text-[10px] text-brand font-black uppercase tracking-[0.3em] mt-1">Socio Fundador •
+                        Licencia Premium</p>
+                </div>
+
+                <div class="grid grid-cols-2 gap-4 mt-10">
+                    <div
+                        class="p-6 rounded-3xl bg-white/[0.02] border border-white/5 hover:border-brand/20 transition-all">
+                        <p class="text-[8px] text-gray-600 font-black uppercase tracking-widest mb-1">Último Acceso</p>
+                        <p class="text-xs font-bold text-white">Hoy, 15:55</p>
+                    </div>
+                    <div
+                        class="p-6 rounded-3xl bg-white/[0.02] border border-white/5 hover:border-brand/20 transition-all">
+                        <p class="text-[8px] text-gray-600 font-black uppercase tracking-widest mb-1">Nodo Activo</p>
+                        <p class="text-xs font-bold text-white">Bogotá (CTX-01)</p>
+                    </div>
+                </div>
+
+                <div class="mt-8 space-y-3">
+                    <button
+                        class="w-full h-14 rounded-2xl bg-white/5 border border-white/10 flex items-center px-6 gap-4 hover:bg-white/10 transition-all group">
+                        <i data-lucide="settings"
+                            class="w-5 h-5 text-gray-500 group-hover:text-brand transition-colors"></i>
+                        <span class="flex-1 text-left text-xs font-bold text-gray-300">Configuración de Cuenta</span>
+                        <i data-lucide="chevron-right" class="w-4 h-4 text-gray-700"></i>
+                    </button>
+                    <button
+                        class="w-full h-14 rounded-2xl bg-white/5 border border-white/10 flex items-center px-6 gap-4 hover:bg-white/10 transition-all group">
+                        <i data-lucide="file-text"
+                            class="w-5 h-5 text-gray-500 group-hover:text-brand transition-colors"></i>
+                        <span class="flex-1 text-left text-xs font-bold text-gray-300">Mis Avalúos Guardados</span>
+                        <span
+                            class="px-2 py-0.5 rounded bg-brand/10 text-brand text-[8px] font-black uppercase">14</span>
+                    </button>
+                    <button onclick="window.logout()"
+                        class="w-full h-14 rounded-2xl bg-red-500/5 border border-red-500/10 flex items-center px-6 gap-4 hover:bg-red-500/10 transition-all group">
+                        <i data-lucide="log-out"
+                            class="w-5 h-5 text-red-500/60 group-hover:text-red-500 transition-colors"></i>
+                        <span class="flex-1 text-left text-xs font-bold text-red-500/60 group-hover:text-red-500">Cerrar
+                            Sesión Segura</span>
+                        <i data-lucide="lock" class="w-4 h-4 text-red-500/20"></i>
+                    </button>
+                </div>
+
+                <p class="mt-8 text-[8px] text-gray-700 font-extrabold uppercase tracking-[0.4em]">
+                    ID SESIÓN: DX-2026-ALPHA-8842
+                </p>
             </div>
         </div>
     </div>

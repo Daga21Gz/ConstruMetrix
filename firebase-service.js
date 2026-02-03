@@ -296,18 +296,17 @@ window.openCheckout = function () {
 };
 
 function updateAuthUI(user) {
-    const btnLogin = document.getElementById('btnLogin');
-    const btnLogout = document.getElementById('btnLogout');
     const authOverlay = document.getElementById('authOverlay');
+    const userWidget = document.getElementById('btnUserWidget');
 
     if (user) {
-        // Logged In: Hide Overlay, Update Status
+        // --- LOGGED IN STATE ---
         if (authOverlay) {
             authOverlay.classList.remove('flex');
             authOverlay.classList.add('hidden');
         }
 
-        // Fetch Extended Profile from Firestore
+        // 1. Fetch Extended Profile from Firestore
         if (db) {
             db.collection('users').doc(user.uid).get().then(doc => {
                 if (doc.exists) {
@@ -316,29 +315,64 @@ function updateAuthUI(user) {
                         window.STATE.userProfile = profile;
                         if (window.adaptDashboardToRole) window.adaptDashboardToRole(profile.role);
                     }
+                    // Update Widget Role if exists
+                    const roleEls = document.querySelectorAll('.user-role-label');
+                    roleEls.forEach(el => el.textContent = `${profile.role.toUpperCase()} • PRO`);
                 }
             });
         }
 
-        if (btnLogin) {
-            const avatarUrl = user.photoURL || `https://ui-avatars.com/api/?name=${user.email}&background=4f7aff&color=fff`;
-            btnLogin.innerHTML = `<img src="${avatarUrl}" class="w-7 h-7 rounded-xl border border-brand/50">`;
-            btnLogin.title = `Conectado como: ${user.email}`;
-            btnLogin.onclick = () => {
-                if (confirm('¿Cerrar sesión técnica?')) window.logout();
-            };
+        // 2. Update Sidebar Widget Identity
+        if (userWidget) {
+            const avatarUrl = user.photoURL || `https://lh3.googleusercontent.com/a/ACg8ocI_0iYp42iZIRDqFhK_AdfAcytuwUeyEIfa1W9WDQzNVrr-iS5mNA=s96-c`;
+            const name = user.displayName || user.email.split('@')[0];
+
+            userWidget.innerHTML = `
+                <div class="relative">
+                    <img src="${avatarUrl}" 
+                        class="w-10 h-10 rounded-2xl border-2 border-brand/20 group-hover:border-brand transition-colors"
+                        alt="Profile">
+                    <span class="absolute -bottom-1 -right-1 w-4 h-4 rounded-full bg-emerald-500 border-2 border-[#0b0e14] flex items-center justify-center">
+                        <span class="w-1.5 h-1.5 rounded-full bg-white animate-pulse"></span>
+                    </span>
+                </div>
+                <div class="text-left flex-1 min-w-0">
+                    <p class="text-xs font-black text-white uppercase tracking-tighter leading-none truncate">${name}</p>
+                    <p class="text-[7px] text-gray-500 font-bold uppercase tracking-widest mt-1 truncate user-role-label">${user.email}</p>
+                </div>
+                <i data-lucide="more-vertical" class="w-4 h-4 text-gray-700 group-hover:text-brand transition-all"></i>
+            `;
+            if (window.lucide) lucide.createIcons();
+            userWidget.title = `Conectado como: ${user.email}`;
         }
+
+        // 3. Update User Hub Modal Photo
+        const modalPhoto = document.querySelector('#userModal img');
+        if (modalPhoto) modalPhoto.src = user.photoURL || modalPhoto.src;
+
+        const modalName = document.querySelector('#userModal h3');
+        if (modalName) modalName.textContent = user.displayName || user.email.split('@')[0];
+
     } else {
-        // Logged Out: Show Overlay
+        // --- LOGGED OUT STATE ---
         if (authOverlay) {
             authOverlay.classList.remove('hidden');
             authOverlay.classList.add('flex');
         }
 
-        if (btnLogin) {
-            btnLogin.innerHTML = `<i data-lucide="user" class="w-4 h-4 text-gray-400 group-hover:text-brand"></i>`;
-            btnLogin.onclick = window.loginWithGoogle;
+        if (userWidget) {
+            userWidget.innerHTML = `
+                <div class="w-10 h-10 rounded-2xl bg-white/5 flex items-center justify-center border border-white/10">
+                    <i data-lucide="user" class="w-5 h-5 text-gray-600"></i>
+                </div>
+                <div class="text-left flex-1">
+                    <p class="text-xs font-black text-white uppercase tracking-tighter">Acceso Requerido</p>
+                    <p class="text-[7px] text-brand font-bold uppercase tracking-widest mt-1">Sincronizar Nodo</p>
+                </div>
+                <i data-lucide="lock" class="w-4 h-4 text-gray-800"></i>
+            `;
             if (window.lucide) lucide.createIcons();
+            userWidget.onclick = () => { if (authOverlay) authOverlay.classList.remove('hidden'); };
         }
     }
 }

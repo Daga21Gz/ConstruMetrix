@@ -6,137 +6,11 @@
 // ==================== EXCEL EXPORT ====================
 // ==================== EXCEL & PDF EXPORT ====================
 
+/** [MIGRATED] PDF Export logic is now handled in app.js for Business Plus branding **/
+/** [MIGRATED] PDF Export logic is now handled in app.js for Business Plus branding **/
 function exportToPDF() {
-    if (!window.jspdf || !window.jspdf.jsPDF) {
-        showToast('Biblioteca PDF no cargada. Intenta recargar.', 'error');
-        return;
-    }
-
-    if (!window.STATE || !window.STATE.budget || window.STATE.budget.length === 0) {
-        showToast('No hay datos para reportar', 'error');
-        return;
-    }
-
-    try {
-        const { jsPDF } = window.jspdf;
-        const doc = new jsPDF();
-        const pageWidth = doc.internal.pageSize.getWidth();
-
-        // --- HEADER ---
-        doc.setFillColor(79, 70, 229); // Brand Indigo
-        doc.rect(0, 0, pageWidth, 25, 'F');
-
-        doc.setTextColor(255, 255, 255);
-        doc.setFontSize(16);
-        doc.setFont('helvetica', 'bold');
-        doc.text('CONSTRUMETRIX | REPORTE EJECUTIVO', 15, 16);
-
-        // Date
-        doc.setFontSize(10);
-        doc.setFont('helvetica', 'normal');
-        doc.text(new Date().toLocaleDateString(), pageWidth - 15, 16, { align: 'right' });
-
-        // --- METADATA ---
-        doc.setTextColor(50, 50, 50);
-        doc.setFontSize(10);
-
-        let y = 35;
-        doc.text(`Proyecto / Predio: ${window.STATE.meta.cedula || 'Sin Referencia'}`, 15, y);
-        doc.text(`Región: ${window.STATE.meta.region.toUpperCase()}`, 15, y + 6);
-        doc.text(`Área: ${window.STATE.meta.area} m²`, 15, y + 12);
-
-        doc.text(`Estrato: ${window.STATE.meta.estrato}`, 120, y);
-        doc.text(`Calidad: ${window.STATE.meta.qualityMultiplier.toFixed(1)}x`, 120, y + 6);
-        doc.text(`Valor m²: ${window.APP_UTILS.format(window.STATE.summary.sqm)}`, 120, y + 12);
-
-        // --- TABLE ---
-        const columns = ["Item", "Descripción", "Unidad", "Cant", "Unitario", "Total"];
-        const rows = window.STATE.budget.map(item => {
-            const originalPrice = item.precios[window.STATE.meta.region] || 0;
-            const basePrice = window.STATE.editedPrices && window.STATE.editedPrices[item.codigo] !== undefined
-                ? window.STATE.editedPrices[item.codigo]
-                : originalPrice;
-
-            // Apply consistency logic
-            const stateMult = (window.APP_UTILS && window.APP_UTILS.factors.state[window.STATE.meta.projectState]) || 1.0;
-            const qualityMult = window.STATE.meta.qualityMultiplier || 1.0;
-            const price = basePrice * stateMult * qualityMult;
-
-            let qty = item.quantity;
-            if (item.calcMode === 'volume') qty *= window.STATE.meta.area * window.STATE.meta.height;
-            else if (item.calcMode === 'area') qty *= window.STATE.meta.area;
-
-            return [
-                item.codigo,
-                item.nombre,
-                item.unidad,
-                qty.toFixed(2),
-                '$' + Math.round(price).toLocaleString(),
-                '$' + Math.round(price * qty).toLocaleString()
-            ];
-        });
-
-        doc.autoTable({
-            startY: 60,
-            head: [columns],
-            body: rows,
-            theme: 'striped',
-            headStyles: { fillColor: [63, 63, 70], textColor: 255, fontSize: 8, fontStyle: 'bold' },
-            bodyStyles: { fontSize: 8 },
-            alternateRowStyles: { fillColor: [245, 245, 245] },
-            margin: { top: 60 }
-        });
-
-        // --- SUMMARY ---
-        let finalY = doc.lastAutoTable.finalY + 10;
-
-        // Prevent page overflow
-        if (finalY > 250) {
-            doc.addPage();
-            finalY = 20;
-        }
-
-        doc.setFillColor(240, 240, 255);
-        doc.rect(120, finalY, pageWidth - 135, 40, 'F');
-        doc.setDrawColor(200, 200, 255);
-        doc.rect(120, finalY, pageWidth - 135, 40, 'S');
-
-        doc.setFontSize(11);
-        doc.setTextColor(0, 0, 0);
-        doc.setFont('helvetica', 'bold');
-        doc.text("RESUMEN FINANCIERO", 125, finalY + 8);
-
-        doc.setFontSize(9);
-        doc.setFont('helvetica', 'normal');
-        doc.text("Costos Directos:", 125, finalY + 16);
-        doc.text("AIU + Indirectos:", 125, finalY + 22);
-        doc.text("Valor Reposición Nuevo:", 125, finalY + 28);
-
-        doc.setFont('helvetica', 'bold');
-        doc.text("AVALÚO COMERCIAL:", 125, finalY + 36);
-
-        // Values
-        const s = window.STATE.summary;
-        const fmt = window.APP_UTILS.format;
-
-        doc.text(fmt(s.direct), 190, finalY + 16, { align: 'right' });
-        doc.text(fmt(s.aiu), 190, finalY + 22, { align: 'right' });
-        doc.text(fmt(s.crn), 190, finalY + 28, { align: 'right' });
-
-        doc.setTextColor(79, 70, 229);
-        doc.setFontSize(11);
-        doc.text(fmt(s.market), 190, finalY + 36, { align: 'right' });
-
-        // Save
-        doc.save(`Presupuesto_ConstruMetrix_${new Date().getTime()}.pdf`);
-        showToast('📄 PDF Generado Exitosamente', 'success');
-
-    } catch (err) {
-        console.error("PDF Fail", err);
-        showToast('Error generando PDF', 'error');
-    }
+    return window.exportToPDF ? window.exportToPDF() : console.warn("Master PDF logic not found");
 }
-
 
 function exportToExcel() {
     if (!window.XLSX) {
@@ -272,6 +146,27 @@ function exportToExcel() {
         const ws2 = XLSX.utils.aoa_to_sheet(chapterData);
         ws2['!cols'] = [{ width: 30 }, { width: 15 }];
         XLSX.utils.book_append_sheet(workbook, ws2, 'Por Capítulos');
+
+        // SHEET 3: Fuentes Oficiales (NEW)
+        const sourceData = [['ENTIDAD', 'RECURSO', 'ENLACE / DOCUMENTO', 'USO METODOLÓGICO']];
+        const sources = window.FUENTES_OFICIALES;
+        Object.keys(sources).forEach(key => {
+            if (key === 'metadata') return;
+            const source = sources[key];
+            Object.keys(source.recursos).forEach(rKey => {
+                const res = source.recursos[rKey];
+                sourceData.push([
+                    source.nombre,
+                    res.titulo,
+                    res.url,
+                    res.uso
+                ]);
+            });
+        });
+
+        const ws3 = XLSX.utils.aoa_to_sheet(sourceData);
+        ws3['!cols'] = [{ width: 40 }, { width: 40 }, { width: 60 }, { width: 50 }];
+        XLSX.utils.book_append_sheet(workbook, ws3, 'Fuentes y Legalidad');
 
         // Export
         const fileName = `CONSTRUMETRIX_Presupuesto_${new Date().getTime()}.xlsx`;
