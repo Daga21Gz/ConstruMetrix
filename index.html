@@ -1466,15 +1466,20 @@
                             </div>
                         </div>
                         <div class="flex gap-1" role="group" aria-label="Order Controls">
+                            <button onclick="openAttributeTable('lines')"
+                                class="p-1.5 rounded hover:bg-white/10 text-brand-400 hover:text-white transition-all"
+                                aria-label="Open Infrastructure Table">
+                                <i data-lucide="table" class="w-3.5 h-3.5"></i>
+                            </button>
                             <button onclick="changeLayerOrder('infra', 'up')"
                                 class="p-1.5 rounded hover:bg-white/10 text-gray-500 hover:text-white transition-all"
                                 aria-label="Bring Infrastructure Forward">
-                                <i data-lucide="chevron-up" class="w-3 h-3"></i>
+                                <i data-lucide="chevron-up" class="w-3.5 h-3.5"></i>
                             </button>
                             <button onclick="changeLayerOrder('infra', 'down')"
                                 class="p-1.5 rounded hover:bg-white/10 text-gray-500 hover:text-white transition-all"
                                 aria-label="Send Infrastructure Backward">
-                                <i data-lucide="chevron-down" class="w-3 h-3"></i>
+                                <i data-lucide="chevron-down" class="w-3.5 h-3.5"></i>
                             </button>
                         </div>
                     </div>
@@ -1493,15 +1498,20 @@
                             </div>
                         </div>
                         <div class="flex gap-1" role="group" aria-label="Order Controls">
+                            <button onclick="openAttributeTable('urban')"
+                                class="p-1.5 rounded hover:bg-white/10 text-emerald-400 hover:text-white transition-all"
+                                aria-label="Open Cadastral Table">
+                                <i data-lucide="table" class="w-3.5 h-3.5"></i>
+                            </button>
                             <button onclick="changeLayerOrder('igac', 'up')"
                                 class="p-1.5 rounded hover:bg-white/10 text-gray-500 hover:text-white transition-all"
                                 aria-label="Bring Cadastre Forward">
-                                <i data-lucide="chevron-up" class="w-3 h-3"></i>
+                                <i data-lucide="chevron-up" class="w-3.5 h-3.5"></i>
                             </button>
                             <button onclick="changeLayerOrder('igac', 'down')"
                                 class="p-1.5 rounded hover:bg-white/10 text-gray-500 hover:text-white transition-all"
                                 aria-label="Send Cadastre Backward">
-                                <i data-lucide="chevron-down" class="w-3 h-3"></i>
+                                <i data-lucide="chevron-down" class="w-3.5 h-3.5"></i>
                             </button>
                         </div>
                     </div>

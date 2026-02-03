@@ -601,23 +601,51 @@
         // Feature: Auto-select 'lines' if no layer specified (UX improvement)
         if (!layerKey) layerKey = 'lines';
 
-        if (!GIS_STATE.cache[layerKey]) {
-            // Si la capa 'lines' no está lista, intentar cargar datos básicos o mostrar aviso
-            if (layerKey === 'lines' && !GIS_STATE.cache.lines) {
-                updateGisStatus("⏳ Esperando datos del servidor...", "info");
-                return;
-            }
-            updateGisStatus("⚠️ Capa no cargada o sin datos.", "error");
+        // 1. Check for Local Cache (Infrastructure)
+        if (GIS_STATE.cache[layerKey]) {
+            const rawData = GIS_STATE.cache[layerKey].features;
+            GIS_TABLE.activeLayer = layerKey;
+            GIS_TABLE.data = rawData.map((f, idx) => ({ ...f.properties, _gid: idx, _geometry: f.geometry }));
+            GIS_TABLE.filteredData = [...GIS_TABLE.data];
+            GIS_TABLE.currentPage = 1;
+            renderTableUI();
             return;
         }
 
-        const rawData = GIS_STATE.cache[layerKey].features;
-        GIS_TABLE.activeLayer = layerKey;
-        GIS_TABLE.data = rawData.map((f, idx) => ({ ...f.properties, _gid: idx, _geometry: f.geometry })); // Enriquecer con índice estable
-        GIS_TABLE.filteredData = [...GIS_TABLE.data];
-        GIS_TABLE.currentPage = 1;
+        // 2. Fallback for IGAC / ESRI Layers (Dynamic Query by Extent)
+        const esriUrls = {
+            'urban': GIS_STATE.urls.urban,
+            'rural': GIS_STATE.urls.rural,
+            'urbanInf': GIS_STATE.urls.urbanInformal,
+            'ruralInf': GIS_STATE.urls.ruralInformal
+        };
 
-        renderTableUI();
+        if (esriUrls[layerKey]) {
+            updateGisStatus("📡 Consultando atributos en servidor IGAC...", "info");
+
+            const bounds = GIS_STATE.map.getBounds();
+            L.esri.query({ url: esriUrls[layerKey] })
+                .within(bounds)
+                .limit(100) // Limit to 100 for performance
+                .run((error, featureCollection) => {
+                    if (error || !featureCollection || !featureCollection.features.length) {
+                        updateGisStatus("⚠️ No hay predios visibles para tabular.", "error");
+                        return;
+                    }
+
+                    const rawData = featureCollection.features;
+                    GIS_TABLE.activeLayer = layerKey;
+                    GIS_TABLE.data = rawData.map((f, idx) => ({ ...f.properties, _gid: idx, _geometry: f.geometry }));
+                    GIS_TABLE.filteredData = [...GIS_TABLE.data];
+                    GIS_TABLE.currentPage = 1;
+
+                    renderTableUI();
+                    updateGisStatus(`✅ ${rawData.length} predios cargados en tabla.`, "success");
+                });
+            return;
+        }
+
+        updateGisStatus("⚠️ Capa no cargada o incompatible.", "error");
     };
 
     function renderTableUI() {
@@ -634,7 +662,16 @@
         const countBadge = document.getElementById('gisTableCount');
         const filterInput = document.getElementById('gisTableFilter');
 
-        if (layerTitle) layerTitle.textContent = GIS_TABLE.activeLayer.toUpperCase();
+        const friendlyNames = {
+            'lines': 'Infraestructura de Red',
+            'towers': 'Torres de Energía',
+            'servidumbre': 'Servidumbres Técnicas',
+            'urban': 'Catastro Urbano (IGAC)',
+            'rural': 'Catastro Rural (IGAC)',
+            'urbanInf': 'Urbano Informal',
+            'ruralInf': 'Rural Informal'
+        };
+        if (layerTitle) layerTitle.textContent = (friendlyNames[GIS_TABLE.activeLayer] || GIS_TABLE.activeLayer).toUpperCase();
         if (countBadge) countBadge.textContent = `${GIS_TABLE.filteredData.length} Registros`;
 
         // Bind Filter Input
