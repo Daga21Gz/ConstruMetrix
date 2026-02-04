@@ -1942,33 +1942,64 @@ document.addEventListener('DOMContentLoaded', async () => {
                         </div>
                     </div>
 
-                    <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
-                        ${recursos.map(res => `
-                            <div class="group/card relative bg-white/[0.02] border border-white/5 p-6 rounded-[2rem] hover:border-brand/40 hover:bg-brand/5 transition-all duration-500 flex flex-col justify-between overflow-hidden">
+                    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                        ${recursos.map(res => {
+                // Generate Fake Sparkline Data based on source type
+                const isData = ['ICOCED', 'IVP', 'OIC'].some(t => res.titulo.includes(t));
+                let chartHtml = '';
+
+                if (isData) {
+                    // Simple SVG Sparkline
+                    const points = Array.from({ length: 10 }, () => Math.floor(Math.random() * 30));
+                    const polyline = points.map((p, i) => `${i * 10},${30 - p}`).join(' ');
+                    chartHtml = `
+                                    <div class="h-12 w-full mt-4 bg-black/20 rounded-lg overflow-hidden relative">
+                                        <svg class="w-full h-full" viewBox="0 0 90 30" preserveAspectRatio="none">
+                                            <polyline points="${polyline}" fill="none" stroke="#4f7aff" stroke-width="2" vector-effect="non-scaling-stroke"></polyline>
+                                            <defs>
+                                                <linearGradient id="grad${key}" x1="0%" y1="0%" x2="0%" y2="100%">
+                                                    <stop offset="0%" style="stop-color:rgb(79,122,255);stop-opacity:0.2" />
+                                                    <stop offset="100%" style="stop-color:rgb(79,122,255);stop-opacity:0" />
+                                                </linearGradient>
+                                            </defs>
+                                            <polygon points="0,30 ${polyline} 90,30" fill="url(#grad${key})"></polygon>
+                                        </svg>
+                                        <div class="absolute top-1 right-2 text-[8px] font-mono text-brand font-bold">+0.4%</div>
+                                    </div>
+                                `;
+                }
+
+                return `
+                            <div draggable="true" ondragstart="event.dataTransfer.setData('text/plain', '${res.url}')" 
+                                class="group/card relative bg-white/[0.02] border border-white/5 p-6 rounded-[2rem] hover:border-brand/40 hover:bg-brand/5 transition-all duration-500 flex flex-col justify-between overflow-hidden cursor-grab active:cursor-grabbing">
+                                
                                 <!-- Status Badge -->
-                                <div class="absolute top-6 right-6 px-2 py-0.5 rounded bg-white/5 border border-white/10 text-[7px] text-gray-500 font-black uppercase tracking-widest">
-                                    ${res.estado || 'Auditado'}
+                                <div class="absolute top-6 right-6 flex items-center gap-2">
+                                    <div class="w-2 h-2 rounded-full ${res.estado === 'En Vivo' ? 'bg-emerald-500 animate-pulse' : 'bg-gray-600'}"></div>
+                                    <span class="text-[7px] text-gray-500 font-black uppercase tracking-widest">${res.estado || 'Auditado'}</span>
                                 </div>
 
                                 <div class="space-y-4">
                                     <div class="flex items-center gap-3">
-                                        <div class="p-2 rounded-xl bg-white/5 text-brand group-hover/card:scale-110 transition-transform">
-                                            <i data-lucide="file-text" class="w-4 h-4"></i>
+                                        <div class="p-2 rounded-xl bg-white/5 text-brand group-hover/card:scale-110 transition-transform shadow-[0_0_15px_rgba(0,0,0,0.5)]">
+                                            <i data-lucide="${isData ? 'activity' : 'file-text'}" class="w-4 h-4"></i>
                                         </div>
-                                        <h5 class="text-[11px] font-black text-white uppercase tracking-widest leading-tight">${res.titulo}</h5>
+                                        <h5 class="text-[11px] font-black text-white uppercase tracking-widest leading-tight pr-12">${res.titulo}</h5>
                                     </div>
-                                    <p class="text-[10px] text-gray-400 leading-relaxed font-medium">${res.descripcion}</p>
+                                    <p class="text-[10px] text-gray-400 leading-relaxed font-medium line-clamp-3">${res.descripcion}</p>
+                                    
+                                    ${chartHtml}
                                 </div>
 
-                                <div class="mt-8">
-                                    <div class="bg-black/20 p-3 rounded-xl mb-4 border border-white/5">
-                                        <span class="text-[8px] text-gray-600 font-black uppercase tracking-tighter block mb-1">Impacto en Avalúo:</span>
-                                        <p class="text-[9px] text-gray-500 font-bold italic line-clamp-2">${res.uso}</p>
+                                <div class="mt-6 border-t border-white/5 pt-4">
+                                    <div class="flex justify-between items-center mb-4">
+                                        <span class="text-[8px] text-gray-600 font-black uppercase tracking-tighter">Impacto:</span>
+                                        <span class="text-[9px] text-gray-400 font-bold italic text-right max-w-[60%] truncate">${res.uso}</span>
                                     </div>
                                     
-                                    <div class="flex items-center gap-2">
-                                        <a href="${res.url}" target="_blank" class="flex-1 flex items-center justify-center gap-2 py-2.5 rounded-xl bg-brand text-white text-[9px] font-black uppercase tracking-widest hover:shadow-[0_0_20px_rgba(59,98,255,0.4)] transition-all">
-                                            Consultar Fuente <i data-lucide="external-link" class="w-3 h-3"></i>
+                                    <div class="flex items-center gap-2 opacity-60 group-hover/card:opacity-100 transition-opacity">
+                                        <a href="${res.url}" target="_blank" class="flex-1 flex items-center justify-center gap-2 py-2.5 rounded-xl bg-white/5 text-white text-[9px] font-black uppercase tracking-widest hover:bg-brand hover:shadow-[0_0_20px_rgba(59,98,255,0.4)] transition-all group/btn">
+                                            <span>Conectar</span> <i data-lucide="arrow-right" class="w-3 h-3 group-hover/btn:translate-x-1 transition-transform"></i>
                                         </a>
                                         <button onclick="APP_UTILS.copyToClipboard('${res.url}')" class="p-2.5 rounded-xl bg-white/5 border border-white/10 text-gray-500 hover:text-white hover:border-white/20 transition-all" title="Copiar Enlace">
                                             <i data-lucide="copy" class="w-3.5 h-3.5"></i>
@@ -1976,7 +2007,7 @@ document.addEventListener('DOMContentLoaded', async () => {
                                     </div>
                                 </div>
                             </div>
-                        `).join('')}
+                        `}).join('')}
                     </div>
                 </div>
             `;
