@@ -544,42 +544,83 @@ document.addEventListener('DOMContentLoaded', async () => {
         const tour = new Shepherd.Tour({
             useModalOverlay: true,
             defaultStepOptions: {
-                classes: 'glass-panel shadow-2xl rounded-3xl border border-white/10 text-white p-6',
+                classes: 'shepherd-element', // Custom Class from elite-colors.css
                 scrollTo: { behavior: 'smooth', block: 'center' },
-                cancelIcon: { enabled: true }
+                cancelIcon: { enabled: true },
+                arrow: true
             }
         });
 
+        // 1. WELCOME
         tour.addStep({
             id: 'welcome',
             title: 'Bienvenido al Nodo Central',
-            text: 'Descubre cómo potenciar tus avalúos técnicos con datos de alta precisión.',
+            text: 'Descubre el poder de la <b>Ingeniería de Avalúos 2026</b>. Esta plataforma fusiona cálculo técnico, datos IGAC y análisis de mercado en una sola interfaz de alta precisión.',
             attachTo: { element: '#sidebar', on: 'right' },
-            buttons: [{ text: 'Siguiente', action: tour.next, classes: 'bg-brand text-dark-bg font-bold px-4 py-2 rounded-lg text-xs uppercase' }]
+            buttons: [
+                { text: 'Omitir', action: tour.cancel, classes: 'shepherd-button-secondary' },
+                { text: 'Iniciar Tour', action: tour.next, classes: 'shepherd-button' }
+            ]
         });
 
+        // 2. BLUEPRINTS (MODELOS)
         tour.addStep({
             id: 'blueprints',
-            title: 'Plantillas de Ingeniería',
-            text: 'Selecciona una tipología constructiva para cargar automáticamente los capítulos de obra técnicos.',
+            title: 'Plantillas Inteligentes',
+            text: 'Selecciona una <b>Tipología Constructiva</b> (Residencial, Comercial o Infraestructura) para cargar automáticamente los ítems, cantidades y precios de referencia validados.',
             attachTo: { element: '#unitTypeSelect', on: 'right' },
-            buttons: [{ text: 'Siguiente', action: tour.next, classes: 'bg-brand text-dark-bg font-bold px-4 py-2 rounded-lg text-xs uppercase' }]
+            buttons: [
+                { text: 'Atrás', action: tour.back, classes: 'shepherd-button-secondary' },
+                { text: 'Siguiente', action: tour.next, classes: 'shepherd-button' }
+            ]
         });
 
+        // 3. QUALITY CONTROL
+        tour.addStep({
+            id: 'quality',
+            title: 'Estándar de Calidad',
+            text: 'Ajusta el nivel de acabados con este control de precisión. Modifica automáticamente el multiplicador de costos para simular desde <b>Obra Gris</b> hasta <b>Lujo Elite</b>.',
+            attachTo: { element: '#qualitySlider', on: 'right' },
+            buttons: [
+                { text: 'Atrás', action: tour.back, classes: 'shepherd-button-secondary' },
+                { text: 'Siguiente', action: tour.next, classes: 'shepherd-button' }
+            ]
+        });
+
+        // 4. GIS COMMAND
         tour.addStep({
             id: 'gis',
-            title: 'Inteligencia Geográfica',
-            text: 'Sincroniza datos directos de IGAC y visualiza la infraestructura en el Geo-Visor avanzado.',
+            title: 'Comando SIG & IGAC',
+            text: 'Despliega el <b>Visor Geográfico</b> para cruzar datos catastrales en tiempo real, visualizar servidumbres, torres de energía y normativa urbana.',
             attachTo: { element: '#toggleGisVisor', on: 'right' },
-            buttons: [{ text: 'Siguiente', action: tour.next, classes: 'bg-brand text-dark-bg font-bold px-4 py-2 rounded-lg text-xs uppercase' }]
+            buttons: [
+                { text: 'Atrás', action: tour.back, classes: 'shepherd-button-secondary' },
+                { text: 'Siguiente', action: tour.next, classes: 'shepherd-button' }
+            ]
         });
 
+        // 5. VALUATION METRICS
+        // Check if dashboard metrics are visible (using a common selector or specific ID)
+        tour.addStep({
+            id: 'metrics',
+            title: 'Avalúo en Tiempo Real',
+            text: 'Aquí visualizarás el <b>Valor Final de Mercado</b> consolidado (+/- Rango de Confianza), calculado dinámicamente según la depreciación Ross-Heidecke.',
+            attachTo: { element: '#finalTotalPanel', on: 'left' }, // Focusing on the main intelligence panel or similar
+            buttons: [
+                { text: 'Atrás', action: tour.back, classes: 'shepherd-button-secondary' },
+                { text: 'Siguiente', action: tour.next, classes: 'shepherd-button' }
+            ]
+        });
+
+        // 6. SOURCES & LEGAL
         tour.addStep({
             id: 'fuentes',
-            title: 'Trazabilidad & Fuentes',
-            text: 'Accede al repositorio maestro de fuentes oficiales. Documentación directa de IGAC, DANE y normativas vigentes para sustentar tus avalúos.',
-            attachTo: { element: 'button[onclick="openSourcesModal()"]', on: 'right' },
-            buttons: [{ text: 'Finalizar', action: tour.complete, classes: 'bg-brand text-dark-bg font-bold px-4 py-2 rounded-lg text-xs uppercase' }]
+            title: 'Trazabilidad Oficial',
+            text: 'Accede al repositorio legal. Documentación directa de <b>DANE, IGAC y CAMACOL</b> para sustentar técnicamente tu avalúo ante terceros.',
+            attachTo: { element: 'button[onclick="openSourcesModal()"]', on: 'bottom' },
+            buttons: [
+                { text: 'Finalizar', action: tour.complete, classes: 'shepherd-button' }
+            ]
         });
 
         tour.start();

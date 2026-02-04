@@ -330,3 +330,101 @@ textarea:focus {
         box-shadow: none !important;
     }
 }
+
+/* === SHEPHERD TOUR CUSTOMIZATION === */
+:root {
+    --shepherd-bg: var(--color-space-900);
+    --shepherd-border: var(--color-citrus-600);
+    --shepherd-text: var(--text-primary);
+}
+
+.shepherd-element {
+    background: rgba(10, 11, 15, 0.95) !important;
+    border: 1px solid var(--color-citrus-600) !important;
+    border-radius: 20px !important;
+    box-shadow: 0 0 30px rgba(0,0,0,0.8), 0 0 20px rgba(247, 252, 0, 0.15) !important;
+    color: var(--text-primary) !important;
+    font-family: 'Inter', sans-serif !important;
+    z-index: 9999 !important;
+    max-width: 450px !important;
+    backdrop-filter: blur(16px) !important;
+}
+
+.shepherd-header {
+    background: transparent !important;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.08) !important;
+    padding: 1.25rem 1.5rem !important;
+    border-top-left-radius: 20px !important;
+    border-top-right-radius: 20px !important;
+}
+
+.shepherd-title {
+    font-family: 'Montserrat', sans-serif !important;
+    font-size: 1rem !important;
+    font-weight: 900 !important;
+    text-transform: uppercase !important;
+    letter-spacing: 0.15em !important;
+    color: var(--color-citrus-600) !important;
+    margin: 0 !important;
+}
+
+.shepherd-text {
+    font-size: 0.9rem !important;
+    line-height: 1.6 !important;
+    padding: 1.5rem !important;
+    color: var(--text-secondary) !important;
+}
+
+.shepherd-footer {
+    padding: 0 1.5rem 1.5rem !important;
+    display: flex !important;
+    justify-content: flex-end !important;
+    gap: 12px !important;
+}
+
+.shepherd-button {
+    background: var(--color-citrus-600) !important;
+    color: var(--color-space-950) !important;
+    border-radius: 12px !important;
+    font-weight: 800 !important;
+    text-transform: uppercase !important;
+    font-size: 0.75rem !important;
+    letter-spacing: 0.1em !important;
+    padding: 0.8rem 1.5rem !important;
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1) !important;
+    border: none !important;
+}
+
+.shepherd-button:hover {
+    background: var(--color-citrus-500) !important;
+    box-shadow: 0 0 20px rgba(247, 252, 0, 0.3) !important;
+    transform: translateY(-2px) !important;
+}
+
+.shepherd-button-secondary {
+    background: transparent !important;
+    color: var(--text-tertiary) !important;
+    border: 1px solid rgba(255, 255, 255, 0.2) !important;
+}
+
+.shepherd-button-secondary:hover {
+    color: white !important;
+    border-color: white !important;
+    background: rgba(255, 255, 255, 0.05) !important;
+    transform: translateY(-2px) !important;
+}
+
+.shepherd-arrow:before {
+    background: var(--color-space-900) !important;
+    border: 1px solid var(--color-citrus-600) !important;
+}
+
+/* Hide default cancel icon if we want a cleaner look, or style it */
+.shepherd-cancel-icon {
+    color: rgba(255,255,255,0.4) !important;
+    transition: color 0.3s !important;
+}
+
+.shepherd-cancel-icon:hover {
+    color: white !important;
+}
