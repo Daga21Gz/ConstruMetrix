@@ -47,15 +47,15 @@ jobs:
           channelId: live
           projectId: construmetrix
 
-  deploy-functions:
-    needs: build-and-test
-    if: github.ref == 'refs/heads/main'
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@v4
-      - name: Deploy Firebase Functions
-        uses: w9jds/firebase-action@master
-        with:
-          args: deploy --only functions --project construmetrix
-        env:
-          GCP_SA_KEY: ${{ secrets.FIREBASE_SERVICE_ACCOUNT_CONSTRUMETRIX }}
+#   deploy-functions:
+#     needs: build-and-test
+#     if: github.ref == 'refs/heads/main'
+#     runs-on: ubuntu-latest
+#     steps:
+#       - uses: actions/checkout@v4
+#       - name: Deploy Firebase Functions
+#         uses: w9jds/firebase-action@master
+#         with:
+#           args: deploy --only functions --project construmetrix
+#         env:
+#           GCP_SA_KEY: ${{ secrets.FIREBASE_SERVICE_ACCOUNT_CONSTRUMETRIX }}
