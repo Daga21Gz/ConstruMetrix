@@ -1844,7 +1844,7 @@ document.addEventListener('DOMContentLoaded', async () => {
         activeSourceCategory = 'all';
         renderSources();
 
-        // One-time listeners for search
+        // One-time listener for search
         const searchInput = document.getElementById('sourceSearch');
         if (searchInput && !searchInput.dataset.listener) {
             searchInput.addEventListener('input', APP_UTILS.debounce((e) => {
@@ -1890,7 +1890,7 @@ document.addEventListener('DOMContentLoaded', async () => {
         const sources = window.FUENTES_OFICIALES;
         const q = filter.toLowerCase();
 
-        // 1. Render Navigation Sidebar
+        // 1. Render Navigation (Sidebar style)
         let navHtml = `
             <button onclick="setSourceCategory('all')" 
                 class="w-full flex items-center gap-3 p-3.5 rounded-2xl transition-all ${activeSourceCategory === 'all' ? 'bg-brand/20 text-brand border border-brand/20' : 'text-gray-500 hover:bg-white/5 hover:text-white border border-transparent'}">
@@ -1942,7 +1942,7 @@ document.addEventListener('DOMContentLoaded', async () => {
                         </div>
                     </div>
 
-                    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 2xl:grid-cols-4 gap-6">
                         ${recursos.map(res => {
                 // Generate Fake Sparkline Data based on source type
                 const isData = ['ICOCED', 'IVP', 'OIC'].some(t => res.titulo.includes(t));
@@ -2029,8 +2029,11 @@ document.addEventListener('DOMContentLoaded', async () => {
 
     window.setSourceCategory = (cat) => {
         activeSourceCategory = cat;
-        renderSources(document.getElementById('sourceSearch')?.value || '');
+        const searchInput = document.getElementById('sourceSearch');
+        const query = searchInput?.value || '';
+        renderSources(query);
     };
+
 
     window.showModal = (title, text, image = null) => new Promise(res => {
         const m = document.getElementById('confirmModal');

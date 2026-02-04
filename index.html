@@ -521,63 +521,6 @@
                 </div>
             </div>
 
-            <!-- KNOWLEDGE HUB: FUENTES OFICIALES (v4.0 Premium) -->
-            <!-- KNOWLEDGE HUB: FUENTES OFICIALES (Refactored Clean Design) -->
-            <div id="sourcesModal"
-                class="fixed inset-0 z-[500] flex justify-end bg-black/60 backdrop-blur-sm opacity-0 pointer-events-none transition-all duration-500">
-
-                <!-- Slide-Over Panel -->
-                <div class="w-full max-w-5xl h-full bg-[#111] border-l border-white/10 shadow-2xl transform translate-x-full transition-transform duration-500 flex flex-col"
-                    id="sourcesModalContent">
-
-                    <!-- Minimal Clean Header -->
-                    <div class="h-20 px-8 border-b border-white/5 flex items-center justify-between bg-[#161616]">
-                        <div class="flex items-center gap-4">
-                            <div class="p-2.5 rounded-xl bg-brand/10 text-brand">
-                                <i data-lucide="shield-check" class="w-5 h-5"></i>
-                            </div>
-                            <div>
-                                <h3 class="text-lg font-bold text-white tracking-tight">Hub de Fuentes Oficiales</h3>
-                                <p class="text-[10px] text-gray-500 font-medium">Repositorio Maestro Sincronizado</p>
-                            </div>
-                        </div>
-
-                        <!-- Search Bar -->
-                        <div class="flex items-center gap-4">
-                            <div class="relative group">
-                                <i data-lucide="search"
-                                    class="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-500"></i>
-                                <input type="text" id="sourceSearch" placeholder="Buscar datos..."
-                                    class="bg-[#0b0b0b] border border-white/10 rounded-lg pl-10 pr-4 py-2 text-xs text-white placeholder-gray-600 focus:outline-none focus:border-brand/50 w-64 transition-all">
-                            </div>
-                            <button onclick="closeSourcesModal()"
-                                class="p-2 rounded-lg hover:bg-white/5 text-gray-500 hover:text-white transition-colors">
-                                <i data-lucide="x" class="w-5 h-5"></i>
-                            </button>
-                        </div>
-                    </div>
-
-                    <!-- Layout Body -->
-                    <div class="flex-1 flex overflow-hidden">
-                        <!-- Sidebar: Clean Categories -->
-                        <div class="w-64 border-r border-white/5 bg-[#141414] overflow-y-auto custom-scroll">
-                            <div class="p-6">
-                                <p class="text-[10px] font-bold text-gray-500 uppercase tracking-wider mb-4 px-2">
-                                    Categorías</p>
-                                <nav id="sourcesNav" class="space-y-1">
-                                    <!-- Dynamic nav items injected by app.js -->
-                                </nav>
-                            </div>
-                        </div>
-
-                        <!-- Content Grid: White Space & Clean Cards -->
-                        <div class="flex-1 overflow-y-auto p-8 bg-[#0b0b0b] custom-scroll" id="sourcesDataContainer">
-                            <!-- Cards Injected Dynamically -->
-                        </div>
-                    </div>
-                </div>
-            </div>
-
             <div class="flex-1 overflow-y-auto custom-scroll p-6 space-y-8">
 
                 <!-- Scenario Simulation -->
@@ -860,11 +803,29 @@
                 <div
                     class="flex items-center justify-between mb-6 p-1.5 rounded-2xl bg-white/[0.02] border border-white/5">
                     <button onclick="openSourcesModal()"
-                        class="flex-1 flex items-center justify-center gap-2 py-2.5 rounded-xl hover:bg-white/5 transition-all group"
-                        title="Fuentes de Información y Bases de Datos">
-                        <i data-lucide="book-open" class="w-3.5 h-3.5 text-gray-500 group-hover:text-brand"></i>
-                        <span
-                            class="text-[8px] font-black text-gray-600 uppercase tracking-widest group-hover:text-white">Fuentes</span>
+                        class="flex-1 flex items-center justify-center gap-2.5 py-3 rounded-xl hover:bg-gradient-to-r hover:from-brand/10 hover:to-purple-600/10 border border-transparent hover:border-brand/20 transition-all group relative overflow-hidden"
+                        title="Fuentes de Información y Bases de Datos Oficiales">
+                        <!-- Hover Glow Effect -->
+                        <div
+                            class="absolute inset-0 bg-gradient-to-r from-brand/5 to-purple-600/5 opacity-0 group-hover:opacity-100 transition-opacity">
+                        </div>
+
+                        <!-- Icon with pulse -->
+                        <div class="relative">
+                            <i data-lucide="database"
+                                class="w-4 h-4 text-gray-500 group-hover:text-brand transition-all group-hover:scale-110 relative z-10"></i>
+                            <div
+                                class="absolute inset-0 bg-brand/20 rounded-full blur-md opacity-0 group-hover:opacity-100 transition-opacity">
+                            </div>
+                        </div>
+
+                        <div class="flex flex-col items-start relative z-10">
+                            <span
+                                class="text-[9px] font-black text-gray-300 group-hover:text-white uppercase tracking-widest transition-colors">Fuentes</span>
+                            <span
+                                class="text-[7px] font-bold text-gray-600 group-hover:text-brand uppercase tracking-wider transition-colors">Hub
+                                Oficial</span>
+                        </div>
                     </button>
                     <div class="w-px h-4 bg-white/5"></div>
                     <button onclick="startGuidedTour()"
@@ -2172,6 +2133,150 @@
             </div>
         </div>
     </div>
+
+    <!-- SOURCES HUB: Premium Full-Screen Modal (v6.0 Enterprise) -->
+    <div id="sourcesModal"
+        class="fixed inset-0 z-[500] flex items-center justify-center bg-black/95 backdrop-blur-3xl opacity-0 pointer-events-none transition-all duration-500">
+
+        <!-- Full-Screen Premium Modal Container -->
+        <div id="sourcesModalContent"
+            class="bg-[#0b0e14] border border-white/10 rounded-[2rem] shadow-[0_60px_150px_rgba(0,0,0,0.95)] max-w-[1920px] w-[95vw] h-[92vh] transform scale-95 transition-all duration-500 overflow-hidden flex">
+
+            <!-- Sidebar Navigation -->
+            <div class="w-80 border-r border-white/5 bg-[#050608] flex flex-col shrink-0">
+                <!-- Sidebar Header with Gradient -->
+                <div class="h-32 bg-gradient-to-r from-brand to-purple-600 relative overflow-hidden">
+                    <div
+                        class="absolute inset-0 bg-[url('https://www.transparenttextures.com/patterns/hexellence.png')] opacity-20">
+                    </div>
+
+                    <!-- Close Button in Sidebar -->
+                    <button onclick="closeSourcesModal()"
+                        class="absolute top-6 right-6 p-3 rounded-full bg-black/20 hover:bg-black/40 backdrop-blur-sm text-white transition-all group"
+                        title="Cerrar">
+                        <i data-lucide="x" class="w-5 h-5 group-hover:rotate-90 transition-transform"></i>
+                    </button>
+
+                    <!-- Glowing Icon Badge -->
+                    <div class="absolute -bottom-10 left-1/2 -translate-x-1/2">
+                        <div
+                            class="w-20 h-20 bg-[#050608] rounded-[2rem] border-4 border-[#050608] shadow-2xl flex items-center justify-center relative group">
+                            <div
+                                class="absolute inset-0 bg-gradient-to-br from-brand/30 to-purple-600/30 rounded-[2rem] blur-xl group-hover:blur-2xl transition-all">
+                            </div>
+                            <i data-lucide="database"
+                                class="w-9 h-9 text-brand relative z-10 group-hover:scale-110 transition-transform"></i>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Sidebar Content -->
+                <div class="flex-1 overflow-y-auto custom-scroll">
+                    <div class="p-8 pt-14">
+                        <!-- Title -->
+                        <div class="text-center mb-8">
+                            <h3 class="text-xl font-black text-white tracking-tight uppercase font-heading mb-2">Hub de
+                                Fuentes</h3>
+                            <div class="flex items-center justify-center gap-2">
+                                <span class="flex h-2 w-2 relative">
+                                    <span
+                                        class="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75"></span>
+                                    <span class="relative inline-flex rounded-full h-2 w-2 bg-emerald-500"></span>
+                                </span>
+                                <p class="text-[9px] text-brand font-black uppercase tracking-[0.3em]">En Vivo</p>
+                            </div>
+                        </div>
+
+                        <!-- Stats Cards -->
+                        <div class="space-y-3 mb-8">
+                            <div
+                                class="p-4 rounded-2xl bg-white/[0.02] border border-white/5 hover:border-brand/20 transition-all">
+                                <p class="text-[8px] text-gray-600 font-black uppercase tracking-widest mb-1">Total
+                                    Fuentes</p>
+                                <p class="text-2xl font-black text-white">12+</p>
+                            </div>
+                            <div
+                                class="p-4 rounded-2xl bg-white/[0.02] border border-white/5 hover:border-brand/20 transition-all">
+                                <p class="text-[8px] text-gray-600 font-black uppercase tracking-widest mb-1">Nodos
+                                    Activos</p>
+                                <p class="text-2xl font-black text-brand">4</p>
+                            </div>
+                            <div
+                                class="p-4 rounded-2xl bg-white/[0.02] border border-white/5 hover:border-emerald-400/20 transition-all">
+                                <p class="text-[8px] text-gray-600 font-black uppercase tracking-widest mb-1">Latencia
+                                </p>
+                                <p class="text-2xl font-black text-emerald-400">14ms</p>
+                            </div>
+                        </div>
+
+                        <!-- Navigation Categories -->
+                        <div class="mb-8">
+                            <div class="flex items-center justify-between mb-4">
+                                <p class="text-[9px] font-black text-gray-500 uppercase tracking-widest">Categorías</p>
+                                <span
+                                    class="text-[9px] text-brand font-bold bg-brand/10 px-2 py-0.5 rounded-md">4</span>
+                            </div>
+                            <nav id="sourcesNav" class="space-y-2">
+                                <!-- Dynamic nav items injected by app.js -->
+                            </nav>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Sidebar Footer -->
+                <div class="p-6 border-t border-white/5">
+                    <div class="flex items-center justify-between text-[9px] font-mono text-gray-600 mb-3">
+                        <div class="flex items-center gap-1.5">
+                            <div class="w-1.5 h-1.5 rounded-full bg-emerald-500"></div>
+                            <span class="font-bold">ONLINE</span>
+                        </div>
+                        <span>TLS 1.3</span>
+                    </div>
+                    <div class="flex items-start gap-2 opacity-60">
+                        <i data-lucide="info" class="w-3.5 h-3.5 text-gray-400 mt-0.5 shrink-0"></i>
+                        <p class="text-[8px] text-gray-500 font-medium leading-relaxed">
+                            Datos oficiales mediante APIs gubernamentales verificadas.
+                        </p>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Main Content Area -->
+            <div class="flex-1 flex flex-col overflow-hidden">
+                <!-- Search Header -->
+                <div
+                    class="h-24 px-10 border-b border-white/5 flex items-center justify-between gap-6 bg-gradient-to-r from-[#0d1117] to-[#080a0f]">
+                    <div class="relative group flex-1 max-w-3xl">
+                        <i data-lucide="search"
+                            class="absolute left-5 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-500 group-focus-within:text-brand transition-colors"></i>
+                        <input type="text" id="sourceSearch"
+                            placeholder="Buscar normativa, indicador, dataset o recurso oficial..."
+                            class="w-full bg-black/30 border border-white/10 rounded-xl pl-14 pr-6 py-4 text-sm text-white placeholder-gray-600 focus:outline-none focus:border-brand/50 focus:bg-black/50 transition-all">
+                    </div>
+
+                    <!-- Header Actions -->
+                    <div class="flex items-center gap-3">
+                        <span class="text-[8px] text-gray-700 font-black uppercase tracking-[0.4em]">GOV.CO</span>
+                        <button onclick="closeSourcesModal()"
+                            class="p-3 rounded-xl bg-white/5 hover:bg-red-500/10 border border-white/10 hover:border-red-500/20 text-gray-400 hover:text-red-500 transition-all group"
+                            title="Cerrar Modal">
+                            <i data-lucide="x" class="w-5 h-5 group-hover:rotate-90 transition-transform"></i>
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Content Grid -->
+                <div class="flex-1 overflow-y-auto p-12 custom-scroll bg-gradient-to-br from-[#0b0e14] to-black relative"
+                    id="sourcesDataContainer">
+                    <div
+                        class="absolute inset-0 bg-[url('https://grainy-gradients.vercel.app/noise.svg')] opacity-[0.03] pointer-events-none">
+                    </div>
+                    <!-- Cards Injected Dynamically by app.js -->
+                </div>
+            </div>
+        </div>
+    </div>
+
     <!-- USER MODAL: ACCOUNT & SETTINGS (v4.0 Premium) -->
     <div id="userModal"
         class="fixed inset-0 z-[600] flex items-center justify-center bg-black/95 backdrop-blur-3xl opacity-0 pointer-events-none transition-all duration-500">
