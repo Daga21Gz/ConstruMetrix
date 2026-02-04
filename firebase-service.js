@@ -344,6 +344,10 @@ function updateAuthUI(user) {
             `;
             if (window.lucide) lucide.createIcons();
             userWidget.title = `Conectado como: ${user.email}`;
+            // FIX: Open User Hub instead of Auth Overlay when logged in
+            userWidget.onclick = () => {
+                if (window.openUserModal) window.openUserModal();
+            };
         }
 
         // 3. Update User Hub Modal Photo
