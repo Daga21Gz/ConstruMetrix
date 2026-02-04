@@ -1347,11 +1347,11 @@ document.addEventListener('DOMContentLoaded', async () => {
                 let curX = margin + 6 + doc.getTextWidth(`VALIDEZ TÉCNICA: `);
 
                 const parts = [
-                    { t: 'DANE', l: 'https://www.dane.gov.co/index.php/estadisticas-por-tema/precios-y-costos/indice-de-costos-de-la-construccion-de-edificaciones-icoced' },
+                    { t: 'DANE', l: 'https://www.dane.gov.co/index.php/estadisticas-por-tema/construccion/indice-de-costos-de-la-construccion-de-edificaciones-icoced' },
                     { t: ' / ', n: true },
-                    { t: 'CAMACOL', l: 'https://camacol.co/coordenada-urbana' },
+                    { t: 'IGAC', l: 'https://oic.igac.gov.co/' },
                     { t: ' / ', n: true },
-                    { t: 'MINTRABAJO', l: 'https://www.mintrabajo.gov.co' }
+                    { t: 'CAMACOL', l: 'https://camacol.co/coordenada-urbana' }
                 ];
 
                 parts.forEach(p => {
