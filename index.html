@@ -71,7 +71,7 @@
     <!-- Export Libraries -->
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.5.31/jspdf.plugin.autotable.min.js"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
+    <script src="libs/xlsx.full.min.js"></script>
 
     <!-- FIREBASE SDK (v10 modular via CDN compat) -->
     <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-app-compat.js"></script>
@@ -556,70 +556,25 @@
                 </div>
 
                 <div class="space-y-4" id="sidebar-accordion">
-                    <!-- DIMENSIÓN 1: ENTORNO -->
-                    <div class="accordion-item group active">
-                        <button onclick="toggleAccordion('dimension-entorno')"
-                            class="w-full flex items-center justify-between p-2 rounded-xl hover:bg-white/5 transition-all">
-                            <h3
-                                class="text-xs font-bold text-brand-400 uppercase tracking-[0.2em] flex items-center gap-3">
-                                <i data-lucide="map-pin" class="w-3 h-3"></i> 01. Entorno
-                            </h3>
-                            <i data-lucide="chevron-down"
-                                class="w-3 h-3 text-gray-600 transition-transform duration-300 group-[.active]:rotate-180"></i>
-                        </button>
-                        <div id="dimension-entorno" class="accordion-content space-y-4 mt-2 px-1">
-                            <div class="p-4 rounded-2xl bg-dark-bg/40 border border-dark-border/50 space-y-4">
-                                <div class="relative w-full group">
-                                    <label for="regionSelect"
-                                        class="absolute text-[9px] uppercase font-bold tracking-widest text-gray-500 top-2 z-10 start-3 pointer-events-none group-focus-within:text-brand transition-colors">Ubicación
-                                        Geo-Económica</label>
-                                    <select id="regionSelect" name="regionSelect"
-                                        class="w-full bg-dark-card border border-dark-border rounded-xl px-3 pt-6 pb-2 text-xs text-white outline-none focus:border-brand transition-all appearance-none cursor-pointer">
-                                        <option value="centro">📍 Centro (Eje Andino)</option>
-                                        <option value="norte">🏠 Norte (Occidente / Caribe)</option>
-                                        <option value="sur">🛣️ Sur / Amazonía</option>
-                                        <option value="oriente">🌄 Oriente / Llanos</option>
-                                        <option value="macizo">🌋 Macizo</option>
-                                        <option value="guapi">🌊 Pacífico</option>
-                                    </select>
-                                    <div class="absolute inset-y-0 right-3 flex items-center pointer-events-none">
-                                        <i data-lucide="chevron-down"
-                                            class="w-4 h-4 text-gray-500 group-focus-within:text-brand transition-colors"></i>
-                                    </div>
-                                </div>
-                                <div class="relative w-full group">
-                                    <label for="estratoSelect"
-                                        class="absolute text-[9px] uppercase font-bold tracking-widest text-gray-500 top-2 z-10 start-3 pointer-events-none group-focus-within:text-brand transition-colors">Estrato
-                                        Socioeconómico</label>
-                                    <select id="estratoSelect" name="estratoSelect"
-                                        class="w-full bg-dark-card border border-dark-border rounded-xl px-3 pt-6 pb-2 text-xs text-white outline-none focus:border-brand transition-all appearance-none cursor-pointer">
-                                        <option value="1">Estrato 1</option>
-                                        <option value="2">Estrato 2</option>
-                                        <option value="3" selected>Estrato 3</option>
-                                        <option value="4">Estrato 4</option>
-                                        <option value="5">Estrato 5</option>
-                                        <option value="6">Estrato 6</option>
-                                    </select>
-                                    <div class="absolute inset-y-0 right-3 flex items-center pointer-events-none">
-                                        <i data-lucide="chevron-down"
-                                            class="w-4 h-4 text-gray-500 group-focus-within:text-brand transition-colors"></i>
-                                    </div>
-                                </div>
-                                <div class="pt-2 border-t border-white/5">
-                                    <a href="https://services2.arcgis.com/RVvWzU3lgJISqdke/arcgis/rest/services/Base_Catastral_Publica_IGAC_Septiembre/FeatureServer"
-                                        target="_blank"
-                                        class="flex items-center justify-between p-2 rounded-xl bg-brand/5 border border-brand/20 hover:bg-brand/10 transition-all group">
-                                        <div class="flex items-center gap-3">
-                                            <i data-lucide="map" class="w-3 h-3 text-brand"></i>
-                                            <span
-                                                class="text-xs font-bold text-gray-300 uppercase tracking-wider">Identificar
-                                                Predio IGAC</span>
-                                        </div>
-                                        <i data-lucide="external-link"
-                                            class="w-3 h-3 text-gray-500 group-hover:text-brand transition-colors"></i>
-                                    </a>
-                                </div>
-                            </div>
+                    <!-- DIMENSIÓN 1: ENTORNO (hidden - valores activos ocultos) -->
+                    <div class="hidden" aria-hidden="true">
+                        <div id="dimension-entorno">
+                            <select id="regionSelect" name="regionSelect">
+                                <option value="centro" selected>Centro (Eje Andino)</option>
+                                <option value="norte">Norte (Occidente / Caribe)</option>
+                                <option value="sur">Sur / Amazonía</option>
+                                <option value="oriente">Oriente / Llanos</option>
+                                <option value="macizo">Macizo</option>
+                                <option value="guapi">Pacífico</option>
+                            </select>
+                            <select id="estratoSelect" name="estratoSelect">
+                                <option value="1">Estrato 1</option>
+                                <option value="2">Estrato 2</option>
+                                <option value="3" selected>Estrato 3</option>
+                                <option value="4">Estrato 4</option>
+                                <option value="5">Estrato 5</option>
+                                <option value="6">Estrato 6</option>
+                            </select>
                         </div>
                     </div>
 
@@ -629,7 +584,7 @@
                             class="w-full flex items-center justify-between p-2 rounded-xl hover:bg-white/5 transition-all">
                             <h3
                                 class="text-xs font-bold text-brand-400 uppercase tracking-[0.2em] flex items-center gap-3">
-                                <i data-lucide="box" class="w-3 h-3"></i> 02. Atributos Físicos
+                                <i data-lucide="box" class="w-3 h-3"></i>01. Atributos Físicos
                             </h3>
                             <i data-lucide="chevron-down"
                                 class="w-3 h-3 text-gray-600 transition-transform duration-300 group-[.active]:rotate-180"></i>
@@ -737,86 +692,27 @@
                         </div>
                     </div>
 
-                    <!-- DIMENSIÓN 3: VALORACIÓN -->
-                    <div class="accordion-item group">
-                        <button onclick="toggleAccordion('dimension-valoracion')"
-                            class="w-full flex items-center justify-between p-2 rounded-xl hover:bg-white/5 transition-all">
-                            <h3
-                                class="text-xs font-bold text-brand-400 uppercase tracking-[0.2em] flex items-center gap-3">
-                                <i data-lucide="banknote" class="w-3 h-3"></i> 03. Valoración
-                            </h3>
-                            <i data-lucide="chevron-down"
-                                class="w-3 h-3 text-gray-600 transition-transform duration-300 group-[.active]:rotate-180"></i>
-                        </button>
-                        <div id="dimension-valoracion" class="accordion-content space-y-4 mt-2 px-1">
-                            <div class="p-4 rounded-2xl bg-dark-bg/40 border border-dark-border/50 space-y-4">
-                                <div class="relative w-full group">
-                                    <label for="conservationSelect"
-                                        class="absolute text-[9px] uppercase font-bold tracking-widest text-gray-500 top-2 z-10 start-3 pointer-events-none group-focus-within:text-brand transition-colors">Conservación
-                                        Heidecke</label>
-                                    <select id="conservationSelect" name="conservationSelect"
-                                        class="w-full bg-dark-card border border-dark-border rounded-xl px-3 pt-6 pb-2 text-xs text-white outline-none focus:border-brand transition-all appearance-none cursor-pointer">
-                                        <option value="malo">Malo (Deterioro Extremo)</option>
-                                        <option value="regular">Regular (Reparaciones)</option>
-                                        <option value="bueno" selected>Bueno (Normal)</option>
-                                        <option value="excelente">Excelente (Pintura y Estetica)</option>
-                                    </select>
-                                    <div class="absolute inset-y-0 right-3 flex items-center pointer-events-none">
-                                        <i data-lucide="chevron-down"
-                                            class="w-4 h-4 text-gray-500 group-focus-within:text-brand transition-colors"></i>
-                                    </div>
-                                </div>
-                                <div class="relative w-full group">
-                                    <label for="statusSelect"
-                                        class="absolute text-[9px] uppercase font-bold tracking-widest text-gray-500 top-2 z-10 start-3 pointer-events-none group-focus-within:text-brand transition-colors">Acabados
-                                        / Estado Proyecto</label>
-                                    <select id="statusSelect" name="statusSelect"
-                                        class="w-full bg-dark-card border border-dark-border rounded-xl px-3 pt-6 pb-2 text-xs text-white outline-none focus:border-brand transition-all appearance-none cursor-pointer">
-                                        <option value="malo">Obra Negra / Gris</option>
-                                        <option value="bueno" selected>Terminado (Estándar)</option>
-                                        <option value="excelente">Premium / Lujo</option>
-                                    </select>
-                                    <div class="absolute inset-y-0 right-3 flex items-center pointer-events-none">
-                                        <i data-lucide="chevron-down"
-                                            class="w-4 h-4 text-gray-500 group-focus-within:text-brand transition-colors"></i>
-                                    </div>
-                                </div>
-                                <div class="relative w-full group">
-                                    <label for="marketFactor"
-                                        class="absolute text-[9px] uppercase font-bold tracking-widest text-gray-500 top-2 z-10 start-3 pointer-events-none group-focus-within:text-brand transition-colors">Multiplicador
-                                        Mercado</label>
-                                    <select id="marketFactor" name="marketFactor"
-                                        class="w-full bg-dark-card border border-dark-border rounded-xl px-3 pt-6 pb-2 text-xs text-white outline-none focus:border-brand transition-all appearance-none cursor-pointer">
-                                        <option value="0.9">0.9x - Bajo Interés</option>
-                                        <option value="1.0" selected>1.0x - Neutral</option>
-                                        <option value="1.1">1.1x - Ubicación Plus</option>
-                                    </select>
-                                    <div class="absolute inset-y-0 right-3 flex items-center pointer-events-none">
-                                        <i data-lucide="chevron-down"
-                                            class="w-4 h-4 text-gray-500 group-focus-within:text-brand transition-colors"></i>
-                                    </div>
-                                </div>
-                                <div class="pt-2 border-t border-dark-border/30">
-                                    <div class="grid grid-cols-2 gap-3">
-                                        <div class="relative w-full">
-                                            <input type="number" id="landArea" name="landArea"
-                                                class="peer w-full bg-dark-card border border-dark-border rounded-xl px-3 pt-6 pb-2 text-xs text-white font-mono outline-none focus:border-brand transition-all"
-                                                placeholder=" ">
-                                            <label for="landArea"
-                                                class="absolute text-[10px] uppercase font-bold tracking-wider text-gray-500 duration-300 transform -translate-y-3 scale-75 top-4 z-10 origin-[0] start-3 peer-focus:text-brand peer-placeholder-shown:scale-100 peer-placeholder-shown:translate-y-0 peer-focus:scale-75 peer-focus:-translate-y-3 pointer-events-none">m²
-                                                Lote</label>
-                                        </div>
-                                        <div class="relative w-full">
-                                            <input type="number" id="landPrice" name="landPrice"
-                                                class="peer w-full bg-dark-card border border-dark-border rounded-xl px-3 pt-6 pb-2 text-xs text-white font-mono outline-none focus:border-brand transition-all"
-                                                placeholder=" ">
-                                            <label for="landPrice"
-                                                class="absolute text-[10px] uppercase font-bold tracking-wider text-gray-500 duration-300 transform -translate-y-3 scale-75 top-4 z-10 origin-[0] start-3 peer-focus:text-brand peer-placeholder-shown:scale-100 peer-placeholder-shown:translate-y-0 peer-focus:scale-75 peer-focus:-translate-y-3 pointer-events-none">$
-                                                x m² Lote</label>
-                                        </div>
-                                    </div>
-                                </div>
-                            </div>
+                    <!-- DIMENSIÓN 3: VALORACIÓN (hidden - valores activos ocultos) -->
+                    <div class="hidden" aria-hidden="true">
+                        <div id="dimension-valoracion">
+                            <select id="conservationSelect" name="conservationSelect">
+                                <option value="malo">Malo</option>
+                                <option value="regular">Regular</option>
+                                <option value="bueno" selected>Bueno</option>
+                                <option value="excelente">Excelente</option>
+                            </select>
+                            <select id="statusSelect" name="statusSelect">
+                                <option value="malo">Obra Negra / Gris</option>
+                                <option value="bueno" selected>Terminado (Estándar)</option>
+                                <option value="excelente">Premium / Lujo</option>
+                            </select>
+                            <select id="marketFactor" name="marketFactor">
+                                <option value="0.9">0.9x</option>
+                                <option value="1.0" selected>1.0x</option>
+                                <option value="1.1">1.1x</option>
+                            </select>
+                            <input type="number" id="landArea" name="landArea" value="0">
+                            <input type="number" id="landPrice" name="landPrice" value="0">
                         </div>
                     </div>
                 </div>
@@ -835,7 +731,7 @@
                 </nav>
 
                 <!-- Chapters Navigation -->
-                <div class="space-y-1">
+                <div class="space-y-1 hidden">
                     <h3 class="text-xs font-bold text-gray-500 uppercase tracking-widest mb-3 flex items-center gap-3">
                         <i data-lucide="library" class="w-3 h-3"></i> Capítulos APU
                     </h3>
@@ -1931,7 +1827,7 @@
     <!-- PDF & Excel Libraries -->
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.5.31/jspdf.plugin.autotable.min.js"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
+    <script src="libs/xlsx.full.min.js"></script>
 
     <!-- MAIN SCRIPTS -->
     <script src="fuentes-oficiales.js"></script>
@@ -2397,7 +2293,7 @@
                 </div>
 
                 <div class="mt-8 space-y-3">
-                    <button
+                    <button onclick="openAccountSettings()"
                         class="w-full h-14 rounded-2xl bg-white/5 border border-white/10 flex items-center px-6 gap-4 hover:bg-white/10 transition-all group">
                         <i data-lucide="settings"
                             class="w-5 h-5 text-gray-500 group-hover:text-brand transition-colors"></i>
@@ -2424,6 +2320,104 @@
                 <p class="mt-8 text-xs text-gray-700 font-extrabold uppercase tracking-[0.4em]">
                     ID SESIÓN: DX-2026-ALPHA-8842
                 </p>
+            </div>
+        </div>
+    </div>
+    <!-- ACCOUNT SETTINGS MODAL (v5.0 Enterprise) -->
+    <div id="settingsModal"
+        class="fixed inset-0 z-[700] flex items-center justify-center bg-black/95 backdrop-blur-3xl opacity-0 pointer-events-none transition-all duration-500">
+        <div class="bg-[#0b0e14] border border-white/10 rounded-[3rem] shadow-[0_60px_150px_rgba(0,0,0,0.95)] max-w-2xl w-full transform scale-95 transition-all duration-500 overflow-hidden"
+            id="settingsModalContent">
+
+            <div class="p-8 border-b border-white/5 flex items-center justify-between bg-white/[0.02]">
+                <div class="flex items-center gap-4">
+                    <div class="p-3 rounded-2xl bg-brand/10 border border-brand/20">
+                        <i data-lucide="sliders" class="w-6 h-6 text-brand"></i>
+                    </div>
+                    <div>
+                        <h3 class="text-xl font-bold text-white uppercase tracking-tight">Configuración del Nodo</h3>
+                        <p class="text-xs text-gray-500 font-bold uppercase tracking-widest mt-0.5">Gestión de Perfil y
+                            Sistema Observability</p>
+                    </div>
+                </div>
+                <button onclick="closeSettingsModal()"
+                    class="p-3 rounded-full hover:bg-white/5 text-gray-400 transition-all">
+                    <i data-lucide="x" class="w-5 h-5"></i>
+                </button>
+            </div>
+
+            <div class="p-10 space-y-8 overflow-y-auto max-h-[70vh] custom-scroll">
+                <!-- Section: User Profile -->
+                <div class="space-y-4">
+                    <h4 class="text-xs font-bold text-brand uppercase tracking-[0.3em] flex items-center gap-2">
+                        <i data-lucide="user" class="w-3 h-3"></i> Perfil de Usuario
+                    </h4>
+                    <div class="grid grid-cols-2 gap-4">
+                        <div class="relative w-full group">
+                            <label for="settingsUserName"
+                                class="absolute text-[9px] uppercase font-bold tracking-widest text-gray-500 top-2 z-10 start-3 pointer-events-none group-focus-within:text-brand transition-colors">Nombre
+                                de Operador</label>
+                            <input type="text" id="settingsUserName"
+                                class="w-full bg-white/[0.03] border border-white/10 rounded-xl px-3 pt-6 pb-2 text-xs text-white outline-none focus:border-brand/50 transition-all"
+                                value="Albert Daniel G.">
+                        </div>
+                        <div class="relative w-full group">
+                            <label for="settingsUserEmail"
+                                class="absolute text-[9px] uppercase font-bold tracking-widest text-gray-500 top-2 z-10 start-3 pointer-events-none group-focus-within:text-brand transition-colors">Email
+                                de Enlace</label>
+                            <input type="email" id="settingsUserEmail"
+                                class="w-full bg-white/[0.03] border border-white/10 rounded-xl px-3 pt-6 pb-2 text-xs text-white outline-none focus:border-brand/50 transition-all"
+                                value="agaviria@igga.com.co" readonly>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Section: Node Monitor -->
+                <div class="space-y-4">
+                    <h4 class="text-xs font-bold text-purple-400 uppercase tracking-[0.3em] flex items-center gap-2">
+                        <i data-lucide="activity" class="w-3 h-3"></i> Monitoreo y Observabilidad
+                    </h4>
+                    <div class="relative w-full group">
+                        <label for="settingsSentryDsn"
+                            class="absolute text-[9px] uppercase font-bold tracking-widest text-gray-500 top-2 z-10 start-3 pointer-events-none group-focus-within:text-brand transition-colors">Sentry
+                            DSN (Observability Endpoint)</label>
+                        <input type="text" id="settingsSentryDsn" placeholder="https://xxx@sentry.io/xxx"
+                            class="w-full bg-white/[0.03] border border-white/10 rounded-xl px-3 pt-6 pb-2 text-xs text-white outline-none focus:border-brand/50 transition-all font-mono">
+                    </div>
+                    <p class="text-[10px] text-gray-600 italic">Captura errores y métricas de rendimiento en tiempo real
+                        para este nodo.</p>
+                </div>
+
+                <!-- Section: Preferences -->
+                <div class="space-y-4">
+                    <h4 class="text-xs font-bold text-emerald-400 uppercase tracking-[0.3em] flex items-center gap-2">
+                        <i data-lucide="shield-check" class="w-3 h-3"></i> Seguridad y Nodo
+                    </h4>
+                    <div class="grid grid-cols-2 gap-4">
+                        <div
+                            class="p-4 rounded-2xl bg-white/[0.02] border border-white/5 flex items-center justify-between">
+                            <span class="text-xs font-bold text-gray-400 uppercase">Modo Depuración</span>
+                            <div class="w-10 h-5 bg-white/10 rounded-full relative cursor-pointer">
+                                <div class="absolute top-1 left-1 w-3 h-3 bg-gray-600 rounded-full"></div>
+                            </div>
+                        </div>
+                        <div
+                            class="p-4 rounded-2xl bg-white/[0.02] border border-white/5 flex items-center justify-between">
+                            <span class="text-xs font-bold text-gray-400 uppercase">Cache SIG Activo</span>
+                            <div class="w-10 h-5 bg-brand/30 rounded-full relative cursor-pointer">
+                                <div class="absolute top-1 right-1 w-3 h-3 bg-brand rounded-full"></div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="p-8 bg-black/40 border-t border-white/5 flex gap-4">
+                <button onclick="saveNodeSettings()"
+                    class="flex-1 h-12 rounded-2xl bg-brand text-white font-bold text-xs uppercase tracking-widest hover:shadow-[0_0_30px_rgba(59,96,255,0.4)] transition-all">Guardar
+                    Cambios</button>
+                <button onclick="closeSettingsModal()"
+                    class="px-8 h-12 rounded-2xl border border-white/10 text-gray-400 font-bold text-xs uppercase tracking-widest hover:bg-white/5 transition-all">Cancelar</button>
             </div>
         </div>
     </div>

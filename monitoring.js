@@ -4,8 +4,10 @@
  */
 
 (function () {
-    // SENTRY_DSN: Reemplazar con el DSN real de tu proyecto en Sentry.io
-    const SENTRY_DSN = "";
+    // SENTRY_DSN: Se prioriza el valor guardado en localStorage (configuración por UI)
+    const STORAGE_KEY = 'construmetrix_node_config';
+    const config = JSON.parse(localStorage.getItem(STORAGE_KEY) || '{}');
+    const SENTRY_DSN = config.sentryDsn || "";
 
     if (SENTRY_DSN) {
         // Inicialización del SDK si ya está cargado por el script tag

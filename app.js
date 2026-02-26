@@ -69,9 +69,9 @@ document.addEventListener('DOMContentLoaded', async () => {
             RESIDENTIAL: {
                 "CASA_SOCIAL": { name: "Casa Interés Social", min: 1800000, max: 2200000, specs: "Acabados básicos, materiales económicos" },
                 "CASA_MEDIA": { name: "Casa Media", min: 2500000, max: 3500000, specs: "Acabados estándar, calidad media" },
-                "CASA_ALTA": { name: "Casa Alta Gama", min: 4500000, max: 7000000, specs: "Acabados premium, importados" },
-                "APTO_ESTANDAR": { name: "Apartamento Estándar", min: 2200000, max: 3000000, specs: "Torre, zonas comunes básicas" },
-                "EDIFICIO_COMERCIAL": { name: "Edificio Comercial", min: 3000000, max: 5000000, specs: "Áreas abiertas, sistemas técnicos" }
+                "CASA_ALTA": { name: "Casa Alta Gama", min: 4500000, max: 7000000, specs: "Acabados premium, alta gama" },
+                "APTO_ESTANDAR": { name: "Apartamento Estándar", min: 2200000, max: 3000000, specs: "Torre, zonas comunes" },
+                "EDIFICIO_COMERCIAL": { name: "Edificio Comercial", min: 3000000, max: 5000000, specs: "Locales, oficinas, comercial" }
             },
             CATEGORIES: {
                 BASIC: { min: 1800000, max: 2200000 },
@@ -688,7 +688,7 @@ document.addEventListener('DOMContentLoaded', async () => {
                 opt.textContent = `⚡ MODELO: ${bp.name}`;
                 opt.className = "text-brand-400 font-bold bg-dark-bg";
                 // Standard logic for groups
-                if (id === '01' || id === '56' || id === '35') cvGroup.appendChild(opt);
+                if (id.startsWith('01') || id === '35') cvGroup.appendChild(opt);
                 else ncGroup.appendChild(opt);
             });
         }
@@ -1003,7 +1003,8 @@ document.addEventListener('DOMContentLoaded', async () => {
             land: landValue,
             market: grandAppraisalValue,
             depFactor: totalDepreciationFactor,
-            sqm: sqmCost
+            sqm: sqmCost,
+            chapterCosts: chapterCosts
         };
 
         // 9. Save
@@ -1452,10 +1453,10 @@ document.addEventListener('DOMContentLoaded', async () => {
         const expertField = (y, label, val) => {
             // Analytical Indicator Dot
             doc.setFillColor(...brand.gold);
-            doc.circle(18.5, y - 1, 0.6, 'F');
+            doc.circle(18.5, y - 1, 0.8, 'F');
 
             doc.setFont("helvetica", "bold");
-            doc.setFontSize(6);
+            doc.setFontSize(6.5);
             doc.setTextColor(...brand.slate);
             doc.text(label.toUpperCase(), 21, y);
 
@@ -1480,14 +1481,59 @@ document.addEventListener('DOMContentLoaded', async () => {
         expertField(133, "Línea / Torre", meta.tower);
         expertField(146, "Atributos Base", `ÁREA: ${meta.area}M² | ALTURA: ${meta.height}M`);
         expertField(159, "Edad y Vida Útil", `${meta.age}A / ${meta.usefulLife}A (V)`);
-        expertField(172, "Metodología", "IVS STANDARD 2026");
+        expertField(172, "Modelo Referencia", meta.modelName || 'VIVIENDA URBANA');
+        expertField(185, "Metodología", "IVS STANDARD 2026");
+
+        // --- ICONOGRAPHY: PROPERTY TYPE RECOGNITION ---
+        const drawIcon = (x, y) => {
+            doc.setDrawColor(...brand.gold);
+            doc.setLineWidth(0.5);
+            doc.rect(x, y, 12, 12, 'S');
+            doc.setFillColor(...brand.gold);
+            // Dynamic icon based on BP
+            const bp = meta.usefulLife > 60 ? 'INSTITUTIONAL' : 'RESIDENTIAL';
+            doc.setFontSize(5);
+            doc.text(bp, x + 1, y + 15);
+        };
+        drawIcon(pageW - 27, 48);
 
         // --- II. FINANCIAL CONSOLIDATION (SUPREME LEDGER STYLE) ---
         const mainX = 78;
+        
+        // --- PRE-SUMMARY: MODEL IDENTITY ---
+        doc.setFontSize(8);
+        doc.setFont("helvetica", "bold");
+        doc.setTextColor(...brand.expert);
+        doc.text("III. IDENTIDAD Y ESPECIFICACIÓN TÉCNICA", mainX, 48);
+
+        doc.setFontSize(14);
+        doc.setTextColor(...brand.navy);
+        doc.text((meta.modelName || "Modelo No Especificado").toUpperCase(), mainX, 55);
+
+        doc.setFontSize(7.5);
+        doc.setFont("helvetica", "normal");
+        doc.setTextColor(...brand.slate);
+        const modelInfo = (meta.modelDesc || "Análisis basado en tipología constructiva estándar regional.") + " " + (meta.modelSpecs || "");
+        const splitInfo = doc.splitTextToSize(modelInfo, pageW - mainX - 15);
+        doc.text(splitInfo, mainX, 60);
+
         doc.setFontSize(10);
         doc.setFont("helvetica", "bold");
         doc.setTextColor(...brand.navy);
-        doc.text("II. CONSOLIDACIÓN DE VALOR Y DEPRECIACIÓN", mainX, 61);
+        doc.text("IV. CONSOLIDACIÓN DE VALOR Y DEPRECIACIÓN", mainX, 74); // Moved down
+
+        // Visual Gauge: Confidence Level
+        const drawGauge = (x, y, pct) => {
+            doc.setDrawColor(220, 220, 220);
+            doc.setLineWidth(2);
+            doc.line(x, y, x + 40, y);
+            doc.setDrawColor(...brand.expert);
+            doc.line(x, y, x + (40 * pct), y);
+            doc.setFontSize(5);
+            doc.setTextColor(...brand.slate);
+            doc.text("ÍNDICE DE CONFIANZA TÉCNICA", x, y + 4);
+        };
+        drawGauge(mainX + 70, 74, 0.92);
 
         const summaryRows = [
             ["Costo Directo Base 2026", format(s.direct)],
@@ -1499,7 +1545,7 @@ document.addEventListener('DOMContentLoaded', async () => {
         ];
 
         doc.autoTable({
-            startY: 68,
+            startY: 81,
             margin: { left: mainX, right: 15 },
             body: summaryRows,
             theme: 'plain',
@@ -1562,11 +1608,38 @@ document.addEventListener('DOMContentLoaded', async () => {
         doc.setTextColor(...brand.gold);
         doc.text(`ZONA PLUS: ${format(highR)}`, mainX + 87, rangeY + 7.5);
 
+        // --- V. ANALÍTICA DE INVERSIÓN (TOP CHAPTERS) ---
+        const analyticsY = finalY + 54;
+        doc.setFontSize(8);
+        doc.setFont("helvetica", "bold");
+        doc.setTextColor(...brand.expert);
+        doc.text("V. ANALÍTICA DE DISTRIBUCIÓN POR CAPÍTULO", mainX, analyticsY);
+
+        const sortedChapters = Object.entries(STATE.summary.chapterCosts || {})
+            .sort((a, b) => b[1] - a[1])
+            .slice(0, 4);
+
+        let curAnY = analyticsY + 8;
+        sortedChapters.forEach(([name, cost]) => {
+            doc.setFontSize(6.5);
+            doc.setFont("helvetica", "normal");
+            doc.setTextColor(...brand.slate);
+            doc.text(name.toUpperCase(), mainX, curAnY);
+            
+            const pct = (cost / s.direct) * 100;
+            doc.setFont("helvetica", "bold");
+            doc.text(`${format(cost)} (${pct.toFixed(1)}%)`, pageW - 15, curAnY, { align: 'right' });
+            
+            doc.setDrawColor(241, 245, 249);
+            doc.line(mainX, curAnY + 2, pageW - 15, curAnY + 2);
+            curAnY += 6;
+        });
+
         // Quality Statement (Bottom)
-        doc.setFontSize(6.5);
+        doc.setFontSize(6);
         doc.setTextColor(...brand.slate);
-        const businessStatement = "NOTA DE INTEGRIDAD: Este informe constituye una certificación de valor comercial Business Plus, generada bajos los más altos estándares de auditoría financiera. Los cálculos integran modelos de depreciación Ross-Heidecke v2026 y proyecciones de mercado regionalizado. Este documento no requiere firma autógrafa al ser un activo digital validado por el protocolo de seguridad Master ID.";
-        doc.text(doc.splitTextToSize(businessStatement, pageW - 40), 20, 260);
+        const businessStatement = "NOTA DE INTEGRIDAD: Este informe constituye una certificación de valor comercial Business Plus v2026, generada bajos los más altos estándares de auditoría financiera. Los cálculos integran modelos de depreciación Ross-Heidecke y proyecciones de mercado regionalizado. Este documento es un activo digital validado por el protocolo de seguridad Master ID de ConstruMetrix.";
+        doc.text(doc.splitTextToSize(businessStatement, pageW - 40), 20, pageH - 30);
 
         /** PAGE 2+: TECHNICAL APU ANNEX **/
         doc.addPage();
@@ -1788,6 +1861,9 @@ document.addEventListener('DOMContentLoaded', async () => {
 
     function loadBlueprint(bp) {
         STATE.budget = [];
+        STATE.meta.modelName = bp.name;
+        STATE.meta.modelDesc = bp.description || '';
+        STATE.meta.modelSpecs = bp.specs || '';
         Object.entries(bp.chapters).forEach(([name, items]) => {
             items.forEach(it => {
                 const db = allItems.find(x => x.codigo === it.codigo);
@@ -1909,6 +1985,11 @@ document.addEventListener('DOMContentLoaded', async () => {
         const content = document.getElementById('userModalContent');
         if (!m || !content) return;
 
+        // Sync visual name from config
+        const config = JSON.parse(localStorage.getItem('construmetrix_node_config') || '{}');
+        const nameDisplay = document.querySelector('#userModal h3');
+        if (nameDisplay) nameDisplay.textContent = config.userName || 'Albert Daniel G.';
+
         m.style.opacity = '1';
         m.style.pointerEvents = 'auto';
         content.style.transform = 'scale(1)';
@@ -1921,6 +2002,63 @@ document.addEventListener('DOMContentLoaded', async () => {
         if (m) m.style.opacity = '0';
         if (m) m.style.pointerEvents = 'none';
         if (content) content.style.transform = 'scale(0.95)';
+    };
+
+    /** SETTINGS MODAL CONTROLS **/
+    window.openAccountSettings = () => {
+        console.log("🛠️ [USER-PREFS] Opening Account Settings Node...");
+        const m = document.getElementById('settingsModal');
+        const content = document.getElementById('settingsModalContent');
+        if (!m || !content) return;
+
+        // Sync values from local/state before opening
+        const config = JSON.parse(localStorage.getItem('construmetrix_node_config') || '{}');
+        if (document.getElementById('settingsUserName')) document.getElementById('settingsUserName').value = config.userName || 'Albert Daniel G.';
+        if (document.getElementById('settingsSentryDsn')) document.getElementById('settingsSentryDsn').value = config.sentryDsn || '';
+
+        // Close user modal first for smooth transition
+        window.closeUserModal();
+
+        setTimeout(() => {
+            m.style.opacity = '1';
+            m.style.pointerEvents = 'auto';
+            content.style.transform = 'scale(1)';
+            lucide.createIcons();
+            showToast("Panel de Configuración de Nodo Activo", "info");
+        }, 300);
+    };
+
+    window.closeSettingsModal = () => {
+        const m = document.getElementById('settingsModal');
+        const content = document.getElementById('settingsModalContent');
+        if (m) m.style.opacity = '0';
+        if (m) m.style.pointerEvents = 'none';
+        if (content) content.style.transform = 'scale(0.95)';
+    };
+
+    window.saveNodeSettings = () => {
+        const name = document.getElementById('settingsUserName').value;
+        const dsn = document.getElementById('settingsSentryDsn').value;
+
+        const config = {
+            userName: name,
+            sentryDsn: dsn,
+            lastUpdate: new Date().toISOString()
+        };
+
+        localStorage.setItem('construmetrix_node_config', JSON.stringify(config));
+
+        showToast("Configuración del Nodo Actualizada", "success");
+        console.log("✅ [NODE-SAVE] Settings persisted locally.");
+
+        // Optionally reload or apply changes immediately
+        setTimeout(() => {
+            if (confirm("Se requiere reiniciar el núcleo para aplicar cambios de monitoreo. ¿Reiniciar ahora?")) {
+                window.location.reload();
+            } else {
+                window.closeSettingsModal();
+            }
+        }, 500);
     };
 
     function renderSources(filter = '') {
