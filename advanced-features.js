@@ -25,154 +25,118 @@ function exportToExcel() {
 
     try {
         const workbook = XLSX.utils.book_new();
-
-        // SHEET 1: Presupuesto Detallado
-        const budgetData = [];
-
-        // Header
-        budgetData.push([
-            'CONSTRUMETRIX - PRESUPUESTO DETALLADO',
-            '',
-            '',
-            '',
-            '',
-            `Fecha: ${new Date().toLocaleDateString()}`
-        ]);
-        budgetData.push([]);
-
-        // Metadata
-        budgetData.push(['Región:', window.STATE.meta.region]);
-        budgetData.push(['Área (m²):', window.STATE.meta.area]);
-        budgetData.push(['Estrato:', window.STATE.meta.estrato]);
-        budgetData.push(['Calidad:', window.STATE.meta.qualityMultiplier]);
-        budgetData.push([]);
-
-        // Table headers
-        budgetData.push([
-            'CÓDIGO',
-            'DESCRIPCIÓN',
-            'UNIDAD',
-            'CANTIDAD',
-            'PRECIO UNIT.',
-            'TOTAL'
-        ]);
-
-        // Budget items
+        const s = window.STATE;
+        const meta = s.meta;
         const format = window.APP_UTILS ? window.APP_UTILS.format : (n) => `$${n.toLocaleString()}`;
 
-        window.STATE.budget.forEach(item => {
-            const originalPrice = item.precios[window.STATE.meta.region] || 0;
-            const basePrice = window.STATE.editedPrices && window.STATE.editedPrices[item.codigo] !== undefined
-                ? window.STATE.editedPrices[item.codigo]
+        // SHEET 0: CARÁTULA DEL PROYECTO (Cover Sheet)
+        const coverData = [
+            ['CONSTRUMETRIX ENTERPRISE v2026', '', '', '', 'AUDITORÍA TÉCNICA NIVEL 1'],
+            ['REPORTE MAESTRO DE VALORACIÓN COMERCIAL', '', '', 'REPORT ID:', `CTX-XLS-${Date.now().toString().slice(-6)}`],
+            ['ESTÁNDAR DE INGENIERÍA IVS + IGAC + DANE', '', '', 'FECHA EXP:', new Date().toLocaleDateString()],
+            [],
+            ['1. IDENTIFICACIÓN DEL SUJETO'],
+            ['MODELO DE REFERENCIA:', (meta.modelName || 'VIVIENDA URBANA').toUpperCase()],
+            ['DESCRIPCIÓN:', meta.modelDesc || 'N/D'],
+            ['ESPECIFICACIONES:', meta.modelSpecs || 'N/D'],
+            [],
+            ['2. LOCALIZACIÓN Y PROPIEDAD'],
+            ['PROPIETARIO:', meta.owner || 'N/D'],
+            ['CÉDULA CATASTRAL:', meta.cedula || 'N/D'],
+            ['MATRÍCULA INMOBILIARIA:', meta.matricula || 'N/D'],
+            ['CIUDAD / MUNICIPIO:', meta.city || 'N/D'],
+            ['DEPARTAMENTO:', meta.dept || 'N/D'],
+            ['REFERENCIA INTERNA:', `${meta.aviso || 'N/D'} / ${meta.tower || 'N/D'}`],
+            [],
+            ['3. ATRIBUTOS FÍSICOS'],
+            ['ÁREA CONSTRUIDA:', `${meta.area} m²`],
+            ['ALTURA ENTREPISO:', `${meta.height} m`],
+            ['EDAD CRONOLÓGICA:', `${meta.age} años`],
+            ['VIDA ÚTIL REMANENTE:', `${meta.usefulLife - (meta.age || 0)} años`],
+            ['ESTADO DE CONSERVACIÓN:', meta.conservation.toUpperCase()],
+            ['NIVEL DE ACABADOS:', (meta.qualityMultiplier * 100).toFixed(0) + '%'],
+            [],
+            ['4. CONSOLIDACIÓN FINANCIERA (VALORES EN COP)'],
+            ['CATEGORÍA DE COSTO', 'VALOR BASE', 'INDICADOR'],
+            ['COSTO DIRECTO DE OBRA:', s.summary.direct, '100%'],
+            ['COSTOS INDIRECTOS (AIU):', s.summary.aiu, ((s.summary.aiu / s.summary.direct) * 100).toFixed(1) + '%'],
+            ['VALOR REPOSICIÓN NUEVO (CRN):', s.summary.crn, ''],
+            ['DEPRECIACIÓN FÍSICA ACUMULADA:', (s.summary.crn - s.summary.depreciated), ((((s.summary.crn - s.summary.depreciated) / s.summary.crn)) * 100).toFixed(1) + '%'],
+            ['VALOR CONSTRUCCIÓN ACTUAL:', s.summary.depreciated, 'Neto'],
+            ['VALOR SUELO / LOTE:', s.summary.land, 'Mercado'],
+            ['BASE COMERCIAL ESTIMADA:', s.summary.market / (meta.marketMultiplier || 1), '1.0x'],
+            ['FACTOR DE COMERCIALIZACIÓN:', meta.marketMultiplier || 1.0, `${((meta.marketMultiplier - 1) * 100).toFixed(1)}%`],
+            [],
+            ['VALOR FINAL DE MERCADO:', s.summary.market, 'CERTIFICADO'],
+            ['COSTO UNITARIO POR M²:', s.summary.market / (meta.area || 1), '/m²']
+        ];
+
+        const wsCover = XLSX.utils.aoa_to_sheet(coverData);
+        wsCover['!cols'] = [{ width: 35 }, { width: 30 }, { width: 10 }, { width: 15 }, { width: 20 }];
+
+        // Basic Formatting (using internal structure if possible, but keeping it simple)
+        XLSX.utils.book_append_sheet(workbook, wsCover, 'Caratula');
+
+        // SHEET 1: PRESUPUESTO DETALLADO (APU)
+        const budgetData = [
+            ['ANEXO TÉCNICO: DESGLOSE DE ACTIVIDADES Y PRECIOS UNITARIOS'],
+            ['CÓDIGO', 'ACTIVIDAD / ESPECIFICACIÓN', 'UNIDAD', 'CANTIDAD', 'V. UNITARIO', 'V. SUBTOTAL']
+        ];
+
+        s.budget.forEach(item => {
+            const originalPrice = item.precios[meta.region] || 0;
+            const basePrice = s.editedPrices && s.editedPrices[item.codigo] !== undefined
+                ? s.editedPrices[item.codigo]
                 : originalPrice;
 
-            // Apply Expert Multipliers (Consistency with app.js)
-            const stateMult = (window.APP_UTILS && window.APP_UTILS.factors.state[window.STATE.meta.projectState]) || 1.0;
-            const qualityMult = window.STATE.meta.qualityMultiplier || 1.0;
+            const stateMult = (window.APP_UTILS && window.APP_UTILS.factors.state[meta.projectState]) || 1.0;
+            const qualityMult = meta.qualityMultiplier || 1.0;
             const price = basePrice * stateMult * qualityMult;
 
             let qty = item.quantity;
-            if (item.calcMode === 'volume') qty *= window.STATE.meta.area * window.STATE.meta.height;
-            else if (item.calcMode === 'area') qty *= window.STATE.meta.area;
-
-            const total = price * qty;
+            if (item.calcMode === 'volume') qty *= meta.area * meta.height;
+            else if (item.calcMode === 'area') qty *= meta.area;
 
             budgetData.push([
                 item.codigo,
-                item.nombre,
+                item.nombre.toUpperCase(),
                 item.unidad,
-                qty.toFixed(2),
+                qty,
                 price,
-                total
+                price * qty
             ]);
         });
 
-        budgetData.push([]);
+        const wsBudget = XLSX.utils.aoa_to_sheet(budgetData);
+        wsBudget['!cols'] = [{ width: 12 }, { width: 60 }, { width: 10 }, { width: 12 }, { width: 18 }, { width: 22 }];
 
-        // Summary
-        if (window.STATE.summary) {
-            budgetData.push(['RESUMEN FINANCIERO']);
-            budgetData.push(['Costos Directos:', '', '', '', '', window.STATE.summary.direct]);
-            budgetData.push(['AIU (A+I+U):', '', '', '', '', window.STATE.summary.aiu]);
-            budgetData.push(['CRN (Reposición Nuevo):', '', '', '', '', window.STATE.summary.crn]);
-            budgetData.push(['Depreciación:', '', '', '', '', window.STATE.summary.depreciated]);
-            budgetData.push(['Valor del Terreno:', '', '', '', '', window.STATE.summary.land]);
-            budgetData.push(['AVALÚO COMERCIAL:', '', '', '', '', window.STATE.summary.market]);
-        }
+        // Merge the title row
+        wsBudget['!merges'] = [{ s: { r: 0, c: 0 }, e: { r: 0, c: 5 } }];
 
-        const ws1 = XLSX.utils.aoa_to_sheet(budgetData);
+        XLSX.utils.book_append_sheet(workbook, wsBudget, 'Presupuesto Detallado');
 
-        // Column widths
-        ws1['!cols'] = [
-            { width: 12 },
-            { width: 50 },
-            { width: 10 },
-            { width: 12 },
-            { width: 15 },
-            { width: 15 }
-        ];
-
-        XLSX.utils.book_append_sheet(workbook, ws1, 'Presupuesto');
-
-        // SHEET 2: Análisis por Capítulos
-        const chapterData = [['CAPÍTULO', 'INVERSIÓN']];
-
-        const chapterTotals = {};
-        window.STATE.budget.forEach(item => {
-            const ch = item.chapter || 'General';
-            if (!chapterTotals[ch]) chapterTotals[ch] = 0;
-
-            const originalPrice = item.precios[window.STATE.meta.region] || 0;
-            const basePrice = window.STATE.editedPrices && window.STATE.editedPrices[item.codigo] !== undefined
-                ? window.STATE.editedPrices[item.codigo]
-                : originalPrice;
-
-            // Apply Expert Multipliers
-            const stateMult = (window.APP_UTILS && window.APP_UTILS.factors.state[window.STATE.meta.projectState]) || 1.0;
-            const qualityMult = window.STATE.meta.qualityMultiplier || 1.0;
-            const price = basePrice * stateMult * qualityMult;
-
-            let qty = item.quantity;
-            if (item.calcMode === 'volume') qty *= window.STATE.meta.area * window.STATE.meta.height;
-            else if (item.calcMode === 'area') qty *= window.STATE.meta.area;
-
-            chapterTotals[ch] += price * qty;
-        });
-
-        Object.entries(chapterTotals).forEach(([ch, total]) => {
-            chapterData.push([ch, total]);
-        });
-
-        const ws2 = XLSX.utils.aoa_to_sheet(chapterData);
-        ws2['!cols'] = [{ width: 30 }, { width: 15 }];
-        XLSX.utils.book_append_sheet(workbook, ws2, 'Por Capítulos');
-
-        // SHEET 3: Fuentes Oficiales (NEW)
-        const sourceData = [['ENTIDAD', 'RECURSO', 'ENLACE / DOCUMENTO', 'USO METODOLÓGICO']];
+        // SHEET 2: TRAZABILIDAD Y LEGALIDAD
+        const sourceData = [['ENTIDAD REGULADORA', 'RECURSO TÉCNICO', 'ENLACE OFICIAL', 'USO EN EL MODELO']];
         const sources = window.FUENTES_OFICIALES;
-        Object.keys(sources).forEach(key => {
-            if (key === 'metadata') return;
-            const source = sources[key];
-            Object.keys(source.recursos).forEach(rKey => {
-                const res = source.recursos[rKey];
-                sourceData.push([
-                    source.nombre,
-                    res.titulo,
-                    res.url,
-                    res.uso
-                ]);
+        if (sources) {
+            Object.keys(sources).forEach(key => {
+                if (key === 'metadata') return;
+                const src = sources[key];
+                Object.keys(src.recursos).forEach(rKey => {
+                    const res = src.recursos[rKey];
+                    sourceData.push([src.nombre, res.titulo, res.url, res.uso]);
+                });
             });
-        });
-
-        const ws3 = XLSX.utils.aoa_to_sheet(sourceData);
-        ws3['!cols'] = [{ width: 40 }, { width: 40 }, { width: 60 }, { width: 50 }];
-        XLSX.utils.book_append_sheet(workbook, ws3, 'Fuentes y Legalidad');
+        }
+        const wsSources = XLSX.utils.aoa_to_sheet(sourceData);
+        wsSources['!cols'] = [{ width: 25 }, { width: 35 }, { width: 50 }, { width: 50 }];
+        XLSX.utils.book_append_sheet(workbook, wsSources, 'Marco Legal');
 
         // Export
-        const fileName = `CONSTRUMETRIX_Presupuesto_${new Date().getTime()}.xlsx`;
+        const fileName = `MASTER_REPORT_${meta.aviso || 'UNNAMED'}_${Date.now()}.xlsx`;
         XLSX.writeFile(workbook, fileName);
 
-        showToast('✅ Excel exportado exitosamente', 'success');
+        showToast('💎 Excel Enterprise Generado con Éxito', 'success');
     } catch (error) {
         console.error('Error al exportar Excel:', error);
         showToast('Error al exportar a Excel', 'error');

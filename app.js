@@ -69,9 +69,9 @@ document.addEventListener('DOMContentLoaded', async () => {
             RESIDENTIAL: {
                 "CASA_SOCIAL": { name: "Casa Interés Social", min: 1800000, max: 2200000, specs: "Acabados básicos, materiales económicos" },
                 "CASA_MEDIA": { name: "Casa Media", min: 2500000, max: 3500000, specs: "Acabados estándar, calidad media" },
-                "CASA_ALTA": { name: "Casa Alta Gama", min: 4500000, max: 7000000, specs: "Acabados premium, importados" },
-                "APTO_ESTANDAR": { name: "Apartamento Estándar", min: 2200000, max: 3000000, specs: "Torre, zonas comunes básicas" },
-                "EDIFICIO_COMERCIAL": { name: "Edificio Comercial", min: 3000000, max: 5000000, specs: "Áreas abiertas, sistemas técnicos" }
+                "CASA_ALTA": { name: "Casa Alta Gama", min: 4500000, max: 7000000, specs: "Acabados premium, alta gama" },
+                "APTO_ESTANDAR": { name: "Apartamento Estándar", min: 2200000, max: 3000000, specs: "Torre, zonas comunes" },
+                "EDIFICIO_COMERCIAL": { name: "Edificio Comercial", min: 3000000, max: 5000000, specs: "Locales, oficinas, comercial" }
             },
             CATEGORIES: {
                 BASIC: { min: 1800000, max: 2200000 },
@@ -482,20 +482,20 @@ document.addEventListener('DOMContentLoaded', async () => {
 
         if (r === 'ingeniero') {
             msg = "⚙️ Perfil de Ingeniería: Enfoque en CRN y Depreciación Técnica.";
-            if (brandSpan) brandSpan.insertAdjacentHTML('afterend', '<span class="role-specific-badge text-[7px] bg-blue-500/20 text-blue-400 px-1.5 py-0.5 rounded ml-2 font-black uppercase">ING</span>');
+            if (brandSpan) brandSpan.insertAdjacentHTML('afterend', '<span class="role-specific-badge text-xs bg-blue-500/20 text-blue-400 px-1.5 py-0.5 rounded ml-2 font-bold uppercase">ING</span>');
             // Prioritize Analysis Tab & Insights
             if (UI.tabAnalysis) UI.tabAnalysis.click();
             if (UI.intelPanel) UI.intelPanel.classList.remove('opacity-50');
         } else if (r === 'arquitecto') {
             msg = "🎨 Perfil de Arquitectura: Enfoque en Acabados y Diseño.";
-            if (brandSpan) brandSpan.insertAdjacentHTML('afterend', '<span class="role-specific-badge text-[7px] bg-purple-500/20 text-purple-400 px-1.5 py-0.5 rounded ml-2 font-black uppercase">ARQ</span>');
+            if (brandSpan) brandSpan.insertAdjacentHTML('afterend', '<span class="role-specific-badge text-xs bg-purple-500/20 text-purple-400 px-1.5 py-0.5 rounded ml-2 font-bold uppercase">ARQ</span>');
             // Highlight quality controls
             const qContainer = document.querySelector('#qualitySlider')?.parentElement;
             if (qContainer) qContainer.classList.add('ring-1', 'ring-brand/30', 'p-2', 'rounded-xl', 'bg-brand/5');
         } else if (r === 'inversionista' || r === 'tasador') {
             msg = "📈 Perfil de Inversión: Enfoque en Valor de Mercado y ROI.";
             const color = r === 'tasador' ? 'amber' : 'emerald';
-            if (brandSpan) brandSpan.insertAdjacentHTML('afterend', `<span class="role-specific-badge text-[7px] bg-${color}-500/20 text-${color}-400 px-1.5 py-0.5 rounded ml-2 font-black uppercase">${r.substring(0, 3).toUpperCase()}</span>`);
+            if (brandSpan) brandSpan.insertAdjacentHTML('afterend', `<span class="role-specific-badge text-xs bg-${color}-500/20 text-${color}-400 px-1.5 py-0.5 rounded ml-2 font-bold uppercase">${r.substring(0, 3).toUpperCase()}</span>`);
             // Highlight GIS sync
             if (UI.gisCard) {
                 UI.gisCard.classList.add('border-brand', 'shadow-lg', 'shadow-brand/10');
@@ -688,7 +688,7 @@ document.addEventListener('DOMContentLoaded', async () => {
                 opt.textContent = `⚡ MODELO: ${bp.name}`;
                 opt.className = "text-brand-400 font-bold bg-dark-bg";
                 // Standard logic for groups
-                if (id === '01' || id === '56' || id === '35') cvGroup.appendChild(opt);
+                if (id.startsWith('01') || id === '35') cvGroup.appendChild(opt);
                 else ncGroup.appendChild(opt);
             });
         }
@@ -789,7 +789,7 @@ document.addEventListener('DOMContentLoaded', async () => {
         const btn = document.createElement('button');
         const isActive = (id === 'all' && !STATE.activeChapter) || (STATE.activeChapter === id);
 
-        btn.className = `w-full text-left px-3 py-2 rounded-lg text-[10px] transition-all flex items-center justify-between group chapter-btn ${isActive ? 'bg-brand/10 text-brand border border-brand/20' : 'text-gray-400 hover:bg-white/5 hover:text-white border border-transparent'}`;
+        btn.className = `w-full text-left px-3 py-2.5 rounded-lg text-xs transition-all flex items-center justify-between group chapter-btn ${isActive ? 'bg-brand/10 text-brand border border-brand/20' : 'text-gray-400 hover:bg-white/5 hover:text-white border border-transparent'}`;
 
         btn.onclick = () => {
             STATE.activeChapter = id === 'all' ? null : id;
@@ -803,7 +803,7 @@ document.addEventListener('DOMContentLoaded', async () => {
         };
 
         btn.innerHTML = `
-            <span class="flex items-center gap-2">
+            <span class="flex items-center gap-3">
                 <i data-lucide="${id === 'all' ? 'layers' : 'bookmark'}" class="w-3 h-3"></i>
                 <span class="truncate">${name}</span>
             </span>
@@ -960,7 +960,7 @@ document.addEventListener('DOMContentLoaded', async () => {
             UI.gisGapPct.textContent = `${gapPct > 0 ? '+' : ''}${gapPct.toFixed(1)}%`;
 
             // Visual feedback based on gap
-            UI.gisGapPct.className = `px-2 py-1 rounded text-[10px] font-black ${Math.abs(gapPct) < 15 ? 'bg-emerald-500/20 text-emerald-400' :
+            UI.gisGapPct.className = `px-2 py-1 rounded text-xs font-bold ${Math.abs(gapPct) < 15 ? 'bg-emerald-500/20 text-emerald-400' :
                 Math.abs(gapPct) < 40 ? 'bg-yellow-500/20 text-yellow-400' : 'bg-red-500/20 text-red-400'
                 }`;
 
@@ -1003,7 +1003,8 @@ document.addEventListener('DOMContentLoaded', async () => {
             land: landValue,
             market: grandAppraisalValue,
             depFactor: totalDepreciationFactor,
-            sqm: sqmCost
+            sqm: sqmCost,
+            chapterCosts: chapterCosts
         };
 
         // 9. Save
@@ -1108,7 +1109,7 @@ document.addEventListener('DOMContentLoaded', async () => {
             if (STATE.isEditMode) {
                 priceDisplay = `
                 <div class="flex items-center gap-1 bg-dark-bg border border-dark-border rounded px-2 py-1 w-full focus-within:border-brand">
-                    <span class="text-gray-500 text-[10px]">$</span>
+                    <span class="text-gray-500 text-xs">$</span>
                     <input type="number" 
                         class="w-full bg-transparent text-white text-xs font-bold outline-none"
                         value="${activePrice}" 
@@ -1118,24 +1119,24 @@ document.addEventListener('DOMContentLoaded', async () => {
                 </div>
             `;
             } else {
-                priceDisplay = `<span class="text-sm font-black text-brand-300">${APP_UTILS.format(activePrice)}</span>`;
+                priceDisplay = `<span class="text-sm font-bold text-brand-300">${APP_UTILS.format(activePrice)}</span>`;
             }
 
             card.innerHTML = `
                 <div class="relative z-10">
                     <div class="flex justify-between items-start mb-2">
-                         <span class="text-[9px] font-bold text-gray-500 uppercase tracking-tighter bg-dark-bg px-2 py-0.5 rounded border border-dark-border">${item.clase}</span>
+                         <span class="text-xs font-bold text-gray-500 uppercase tracking-tighter bg-dark-bg px-2 py-0.5 rounded border border-dark-border">${item.clase}</span>
                          <i data-lucide="plus-circle" class="w-4 h-4 text-brand opacity-0 group-hover:opacity-100 transition-opacity"></i>
                     </div>
                     <h4 class="text-xs font-bold text-white mb-1 group-hover:text-brand transition-colors line-clamp-2">${displayName}</h4>
-                    <p class="text-[9px] text-gray-500 mb-2 italic opacity-50">${item.nombre}</p>
+                    <p class="text-xs text-gray-500 mb-2 italic opacity-50">${item.nombre}</p>
                 </div>
                 <div class="relative z-10 flex justify-between items-end border-t border-dark-border/50 pt-3 mt-auto">
                     <div class="flex-1">
-                        <span class="text-[9px] text-gray-500 uppercase block font-medium mb-1">Precio Est.</span>
+                        <span class="text-xs text-gray-500 uppercase block font-medium mb-1">Precio Est.</span>
                         ${priceDisplay}
                     </div>
-                    <span class="text-[10px] font-bold text-gray-500 ml-2">${item.unidad}</span>
+                    <span class="text-xs font-bold text-gray-500 ml-2">${item.unidad}</span>
                 </div>
             `;
             fragment.appendChild(card);
@@ -1166,9 +1167,9 @@ document.addEventListener('DOMContentLoaded', async () => {
             const simpleChapter = getSimpleName(chapterName);
 
             groupWrap.innerHTML = `
-                <div class="flex items-center gap-2 mb-2 px-2">
+                <div class="flex items-center gap-3 mb-2 px-2">
                     <i data-lucide="folder" class="w-3 h-3 text-brand-400"></i>
-                    <span class="text-[10px] font-bold text-brand-200 uppercase tracking-widest">${simpleChapter}</span>
+                    <span class="text-xs font-bold text-brand-200 uppercase tracking-widest">${simpleChapter}</span>
                 </div>
             `;
 
@@ -1191,18 +1192,18 @@ document.addEventListener('DOMContentLoaded', async () => {
                 row.className = 'bg-dark-card border border-dark-border/50 p-3 rounded-xl mb-2 flex items-center gap-3 relative group hover:border-brand/30 transition-colors';
                 row.innerHTML = `
                     <div class="flex-1 min-w-0">
-                        <p class="text-[10px] text-gray-300 truncate font-medium">${displayName}</p>
-                        <div class="flex items-center gap-2 mt-0.5">
+                        <p class="text-xs text-gray-300 truncate font-medium">${displayName}</p>
+                        <div class="flex items-center gap-3 mt-0.5">
                             <input type="number" 
                                 id="qty_${item.codigo}"
                                 name="qty_${item.codigo}"
-                                class="w-12 bg-dark-bg border border-dark-border rounded px-1 py-0.5 text-[10px] text-white font-mono focus:border-brand outline-none"
+                                class="w-12 bg-dark-bg border border-dark-border rounded px-1 py-0.5 text-xs text-white font-mono focus:border-brand outline-none"
                                 value="${item.quantity}"
                                 onchange="updateItemQuantity('${item.codigo}', this.value)"
                             >
-                            <span class="text-[9px] text-gray-500">${item.unidad} total: ${qtyDisplay.toFixed(1)}</span>
-                            <span class="text-[9px] text-gray-500">x</span>
-                            <span class="text-[9px] text-gray-400 font-bold">$${Math.round(finalPrice).toLocaleString()}</span>
+                            <span class="text-xs text-gray-500">${item.unidad} total: ${qtyDisplay.toFixed(1)}</span>
+                            <span class="text-xs text-gray-500">x</span>
+                            <span class="text-xs text-gray-400 font-bold">$${Math.round(finalPrice).toLocaleString()}</span>
                         </div>
                     </div>
                     <div class="text-right">
@@ -1239,11 +1240,11 @@ document.addEventListener('DOMContentLoaded', async () => {
                     <div class="p-2 rounded-lg bg-dark-bg ${colorClass}">
                         <i data-lucide="${icon}" class="w-4 h-4"></i>
                     </div>
-                    <span class="text-[10px] font-bold text-gray-500 uppercase tracking-widest">${title}</span>
+                    <span class="text-xs font-bold text-gray-500 uppercase tracking-widest">${title}</span>
                 </div>
                 <div class="flex justify-between items-end">
                     <span class="text-xl font-bold text-white">${value}</span>
-                    <span class="text-[10px] font-bold text-gray-400 bg-dark-bg px-2 py-1 rounded border border-dark-border">${sub}</span>
+                    <span class="text-xs font-bold text-gray-400 bg-dark-bg px-2 py-1 rounded border border-dark-border">${sub}</span>
                 </div>
             `;
             UI.analysisContainer.appendChild(card);
@@ -1263,11 +1264,11 @@ document.addEventListener('DOMContentLoaded', async () => {
             <div class="absolute top-0 right-0 p-4 opacity-10 group-hover:rotate-12 transition-transform">
                 <i data-lucide="award" class="w-12 h-12 text-brand"></i>
             </div>
-            <div class="flex items-center gap-2 mb-3">
+            <div class="flex items-center gap-3 mb-3">
                 <i data-lucide="sparkles" class="w-4 h-4 text-brand"></i>
-                <span class="text-[10px] font-bold text-brand uppercase tracking-widest">Dictamen Profesional de Valor</span>
+                <span class="text-xs font-bold text-brand uppercase tracking-widest">Dictamen Profesional de Valor</span>
             </div>
-            <p class="text-[11px] text-gray-300 leading-relaxed max-w-[90%]">
+            <p class="text-sm text-gray-300 leading-relaxed max-w-[90%]">
                 Inmueble con <b>${STATE.meta.age} años</b> de antigüedad en estrato <b>${STATE.meta.estrato}</b>. 
                 El factor de comercialización de <b>${STATE.meta.marketMultiplier}x</b> ${STATE.meta.marketMultiplier >= 1 ? 'favorece' : 'ajusta'} el avalúo 
                 en un total de <b>${format(Math.abs(marketDelta))}</b>. <br><br>
@@ -1281,16 +1282,16 @@ document.addEventListener('DOMContentLoaded', async () => {
         legalSection.className = 'mt-6 pt-6 border-t border-dark-border/50';
         legalSection.innerHTML = `
             <div class="flex items-center justify-between mb-4">
-                <h4 class="text-[9px] font-black text-gray-500 uppercase tracking-[0.2em]">Referencias Técnicas 2026</h4>
-                <button onclick="openSourcesModal()" class="text-[8px] text-brand-400 font-black uppercase hover:underline">Ver Repositorio Legal</button>
+                <h4 class="text-xs font-bold text-gray-500 uppercase tracking-[0.2em]">Referencias Técnicas 2026</h4>
+                <button onclick="openSourcesModal()" class="text-xs text-brand-400 font-bold uppercase hover:underline">Ver Repositorio Legal</button>
             </div>
             <div class="grid grid-cols-2 gap-3">
                 <div class="bg-dark-bg border border-dark-border/30 p-3 rounded-xl">
-                    <span class="text-[9px] text-gray-500 block mb-1 uppercase">SMLV Proyectado</span>
+                    <span class="text-xs text-gray-500 block mb-1 uppercase">SMLV Proyectado</span>
                     <span class="text-xs font-bold text-gray-300">${format(CONSTANTS_2026.SMLV)}</span>
                 </div>
                 <div class="bg-dark-bg border border-dark-border/30 p-3 rounded-xl">
-                    <span class="text-[9px] text-gray-500 block mb-1 uppercase">Factor Prestacional</span>
+                    <span class="text-xs text-gray-500 block mb-1 uppercase">Factor Prestacional</span>
                     <span class="text-xs font-bold text-gray-300">52.38% (MinTrabajo)</span>
                 </div>
             </div>
@@ -1452,10 +1453,10 @@ document.addEventListener('DOMContentLoaded', async () => {
         const expertField = (y, label, val) => {
             // Analytical Indicator Dot
             doc.setFillColor(...brand.gold);
-            doc.circle(18.5, y - 1, 0.6, 'F');
+            doc.circle(18.5, y - 1, 0.8, 'F');
 
             doc.setFont("helvetica", "bold");
-            doc.setFontSize(6);
+            doc.setFontSize(6.5);
             doc.setTextColor(...brand.slate);
             doc.text(label.toUpperCase(), 21, y);
 
@@ -1480,14 +1481,59 @@ document.addEventListener('DOMContentLoaded', async () => {
         expertField(133, "Línea / Torre", meta.tower);
         expertField(146, "Atributos Base", `ÁREA: ${meta.area}M² | ALTURA: ${meta.height}M`);
         expertField(159, "Edad y Vida Útil", `${meta.age}A / ${meta.usefulLife}A (V)`);
-        expertField(172, "Metodología", "IVS STANDARD 2026");
+        expertField(172, "Modelo Referencia", meta.modelName || 'VIVIENDA URBANA');
+        expertField(185, "Metodología", "IVS STANDARD 2026");
+
+        // --- ICONOGRAPHY: PROPERTY TYPE RECOGNITION ---
+        const drawIcon = (x, y) => {
+            doc.setDrawColor(...brand.gold);
+            doc.setLineWidth(0.5);
+            doc.rect(x, y, 12, 12, 'S');
+            doc.setFillColor(...brand.gold);
+            // Dynamic icon based on BP
+            const bp = meta.usefulLife > 60 ? 'INSTITUTIONAL' : 'RESIDENTIAL';
+            doc.setFontSize(5);
+            doc.text(bp, x + 1, y + 15);
+        };
+        drawIcon(pageW - 27, 48);
 
         // --- II. FINANCIAL CONSOLIDATION (SUPREME LEDGER STYLE) ---
         const mainX = 78;
+        
+        // --- PRE-SUMMARY: MODEL IDENTITY ---
+        doc.setFontSize(8);
+        doc.setFont("helvetica", "bold");
+        doc.setTextColor(...brand.expert);
+        doc.text("III. IDENTIDAD Y ESPECIFICACIÓN TÉCNICA", mainX, 48);
+
+        doc.setFontSize(14);
+        doc.setTextColor(...brand.navy);
+        doc.text((meta.modelName || "Modelo No Especificado").toUpperCase(), mainX, 55);
+
+        doc.setFontSize(7.5);
+        doc.setFont("helvetica", "normal");
+        doc.setTextColor(...brand.slate);
+        const modelInfo = (meta.modelDesc || "Análisis basado en tipología constructiva estándar regional.") + " " + (meta.modelSpecs || "");
+        const splitInfo = doc.splitTextToSize(modelInfo, pageW - mainX - 15);
+        doc.text(splitInfo, mainX, 60);
+
         doc.setFontSize(10);
         doc.setFont("helvetica", "bold");
         doc.setTextColor(...brand.navy);
-        doc.text("II. CONSOLIDACIÓN DE VALOR Y DEPRECIACIÓN", mainX, 61);
+        doc.text("IV. CONSOLIDACIÓN DE VALOR Y DEPRECIACIÓN", mainX, 74); // Moved down
+
+        // Visual Gauge: Confidence Level
+        const drawGauge = (x, y, pct) => {
+            doc.setDrawColor(220, 220, 220);
+            doc.setLineWidth(2);
+            doc.line(x, y, x + 40, y);
+            doc.setDrawColor(...brand.expert);
+            doc.line(x, y, x + (40 * pct), y);
+            doc.setFontSize(5);
+            doc.setTextColor(...brand.slate);
+            doc.text("ÍNDICE DE CONFIANZA TÉCNICA", x, y + 4);
+        };
+        drawGauge(mainX + 70, 74, 0.92);
 
         const summaryRows = [
             ["Costo Directo Base 2026", format(s.direct)],
@@ -1499,7 +1545,7 @@ document.addEventListener('DOMContentLoaded', async () => {
         ];
 
         doc.autoTable({
-            startY: 68,
+            startY: 81,
             margin: { left: mainX, right: 15 },
             body: summaryRows,
             theme: 'plain',
@@ -1562,11 +1608,38 @@ document.addEventListener('DOMContentLoaded', async () => {
         doc.setTextColor(...brand.gold);
         doc.text(`ZONA PLUS: ${format(highR)}`, mainX + 87, rangeY + 7.5);
 
+        // --- V. ANALÍTICA DE INVERSIÓN (TOP CHAPTERS) ---
+        const analyticsY = finalY + 54;
+        doc.setFontSize(8);
+        doc.setFont("helvetica", "bold");
+        doc.setTextColor(...brand.expert);
+        doc.text("V. ANALÍTICA DE DISTRIBUCIÓN POR CAPÍTULO", mainX, analyticsY);
+
+        const sortedChapters = Object.entries(STATE.summary.chapterCosts || {})
+            .sort((a, b) => b[1] - a[1])
+            .slice(0, 4);
+
+        let curAnY = analyticsY + 8;
+        sortedChapters.forEach(([name, cost]) => {
+            doc.setFontSize(6.5);
+            doc.setFont("helvetica", "normal");
+            doc.setTextColor(...brand.slate);
+            doc.text(name.toUpperCase(), mainX, curAnY);
+            
+            const pct = (cost / s.direct) * 100;
+            doc.setFont("helvetica", "bold");
+            doc.text(`${format(cost)} (${pct.toFixed(1)}%)`, pageW - 15, curAnY, { align: 'right' });
+            
+            doc.setDrawColor(241, 245, 249);
+            doc.line(mainX, curAnY + 2, pageW - 15, curAnY + 2);
+            curAnY += 6;
+        });
+
         // Quality Statement (Bottom)
-        doc.setFontSize(6.5);
+        doc.setFontSize(6);
         doc.setTextColor(...brand.slate);
-        const businessStatement = "NOTA DE INTEGRIDAD: Este informe constituye una certificación de valor comercial Business Plus, generada bajos los más altos estándares de auditoría financiera. Los cálculos integran modelos de depreciación Ross-Heidecke v2026 y proyecciones de mercado regionalizado. Este documento no requiere firma autógrafa al ser un activo digital validado por el protocolo de seguridad Master ID.";
-        doc.text(doc.splitTextToSize(businessStatement, pageW - 40), 20, 260);
+        const businessStatement = "NOTA DE INTEGRIDAD: Este informe constituye una certificación de valor comercial Business Plus v2026, generada bajos los más altos estándares de auditoría financiera. Los cálculos integran modelos de depreciación Ross-Heidecke y proyecciones de mercado regionalizado. Este documento es un activo digital validado por el protocolo de seguridad Master ID de ConstruMetrix.";
+        doc.text(doc.splitTextToSize(businessStatement, pageW - 40), 20, pageH - 30);
 
         /** PAGE 2+: TECHNICAL APU ANNEX **/
         doc.addPage();
@@ -1788,6 +1861,9 @@ document.addEventListener('DOMContentLoaded', async () => {
 
     function loadBlueprint(bp) {
         STATE.budget = [];
+        STATE.meta.modelName = bp.name;
+        STATE.meta.modelDesc = bp.description || '';
+        STATE.meta.modelSpecs = bp.specs || '';
         Object.entries(bp.chapters).forEach(([name, items]) => {
             items.forEach(it => {
                 const db = allItems.find(x => x.codigo === it.codigo);
@@ -1837,10 +1913,10 @@ document.addEventListener('DOMContentLoaded', async () => {
             <div class="p-4 rounded-2xl bg-dark-bg border border-white/5 hover:border-brand/40 transition-all group">
                 <div class="flex justify-between items-start mb-1">
                     <span class="text-xs font-bold text-white group-hover:text-brand transition-colors">${t.name}</span>
-                    <span class="text-[10px] font-black text-brand bg-brand/10 px-2 py-0.5 rounded">2026</span>
+                    <span class="text-xs font-bold text-brand bg-brand/10 px-2 py-0.5 rounded">2026</span>
                 </div>
-                <p class="text-[14px] font-black text-white">${APP_UTILS.format(t.min)} - ${APP_UTILS.format(t.max)}</p>
-                <p class="text-[9px] text-gray-500 mt-1 uppercase tracking-tighter">${t.specs}</p>
+                <p class="text-[14px] font-bold text-white">${APP_UTILS.format(t.min)} - ${APP_UTILS.format(t.max)}</p>
+                <p class="text-xs text-gray-500 mt-1 uppercase tracking-tighter">${t.specs}</p>
             </div>
         `).join('');
 
@@ -1849,12 +1925,12 @@ document.addEventListener('DOMContentLoaded', async () => {
         matList.innerHTML = allItems.map(m => `
             <div class="flex items-center justify-between p-3 rounded-xl hover:bg-white/5 transition-all border-b border-white/5 last:border-0">
                 <div>
-                    <p class="text-[10px] font-bold text-gray-300">${m.item}</p>
-                    <p class="text-[8px] text-gray-500 uppercase">${m.unit}</p>
+                    <p class="text-xs font-bold text-gray-300">${m.item}</p>
+                    <p class="text-xs text-gray-500 uppercase">${m.unit}</p>
                 </div>
                 <div class="text-right">
-                    <p class="text-[11px] font-mono font-bold text-emerald-400">$${m.price}</p>
-                    ${m.delta ? `<span class="text-[8px] font-black text-red-400">${m.delta} ▲</span>` : ''}
+                    <p class="text-sm font-mono font-bold text-emerald-400">$${m.price}</p>
+                    ${m.delta ? `<span class="text-xs font-bold text-red-400">${m.delta} ▲</span>` : ''}
                 </div>
             </div>
         `).join('');
@@ -1909,6 +1985,11 @@ document.addEventListener('DOMContentLoaded', async () => {
         const content = document.getElementById('userModalContent');
         if (!m || !content) return;
 
+        // Sync visual name from config
+        const config = JSON.parse(localStorage.getItem('construmetrix_node_config') || '{}');
+        const nameDisplay = document.querySelector('#userModal h3');
+        if (nameDisplay) nameDisplay.textContent = config.userName || 'Albert Daniel G.';
+
         m.style.opacity = '1';
         m.style.pointerEvents = 'auto';
         content.style.transform = 'scale(1)';
@@ -1921,6 +2002,63 @@ document.addEventListener('DOMContentLoaded', async () => {
         if (m) m.style.opacity = '0';
         if (m) m.style.pointerEvents = 'none';
         if (content) content.style.transform = 'scale(0.95)';
+    };
+
+    /** SETTINGS MODAL CONTROLS **/
+    window.openAccountSettings = () => {
+        console.log("🛠️ [USER-PREFS] Opening Account Settings Node...");
+        const m = document.getElementById('settingsModal');
+        const content = document.getElementById('settingsModalContent');
+        if (!m || !content) return;
+
+        // Sync values from local/state before opening
+        const config = JSON.parse(localStorage.getItem('construmetrix_node_config') || '{}');
+        if (document.getElementById('settingsUserName')) document.getElementById('settingsUserName').value = config.userName || 'Albert Daniel G.';
+        if (document.getElementById('settingsSentryDsn')) document.getElementById('settingsSentryDsn').value = config.sentryDsn || '';
+
+        // Close user modal first for smooth transition
+        window.closeUserModal();
+
+        setTimeout(() => {
+            m.style.opacity = '1';
+            m.style.pointerEvents = 'auto';
+            content.style.transform = 'scale(1)';
+            lucide.createIcons();
+            showToast("Panel de Configuración de Nodo Activo", "info");
+        }, 300);
+    };
+
+    window.closeSettingsModal = () => {
+        const m = document.getElementById('settingsModal');
+        const content = document.getElementById('settingsModalContent');
+        if (m) m.style.opacity = '0';
+        if (m) m.style.pointerEvents = 'none';
+        if (content) content.style.transform = 'scale(0.95)';
+    };
+
+    window.saveNodeSettings = () => {
+        const name = document.getElementById('settingsUserName').value;
+        const dsn = document.getElementById('settingsSentryDsn').value;
+
+        const config = {
+            userName: name,
+            sentryDsn: dsn,
+            lastUpdate: new Date().toISOString()
+        };
+
+        localStorage.setItem('construmetrix_node_config', JSON.stringify(config));
+
+        showToast("Configuración del Nodo Actualizada", "success");
+        console.log("✅ [NODE-SAVE] Settings persisted locally.");
+
+        // Optionally reload or apply changes immediately
+        setTimeout(() => {
+            if (confirm("Se requiere reiniciar el núcleo para aplicar cambios de monitoreo. ¿Reiniciar ahora?")) {
+                window.location.reload();
+            } else {
+                window.closeSettingsModal();
+            }
+        }, 500);
     };
 
     function renderSources(filter = '') {
@@ -1936,7 +2074,7 @@ document.addEventListener('DOMContentLoaded', async () => {
             <button onclick="setSourceCategory('all')" 
                 class="w-full flex items-center gap-3 p-3.5 rounded-2xl transition-all ${activeSourceCategory === 'all' ? 'bg-brand/20 text-brand border border-brand/20' : 'text-gray-500 hover:bg-white/5 hover:text-white border border-transparent'}">
                 <i data-lucide="grid-3x3" class="w-4 h-4"></i>
-                <span class="text-[10px] font-black uppercase tracking-widest">Todos</span>
+                <span class="text-xs font-bold uppercase tracking-widest">Todos</span>
             </button>
         `;
 
@@ -1947,7 +2085,7 @@ document.addEventListener('DOMContentLoaded', async () => {
                 <button onclick="setSourceCategory('${key}')" 
                     class="w-full flex items-center gap-3 p-3.5 rounded-2xl transition-all ${activeSourceCategory === key ? 'bg-brand/20 text-brand border border-brand/20' : 'text-gray-500 hover:bg-white/5 hover:text-white border border-transparent'}">
                     <i data-lucide="${s.logo_icon || 'database'}" class="w-4 h-4"></i>
-                    <span class="text-[10px] font-black uppercase tracking-widest">${s.sigla || key.toUpperCase()}</span>
+                    <span class="text-xs font-bold uppercase tracking-widest">${s.sigla || key.toUpperCase()}</span>
                 </button>
             `;
         });
@@ -1978,8 +2116,8 @@ document.addEventListener('DOMContentLoaded', async () => {
                             <i data-lucide="${source.logo_icon || 'database'}" class="w-6 h-6 text-${source.color || 'brand'}"></i>
                         </div>
                         <div>
-                            <h4 class="text-xl font-black text-white uppercase tracking-tighter">${source.nombre}</h4>
-                            <p class="text-[10px] text-gray-500 font-bold uppercase tracking-widest">${source.descripcion}</p>
+                            <h4 class="text-xl font-bold text-white uppercase tracking-tighter">${source.nombre}</h4>
+                            <p class="text-xs text-gray-500 font-bold uppercase tracking-widest">${source.descripcion}</p>
                         </div>
                     </div>
 
@@ -2005,7 +2143,7 @@ document.addEventListener('DOMContentLoaded', async () => {
                                             </defs>
                                             <polygon points="0,30 ${polyline} 90,30" fill="url(#grad${key})"></polygon>
                                         </svg>
-                                        <div class="absolute top-1 right-2 text-[8px] font-mono text-brand font-bold">+0.4%</div>
+                                        <div class="absolute top-1 right-2 text-xs font-mono text-brand font-bold">+0.4%</div>
                                     </div>
                                 `;
                 }
@@ -2015,9 +2153,9 @@ document.addEventListener('DOMContentLoaded', async () => {
                                 class="group/card relative bg-white/[0.02] border border-white/5 p-6 rounded-[2rem] hover:border-brand/40 hover:bg-brand/5 transition-all duration-500 flex flex-col justify-between overflow-hidden cursor-grab active:cursor-grabbing">
                                 
                                 <!-- Status Badge -->
-                                <div class="absolute top-6 right-6 flex items-center gap-2">
-                                    <div class="w-2 h-2 rounded-full ${res.estado === 'En Vivo' ? 'bg-emerald-500 animate-pulse' : 'bg-gray-600'}"></div>
-                                    <span class="text-[7px] text-gray-500 font-black uppercase tracking-widest">${res.estado || 'Auditado'}</span>
+                                <div class="absolute top-6 right-6 flex items-center gap-3">
+                                    <div class="w-2 h-2 rounded-full ${res.estado === 'En Vivo' ? 'bg-emerald-500 group-hover:animate-pulse transition-all duration-300' : 'bg-gray-600'}"></div>
+                                    <span class="text-xs text-gray-500 font-bold uppercase tracking-widest">${res.estado || 'Auditado'}</span>
                                 </div>
 
                                 <div class="space-y-4">
@@ -2025,21 +2163,21 @@ document.addEventListener('DOMContentLoaded', async () => {
                                         <div class="p-2 rounded-xl bg-white/5 text-brand group-hover/card:scale-110 transition-transform shadow-[0_0_15px_rgba(0,0,0,0.5)]">
                                             <i data-lucide="${isData ? 'activity' : 'file-text'}" class="w-4 h-4"></i>
                                         </div>
-                                        <h5 class="text-[11px] font-black text-white uppercase tracking-widest leading-tight pr-12">${res.titulo}</h5>
+                                        <h5 class="text-sm font-bold text-white uppercase tracking-widest leading-tight pr-12">${res.titulo}</h5>
                                     </div>
-                                    <p class="text-[10px] text-gray-400 leading-relaxed font-medium line-clamp-3">${res.descripcion}</p>
+                                    <p class="text-xs text-gray-400 leading-relaxed font-medium line-clamp-3">${res.descripcion}</p>
                                     
                                     ${chartHtml}
                                 </div>
 
                                 <div class="mt-6 border-t border-white/5 pt-4">
                                     <div class="flex justify-between items-center mb-4">
-                                        <span class="text-[8px] text-gray-600 font-black uppercase tracking-tighter">Impacto:</span>
-                                        <span class="text-[9px] text-gray-400 font-bold italic text-right max-w-[60%] truncate">${res.uso}</span>
+                                        <span class="text-xs text-gray-600 font-bold uppercase tracking-tighter">Impacto:</span>
+                                        <span class="text-xs text-gray-400 font-bold italic text-right max-w-[60%] truncate">${res.uso}</span>
                                     </div>
                                     
-                                    <div class="flex items-center gap-2 opacity-60 group-hover/card:opacity-100 transition-opacity">
-                                        <a href="${res.url}" target="_blank" class="flex-1 flex items-center justify-center gap-2 py-2.5 rounded-xl bg-white/5 text-white text-[9px] font-black uppercase tracking-widest hover:bg-brand hover:shadow-[0_0_20px_rgba(59,98,255,0.4)] transition-all group/btn">
+                                    <div class="flex items-center gap-3 opacity-60 group-hover/card:opacity-100 transition-opacity">
+                                        <a href="${res.url}" target="_blank" class="flex-1 flex items-center justify-center gap-3 py-2.5 rounded-xl bg-white/5 text-white text-xs font-bold uppercase tracking-widest hover:bg-brand hover:shadow-[0_0_20px_rgba(59,98,255,0.4)] transition-all group/btn">
                                             <span>Conectar</span> <i data-lucide="arrow-right" class="w-3 h-3 group-hover/btn:translate-x-1 transition-transform"></i>
                                         </a>
                                         <button onclick="APP_UTILS.copyToClipboard('${res.url}')" class="p-2.5 rounded-xl bg-white/5 border border-white/10 text-gray-500 hover:text-white hover:border-white/20 transition-all" title="Copiar Enlace">
@@ -2058,8 +2196,8 @@ document.addEventListener('DOMContentLoaded', async () => {
             gridHtml = `
                 <div class="h-64 flex flex-col items-center justify-center text-gray-600 border border-dashed border-white/10 rounded-[3rem]">
                     <i data-lucide="search-x" class="w-12 h-12 mb-4 opacity-20"></i>
-                    <p class="text-xs font-black uppercase tracking-widest">No se encontraron recursos</p>
-                    <button onclick="document.getElementById('sourceSearch').value=''; renderSources();" class="mt-4 text-[10px] text-brand font-bold uppercase hover:underline">Limpiar Filtros</button>
+                    <p class="text-xs font-bold uppercase tracking-widest">No se encontraron recursos</p>
+                    <button onclick="document.getElementById('sourceSearch').value=''; renderSources();" class="mt-4 text-xs text-brand font-bold uppercase hover:underline">Limpiar Filtros</button>
                 </div>
             `;
         }
@@ -2229,8 +2367,8 @@ document.addEventListener('DOMContentLoaded', async () => {
                 <div class="flex gap-3 bg-dark-bg/40 p-3 rounded-2xl border border-white/5 group-hover:border-white/10 transition-colors">
                     <i data-lucide="${is.icon}" class="w-4 h-4 ${is.color} shrink-0 mt-0.5"></i>
                     <div>
-                        <p class="text-[10px] font-black text-white uppercase tracking-wider">${is.title}</p>
-                        <p class="text-[9px] text-gray-500 leading-tight mt-1">${is.desc}</p>
+                        <p class="text-xs font-bold text-white uppercase tracking-wider">${is.title}</p>
+                        <p class="text-xs text-gray-500 leading-tight mt-1">${is.desc}</p>
                     </div>
                 </div>
             `).join('');

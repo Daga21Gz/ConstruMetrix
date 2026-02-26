@@ -261,18 +261,18 @@
     function renderValuationHUD(valData) {
         const extraInfo = `
             <div class="mt-4 p-4 rounded-xl bg-brand/10 border border-brand/30 animate-up">
-                <p class="text-[9px] font-black text-brand uppercase mb-2">Contexto de Valoración IGAC</p>
+                <p class="text-xs font-bold text-brand uppercase mb-2">Contexto de Valoración IGAC</p>
                 <div class="grid grid-cols-2 gap-3">
                     <div>
-                        <p class="text-[8px] text-gray-500 uppercase">Avalúo Actual</p>
+                        <p class="text-xs text-gray-500 uppercase">Avalúo Actual</p>
                         <p class="text-xs font-bold text-white">$${(valData.AVALUO_CATASTRAL || 0).toLocaleString()}</p>
                     </div>
                     <div>
-                        <p class="text-[8px] text-gray-500 uppercase">Destino</p>
+                        <p class="text-xs text-gray-500 uppercase">Destino</p>
                         <p class="text-xs font-bold text-white truncate">${valData.DESTINO_ECONOMICO || 'Habitacional'}</p>
                     </div>
                 </div>
-                <div class="mt-2 text-[10px] text-gray-400 font-medium">
+                <div class="mt-2 text-xs text-gray-400 font-medium">
                     <span class="text-brand">⚡</span> Datos Oficiales Sincronizados
                 </div>
             </div>
@@ -515,7 +515,7 @@
     function updateGisStatus(text, type = 'info') {
         if (!UI_GIS.statusList) return;
         const item = document.createElement('div');
-        item.className = `p-3 rounded-xl bg-white/5 border-l-4 ${type === 'success' ? 'border-l-emerald-500' : type === 'error' ? 'border-l-red-500' : 'border-l-brand'} animate-up text-[10px] text-gray-300 font-bold mb-2 transition-all`;
+        item.className = `p-3 rounded-xl bg-white/5 border-l-4 ${type === 'success' ? 'border-l-emerald-500' : type === 'error' ? 'border-l-red-500' : 'border-l-brand'} animate-up text-xs text-gray-300 font-bold mb-2 transition-all`;
         item.innerHTML = text;
         UI_GIS.statusList.prepend(item);
         if (UI_GIS.statusList.children.length > 4) UI_GIS.statusList.lastChild.remove();
@@ -700,7 +700,7 @@
                 </th>
                 ${keys.map(k => `
                     <th class="p-3 text-left font-bold text-gray-300 uppercase text-xs tracking-wider sticky top-0 bg-dark-bg z-10 cursor-pointer hover:text-white hover:bg-white/5 border-b border-brand/20 transition-colors group" onclick="sortGisTable('${k}')">
-                        <div class="flex items-center gap-2">
+                        <div class="flex items-center gap-3">
                             ${k}
                             <i data-lucide="arrow-up-down" class="w-3 h-3 opacity-30 group-hover:opacity-100"></i>
                         </div>
@@ -738,8 +738,8 @@
                 <td class="p-2 text-center border-b border-white/5" role="gridcell">
                     <input type="checkbox" class="row-selector rounded bg-black/40 border-white/10 text-brand focus:ring-brand" aria-label="Seleccionar fila" data-gid="${row._gid}" ${isSelected ? 'checked' : ''}>
                 </td>
-                <td class="p-2 text-[10px] text-gray-500 font-mono border-b border-white/5" role="gridcell">${row._gid}</td>
-                ${keys.map(k => `<td class="p-2 text-[10px] text-gray-300 whitespace-nowrap overflow-hidden text-ellipsis max-w-[150px] border-b border-white/5" role="gridcell" title="${row[k]}">${row[k] || '--'}</td>`).join('')}
+                <td class="p-2 text-xs text-gray-500 font-mono border-b border-white/5" role="gridcell">${row._gid}</td>
+                ${keys.map(k => `<td class="p-2 text-xs text-gray-300 whitespace-nowrap overflow-hidden text-ellipsis max-w-[150px] border-b border-white/5" role="gridcell" title="${row[k]}">${row[k] || '--'}</td>`).join('')}
                 <td class="p-2 text-right border-b border-white/5 border-l border-white/10 sticky right-0 bg-[#0a0c10] z-[50] shadow-[-5px_0_10px_rgba(0,0,0,0.5)]" role="gridcell">
                     <button type="button" class="action-zoom-btn gis-action-btn" aria-label="Ver elemento en mapa" style="background-color: #2563eb !important; color: #ffffff !important; padding: 6px 14px; border-radius: 6px; font-weight: 900; font-size: 11px; text-transform: uppercase; border: 1px solid rgba(255,255,255,0.3); display: inline-flex; align-items: center; gap: 6px; cursor: pointer; white-space: nowrap;" data-gid="${row._gid}">
                         <i data-lucide="map-pin" class="w-3 h-3"></i> VER
@@ -929,10 +929,10 @@
             if (!btn) return;
             if (active) {
                 // Style Active
-                btn.className = "px-4 py-2 rounded-xl bg-brand/20 border border-brand/50 text-brand text-[9px] font-black uppercase tracking-widest hover:bg-brand/30 transition-all";
+                btn.className = "px-4 py-2.5 rounded-xl bg-brand/20 border border-brand/50 text-brand text-xs font-bold uppercase tracking-widest hover:bg-brand/30 transition-all";
             } else {
                 // Style Inactive
-                btn.className = "px-4 py-2 rounded-xl hover:bg-white/5 text-gray-500 hover:text-white border border-transparent hover:border-white/10 text-[9px] font-black uppercase tracking-widest transition-all";
+                btn.className = "px-4 py-2.5 rounded-xl hover:bg-white/5 text-gray-500 hover:text-white border border-transparent hover:border-white/10 text-xs font-bold uppercase tracking-widest transition-all";
             }
         };
 
