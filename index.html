@@ -569,12 +569,12 @@
                         </button>
                         <div id="dimension-entorno" class="accordion-content space-y-4 mt-2 px-1">
                             <div class="p-4 rounded-2xl bg-dark-bg/40 border border-dark-border/50 space-y-4">
-                                <label class="block">
-                                    <span
-                                        class="text-xs text-gray-500 uppercase font-bold mb-1.5 block tracking-wider">Ubicación
-                                        Geo-Económica</span>
+                                <div class="relative w-full group">
+                                    <label for="regionSelect"
+                                        class="absolute text-[9px] uppercase font-bold tracking-widest text-gray-500 top-2 z-10 start-3 pointer-events-none group-focus-within:text-brand transition-colors">Ubicación
+                                        Geo-Económica</label>
                                     <select id="regionSelect" name="regionSelect"
-                                        class="w-full bg-dark-card border border-dark-border rounded-xl px-3 py-2.5 text-xs text-white outline-none focus:border-brand transition-all">
+                                        class="w-full bg-dark-card border border-dark-border rounded-xl px-3 pt-6 pb-2 text-xs text-white outline-none focus:border-brand transition-all appearance-none cursor-pointer">
                                         <option value="centro">📍 Centro (Eje Andino)</option>
                                         <option value="norte">🏠 Norte (Occidente / Caribe)</option>
                                         <option value="sur">🛣️ Sur / Amazonía</option>
@@ -582,13 +582,17 @@
                                         <option value="macizo">🌋 Macizo</option>
                                         <option value="guapi">🌊 Pacífico</option>
                                     </select>
-                                </label>
-                                <label class="block">
-                                    <span
-                                        class="text-xs text-gray-500 uppercase font-bold mb-1.5 block tracking-wider">Estrato
-                                        Socioeconómico</span>
+                                    <div class="absolute inset-y-0 right-3 flex items-center pointer-events-none">
+                                        <i data-lucide="chevron-down"
+                                            class="w-4 h-4 text-gray-500 group-focus-within:text-brand transition-colors"></i>
+                                    </div>
+                                </div>
+                                <div class="relative w-full group">
+                                    <label for="estratoSelect"
+                                        class="absolute text-[9px] uppercase font-bold tracking-widest text-gray-500 top-2 z-10 start-3 pointer-events-none group-focus-within:text-brand transition-colors">Estrato
+                                        Socioeconómico</label>
                                     <select id="estratoSelect" name="estratoSelect"
-                                        class="w-full bg-dark-card border border-dark-border rounded-xl px-3 py-2.5 text-xs text-white outline-none">
+                                        class="w-full bg-dark-card border border-dark-border rounded-xl px-3 pt-6 pb-2 text-xs text-white outline-none focus:border-brand transition-all appearance-none cursor-pointer">
                                         <option value="1">Estrato 1</option>
                                         <option value="2">Estrato 2</option>
                                         <option value="3" selected>Estrato 3</option>
@@ -596,7 +600,11 @@
                                         <option value="5">Estrato 5</option>
                                         <option value="6">Estrato 6</option>
                                     </select>
-                                </label>
+                                    <div class="absolute inset-y-0 right-3 flex items-center pointer-events-none">
+                                        <i data-lucide="chevron-down"
+                                            class="w-4 h-4 text-gray-500 group-focus-within:text-brand transition-colors"></i>
+                                    </div>
+                                </div>
                                 <div class="pt-2 border-t border-white/5">
                                     <a href="https://services2.arcgis.com/RVvWzU3lgJISqdke/arcgis/rest/services/Base_Catastral_Publica_IGAC_Septiembre/FeatureServer"
                                         target="_blank"
@@ -629,96 +637,100 @@
                         <div id="dimension-fisica" class="accordion-content space-y-4 mt-2 px-1">
                             <div class="p-4 rounded-2xl bg-dark-bg/40 border border-dark-border/50 space-y-4">
                                 <div class="grid grid-cols-2 gap-3">
-                                    <label>
-                                        <span
-                                            class="text-xs text-gray-500 uppercase font-bold mb-1 block tracking-wider">Área
-                                            Constr.</span>
+                                    <div class="relative w-full">
                                         <input type="number" id="baseArea" name="baseArea" value="1.0"
-                                            class="w-full bg-dark-card border border-dark-border rounded-xl px-3 py-2.5 text-xs text-white font-mono outline-none focus:border-brand">
-                                    </label>
-                                    <label>
-                                        <span
-                                            class="text-xs text-gray-500 uppercase font-bold mb-1 block tracking-wider">Altura
-                                            (m)</span>
+                                            class="peer w-full bg-dark-card border border-dark-border rounded-xl px-3 pt-6 pb-2 text-xs text-white font-mono outline-none focus:border-brand transition-all"
+                                            placeholder=" ">
+                                        <label for="baseArea"
+                                            class="absolute text-[10px] uppercase font-bold tracking-wider text-gray-500 duration-300 transform -translate-y-3 scale-75 top-4 z-10 origin-[0] start-3 peer-focus:text-brand peer-placeholder-shown:scale-100 peer-placeholder-shown:translate-y-0 peer-focus:scale-75 peer-focus:-translate-y-3 pointer-events-none">Área
+                                            Constr.</label>
+                                    </div>
+                                    <div class="relative w-full">
                                         <input type="number" id="baseHeight" name="baseHeight" value="2.5"
-                                            class="w-full bg-dark-card border border-dark-border rounded-xl px-3 py-2.5 text-xs text-white font-mono outline-none">
-                                    </label>
+                                            class="peer w-full bg-dark-card border border-dark-border rounded-xl px-3 pt-6 pb-2 text-xs text-white font-mono outline-none focus:border-brand transition-all"
+                                            placeholder=" ">
+                                        <label for="baseHeight"
+                                            class="absolute text-[10px] uppercase font-bold tracking-wider text-gray-500 duration-300 transform -translate-y-3 scale-75 top-4 z-10 origin-[0] start-3 peer-focus:text-brand peer-placeholder-shown:scale-100 peer-placeholder-shown:translate-y-0 peer-focus:scale-75 peer-focus:-translate-y-3 pointer-events-none">Altura
+                                            (m)</label>
+                                    </div>
                                 </div>
                                 <div class="grid grid-cols-2 gap-3">
-                                    <label>
-                                        <span
-                                            class="text-xs text-gray-500 uppercase font-bold mb-1 block tracking-wider">Antigüedad</span>
+                                    <div class="relative w-full">
                                         <input type="number" id="baseAge" name="baseAge" value="0"
-                                            class="w-full bg-dark-card border border-dark-border rounded-xl px-3 py-2.5 text-xs text-white font-mono outline-none">
-                                    </label>
-                                    <label>
-                                        <span
-                                            class="text-xs text-gray-500 uppercase font-bold mb-1 block tracking-wider">Vida
-                                            Útil</span>
+                                            class="peer w-full bg-dark-card border border-dark-border rounded-xl px-3 pt-6 pb-2 text-xs text-white font-mono outline-none focus:border-brand transition-all"
+                                            placeholder=" ">
+                                        <label for="baseAge"
+                                            class="absolute text-[10px] uppercase font-bold tracking-wider text-gray-500 duration-300 transform -translate-y-3 scale-75 top-4 z-10 origin-[0] start-3 peer-focus:text-brand peer-placeholder-shown:scale-100 peer-placeholder-shown:translate-y-0 peer-focus:scale-75 peer-focus:-translate-y-3 pointer-events-none">Antigüedad</label>
+                                    </div>
+                                    <div class="relative w-full">
                                         <input type="number" id="baseLife" name="baseLife" value="50"
-                                            class="w-full bg-dark-card border border-dark-border rounded-xl px-3 py-2.5 text-xs text-white font-mono outline-none">
-                                    </label>
+                                            class="peer w-full bg-dark-card border border-dark-border rounded-xl px-3 pt-6 pb-2 text-xs text-white font-mono outline-none focus:border-brand transition-all"
+                                            placeholder=" ">
+                                        <label for="baseLife"
+                                            class="absolute text-[10px] uppercase font-bold tracking-wider text-gray-500 duration-300 transform -translate-y-3 scale-75 top-4 z-10 origin-[0] start-3 peer-focus:text-brand peer-placeholder-shown:scale-100 peer-placeholder-shown:translate-y-0 peer-focus:scale-75 peer-focus:-translate-y-3 pointer-events-none">Vida
+                                            Útil</label>
+                                    </div>
                                 </div>
                                 <div class="pt-2 border-t border-white/5 space-y-3">
                                     <div class="grid grid-cols-2 gap-3">
-                                        <label>
-                                            <span
-                                                class="text-xs text-gray-500 uppercase font-bold mb-1 block tracking-wider">Aviso
-                                                #</span>
+                                        <div class="relative w-full">
                                             <input type="text" id="inputAviso" name="inputAviso"
-                                                placeholder="Ej: 5759622"
-                                                class="w-full bg-dark-card border border-dark-border rounded-xl px-3 py-2.5 text-xs text-white outline-none focus:border-brand">
-                                        </label>
-                                        <label>
-                                            <span
-                                                class="text-xs text-gray-500 uppercase font-bold mb-1 block tracking-wider">Línea
-                                                - Torre</span>
+                                                class="peer w-full bg-dark-card border border-dark-border rounded-xl px-3 pt-6 pb-2 text-xs text-white outline-none focus:border-brand transition-all"
+                                                placeholder=" ">
+                                            <label for="inputAviso"
+                                                class="absolute text-[10px] uppercase font-bold tracking-wider text-gray-500 duration-300 transform -translate-y-3 scale-75 top-4 z-10 origin-[0] start-3 peer-focus:text-brand peer-placeholder-shown:scale-100 peer-placeholder-shown:translate-y-0 peer-focus:scale-75 peer-focus:-translate-y-3 pointer-events-none">Aviso
+                                                #</label>
+                                        </div>
+                                        <div class="relative w-full">
                                             <input type="text" id="inputTower" name="inputTower"
-                                                placeholder="Ej: L-405 T-12"
-                                                class="w-full bg-dark-card border border-dark-border rounded-xl px-3 py-2.5 text-xs text-white outline-none focus:border-brand">
-                                        </label>
+                                                class="peer w-full bg-dark-card border border-dark-border rounded-xl px-3 pt-6 pb-2 text-xs text-white outline-none focus:border-brand transition-all"
+                                                placeholder=" ">
+                                            <label for="inputTower"
+                                                class="absolute text-[10px] uppercase font-bold tracking-wider text-gray-500 duration-300 transform -translate-y-3 scale-75 top-4 z-10 origin-[0] start-3 peer-focus:text-brand peer-placeholder-shown:scale-100 peer-placeholder-shown:translate-y-0 peer-focus:scale-75 peer-focus:-translate-y-3 pointer-events-none">Línea
+                                                - Torre</label>
+                                        </div>
                                     </div>
-                                    <label class="block">
-                                        <span
-                                            class="text-xs text-gray-500 uppercase font-bold mb-1 block tracking-wider">Propietario
-                                            / Responsable</span>
+                                    <div class="relative w-full">
                                         <input type="text" id="inputOwner" name="inputOwner"
-                                            placeholder="Nombre completo"
-                                            class="w-full bg-dark-card border border-dark-border rounded-xl px-3 py-2.5 text-xs text-white outline-none focus:border-brand">
-                                    </label>
-                                    <div class="grid grid-cols-2 gap-3">
-                                        <label>
-                                            <span
-                                                class="text-xs text-gray-500 uppercase font-bold mb-1 block tracking-wider">Cédula
-                                                Catastral</span>
-                                            <input type="text" id="inputCedula" name="inputCedula"
-                                                placeholder="Ej: 01-02-0003..."
-                                                class="w-full bg-dark-card border border-dark-border rounded-xl px-3 py-2.5 text-xs text-white outline-none focus:border-brand">
-                                        </label>
-                                        <label>
-                                            <span
-                                                class="text-xs text-gray-500 uppercase font-bold mb-1 block tracking-wider">Matrícula
-                                                Inmob.</span>
-                                            <input type="text" id="inputMatricula" name="inputMatricula"
-                                                placeholder="Ej: 50C-123456"
-                                                class="w-full bg-dark-card border border-dark-border rounded-xl px-3 py-2.5 text-xs text-white outline-none focus:border-brand">
-                                        </label>
+                                            class="peer w-full bg-dark-card border border-dark-border rounded-xl px-3 pt-6 pb-2 text-xs text-white outline-none focus:border-brand transition-all"
+                                            placeholder=" ">
+                                        <label for="inputOwner"
+                                            class="absolute text-[10px] uppercase font-bold tracking-wider text-gray-500 duration-300 transform -translate-y-3 scale-75 top-4 z-10 origin-[0] start-3 peer-focus:text-brand peer-placeholder-shown:scale-100 peer-placeholder-shown:translate-y-0 peer-focus:scale-75 peer-focus:-translate-y-3 pointer-events-none">Propietario
+                                            / Responsable</label>
                                     </div>
                                     <div class="grid grid-cols-2 gap-3">
-                                        <label>
-                                            <span
-                                                class="text-xs text-gray-500 uppercase font-bold mb-1 block tracking-wider">Municipio</span>
+                                        <div class="relative w-full">
+                                            <input type="text" id="inputCedula" name="inputCedula"
+                                                class="peer w-full bg-dark-card border border-dark-border rounded-xl px-3 pt-6 pb-2 text-xs text-white outline-none focus:border-brand transition-all"
+                                                placeholder=" ">
+                                            <label for="inputCedula"
+                                                class="absolute text-[10px] uppercase font-bold tracking-wider text-gray-500 duration-300 transform -translate-y-3 scale-75 top-4 z-10 origin-[0] start-3 peer-focus:text-brand peer-placeholder-shown:scale-100 peer-placeholder-shown:translate-y-0 peer-focus:scale-75 peer-focus:-translate-y-3 pointer-events-none">Cédula
+                                                Catastral</label>
+                                        </div>
+                                        <div class="relative w-full">
+                                            <input type="text" id="inputMatricula" name="inputMatricula"
+                                                class="peer w-full bg-dark-card border border-dark-border rounded-xl px-3 pt-6 pb-2 text-xs text-white outline-none focus:border-brand transition-all"
+                                                placeholder=" ">
+                                            <label for="inputMatricula"
+                                                class="absolute text-[10px] uppercase font-bold tracking-wider text-gray-500 duration-300 transform -translate-y-3 scale-75 top-4 z-10 origin-[0] start-3 peer-focus:text-brand peer-placeholder-shown:scale-100 peer-placeholder-shown:translate-y-0 peer-focus:scale-75 peer-focus:-translate-y-3 pointer-events-none">Matrícula
+                                                Inmob.</label>
+                                        </div>
+                                    </div>
+                                    <div class="grid grid-cols-2 gap-3">
+                                        <div class="relative w-full">
                                             <input type="text" id="inputCity" name="inputCity"
-                                                placeholder="Ej: Medellín"
-                                                class="w-full bg-dark-card border border-dark-border rounded-xl px-3 py-2.5 text-xs text-white outline-none focus:border-brand">
-                                        </label>
-                                        <label>
-                                            <span
-                                                class="text-xs text-gray-500 uppercase font-bold mb-1 block tracking-wider">Departamento</span>
+                                                class="peer w-full bg-dark-card border border-dark-border rounded-xl px-3 pt-6 pb-2 text-xs text-white outline-none focus:border-brand transition-all"
+                                                placeholder=" ">
+                                            <label for="inputCity"
+                                                class="absolute text-[10px] uppercase font-bold tracking-wider text-gray-500 duration-300 transform -translate-y-3 scale-75 top-4 z-10 origin-[0] start-3 peer-focus:text-brand peer-placeholder-shown:scale-100 peer-placeholder-shown:translate-y-0 peer-focus:scale-75 peer-focus:-translate-y-3 pointer-events-none">Municipio</label>
+                                        </div>
+                                        <div class="relative w-full">
                                             <input type="text" id="inputState" name="inputState"
-                                                placeholder="Ej: Antioquia"
-                                                class="w-full bg-dark-card border border-dark-border rounded-xl px-3 py-2.5 text-xs text-white outline-none focus:border-brand">
-                                        </label>
+                                                class="peer w-full bg-dark-card border border-dark-border rounded-xl px-3 pt-6 pb-2 text-xs text-white outline-none focus:border-brand transition-all"
+                                                placeholder=" ">
+                                            <label for="inputState"
+                                                class="absolute text-[10px] uppercase font-bold tracking-wider text-gray-500 duration-300 transform -translate-y-3 scale-75 top-4 z-10 origin-[0] start-3 peer-focus:text-brand peer-placeholder-shown:scale-100 peer-placeholder-shown:translate-y-0 peer-focus:scale-75 peer-focus:-translate-y-3 pointer-events-none">Departamento</label>
+                                        </div>
                                     </div>
                                 </div>
                             </div>
@@ -738,46 +750,70 @@
                         </button>
                         <div id="dimension-valoracion" class="accordion-content space-y-4 mt-2 px-1">
                             <div class="p-4 rounded-2xl bg-dark-bg/40 border border-dark-border/50 space-y-4">
-                                <label class="block">
-                                    <span
-                                        class="text-xs text-gray-500 uppercase font-bold mb-1.5 block tracking-wider">Conservación
-                                        Heidecke</span>
+                                <div class="relative w-full group">
+                                    <label for="conservationSelect"
+                                        class="absolute text-[9px] uppercase font-bold tracking-widest text-gray-500 top-2 z-10 start-3 pointer-events-none group-focus-within:text-brand transition-colors">Conservación
+                                        Heidecke</label>
                                     <select id="conservationSelect" name="conservationSelect"
-                                        class="w-full bg-dark-card border border-dark-border rounded-xl px-3 py-2.5 text-xs text-white outline-none focus:border-brand transition-all cursor-pointer">
+                                        class="w-full bg-dark-card border border-dark-border rounded-xl px-3 pt-6 pb-2 text-xs text-white outline-none focus:border-brand transition-all appearance-none cursor-pointer">
                                         <option value="malo">Malo (Deterioro Extremo)</option>
                                         <option value="regular">Regular (Reparaciones)</option>
                                         <option value="bueno" selected>Bueno (Normal)</option>
                                         <option value="excelente">Excelente (Pintura y Estetica)</option>
                                     </select>
-                                </label>
-                                <label class="block">
-                                    <span
-                                        class="text-xs text-gray-500 uppercase font-bold mb-1.5 block tracking-wider">Acabados
-                                        / Estado Proyecto</span>
+                                    <div class="absolute inset-y-0 right-3 flex items-center pointer-events-none">
+                                        <i data-lucide="chevron-down"
+                                            class="w-4 h-4 text-gray-500 group-focus-within:text-brand transition-colors"></i>
+                                    </div>
+                                </div>
+                                <div class="relative w-full group">
+                                    <label for="statusSelect"
+                                        class="absolute text-[9px] uppercase font-bold tracking-widest text-gray-500 top-2 z-10 start-3 pointer-events-none group-focus-within:text-brand transition-colors">Acabados
+                                        / Estado Proyecto</label>
                                     <select id="statusSelect" name="statusSelect"
-                                        class="w-full bg-dark-card border border-dark-border rounded-xl px-3 py-2.5 text-xs text-white outline-none">
+                                        class="w-full bg-dark-card border border-dark-border rounded-xl px-3 pt-6 pb-2 text-xs text-white outline-none focus:border-brand transition-all appearance-none cursor-pointer">
                                         <option value="malo">Obra Negra / Gris</option>
                                         <option value="bueno" selected>Terminado (Estándar)</option>
                                         <option value="excelente">Premium / Lujo</option>
                                     </select>
-                                </label>
-                                <label class="block">
-                                    <span
-                                        class="text-xs text-gray-500 uppercase font-bold mb-1.5 block tracking-wider">Multiplicador
-                                        Mercado</span>
+                                    <div class="absolute inset-y-0 right-3 flex items-center pointer-events-none">
+                                        <i data-lucide="chevron-down"
+                                            class="w-4 h-4 text-gray-500 group-focus-within:text-brand transition-colors"></i>
+                                    </div>
+                                </div>
+                                <div class="relative w-full group">
+                                    <label for="marketFactor"
+                                        class="absolute text-[9px] uppercase font-bold tracking-widest text-gray-500 top-2 z-10 start-3 pointer-events-none group-focus-within:text-brand transition-colors">Multiplicador
+                                        Mercado</label>
                                     <select id="marketFactor" name="marketFactor"
-                                        class="w-full bg-dark-card border border-dark-border rounded-xl px-3 py-2.5 text-xs text-white outline-none">
+                                        class="w-full bg-dark-card border border-dark-border rounded-xl px-3 pt-6 pb-2 text-xs text-white outline-none focus:border-brand transition-all appearance-none cursor-pointer">
                                         <option value="0.9">0.9x - Bajo Interés</option>
                                         <option value="1.0" selected>1.0x - Neutral</option>
                                         <option value="1.1">1.1x - Ubicación Plus</option>
                                     </select>
-                                </label>
+                                    <div class="absolute inset-y-0 right-3 flex items-center pointer-events-none">
+                                        <i data-lucide="chevron-down"
+                                            class="w-4 h-4 text-gray-500 group-focus-within:text-brand transition-colors"></i>
+                                    </div>
+                                </div>
                                 <div class="pt-2 border-t border-dark-border/30">
                                     <div class="grid grid-cols-2 gap-3">
-                                        <input type="number" id="landArea" name="landArea" placeholder="m² Lote"
-                                            class="w-full bg-dark-card border border-dark-border rounded-xl px-3 py-2.5 text-xs text-white font-mono outline-none">
-                                        <input type="number" id="landPrice" name="landPrice" placeholder="$ x m²"
-                                            class="w-full bg-dark-card border border-dark-border rounded-xl px-3 py-2.5 text-xs text-white font-mono outline-none">
+                                        <div class="relative w-full">
+                                            <input type="number" id="landArea" name="landArea"
+                                                class="peer w-full bg-dark-card border border-dark-border rounded-xl px-3 pt-6 pb-2 text-xs text-white font-mono outline-none focus:border-brand transition-all"
+                                                placeholder=" ">
+                                            <label for="landArea"
+                                                class="absolute text-[10px] uppercase font-bold tracking-wider text-gray-500 duration-300 transform -translate-y-3 scale-75 top-4 z-10 origin-[0] start-3 peer-focus:text-brand peer-placeholder-shown:scale-100 peer-placeholder-shown:translate-y-0 peer-focus:scale-75 peer-focus:-translate-y-3 pointer-events-none">m²
+                                                Lote</label>
+                                        </div>
+                                        <div class="relative w-full">
+                                            <input type="number" id="landPrice" name="landPrice"
+                                                class="peer w-full bg-dark-card border border-dark-border rounded-xl px-3 pt-6 pb-2 text-xs text-white font-mono outline-none focus:border-brand transition-all"
+                                                placeholder=" ">
+                                            <label for="landPrice"
+                                                class="absolute text-[10px] uppercase font-bold tracking-wider text-gray-500 duration-300 transform -translate-y-3 scale-75 top-4 z-10 origin-[0] start-3 peer-focus:text-brand peer-placeholder-shown:scale-100 peer-placeholder-shown:translate-y-0 peer-focus:scale-75 peer-focus:-translate-y-3 pointer-events-none">$
+                                                x m² Lote</label>
+                                        </div>
                                     </div>
                                 </div>
                             </div>
