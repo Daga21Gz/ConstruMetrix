@@ -1015,7 +1015,7 @@ document.addEventListener('DOMContentLoaded', async () => {
 
         // 10. 🏗️ VALUATION PRO — Terreno IGAC + Zona Homogénea + OIC Comparativo
         if (window.ValuationProEngine) {
-            const activeBpId = window.STATE._activeBlueprintId || null;
+            const activeBpId = STATE._activeBlueprintId || null; // usar STATE del closure, no window.STATE
             window.ValuationProEngine.run(STATE, activeBpId).catch(() => { });
         }
     }
