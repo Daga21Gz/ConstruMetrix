@@ -1,13 +1,13 @@
+/**
  * CONSTRUMETRIX - MASTER CORE
-    * v4.6.1(Auditado Marzo 2026)
-        * 
+ * v4.6.1 (Auditado Marzo 2026)
+ *
  * Features:
- * - Real - time AIU Calculation(Colombian Standard)
-    * - Chart.js Analytics
-        * - LocalStorage Persistence
-            * - "Inline Edit" Mode
-                */
-
+ * - Real-time AIU Calculation (Colombian Standard)
+ * - Chart.js Analytics
+ * - LocalStorage Persistence
+ * - "Inline Edit" Mode
+ */
 document.addEventListener('DOMContentLoaded', async () => {
 
     // --- 1. STATE MANAGEMENT ---
@@ -1814,7 +1814,17 @@ document.addEventListener('DOMContentLoaded', async () => {
     if (UI.selectStatus) UI.selectStatus.addEventListener('change', (e) => { STATE.meta.projectState = e.target.value; recalculate(); });
     if (UI.selectConservation) UI.selectConservation.addEventListener('change', (e) => { STATE.meta.conservation = e.target.value; recalculate(); });
     UI.inputAge.addEventListener('input', (e) => { STATE.meta.age = parseInt(e.target.value) || 0; recalculate(); });
-    UI.inputLife.addEventListener('input', (e) => { STATE.meta.usefulLife = parseInt(e.target.value) || 50; recalculate(); });
+    UI.inputLife.addEventListener('input', (e) => {
+        // Si el campo está bloqueado por un Blueprint oficial, ignorar cambios manuales
+        if (UI.inputLife.hasAttribute('readonly')) {
+            e.target.value = STATE.meta.usefulLife; // Revertir al valor oficial
+            showToast('🔒 Vida Útil bloqueada — asignada automáticamente según IGAC', 'warning');
+            return;
+        }
+        STATE.meta.usefulLife = parseInt(e.target.value) || 50;
+        recalculate();
+    });
+
     UI.inputLandArea.addEventListener('input', (e) => { STATE.meta.landArea = parseFloat(e.target.value) || 0; recalculate(); });
     UI.inputLandPrice.addEventListener('input', (e) => { STATE.meta.landPrice = parseFloat(e.target.value) || 0; recalculate(); });
     UI.selectEstrato.addEventListener('change', (e) => { STATE.meta.estrato = parseInt(e.target.value) || 3; recalculate(); });
@@ -1837,16 +1847,30 @@ document.addEventListener('DOMContentLoaded', async () => {
             STATE.budget = [];
             STATE.editedPrices = {};
             STATE.meta.age = 0;
+            STATE.meta.usefulLife = 50;
             STATE.meta.landArea = 0;
             STATE.meta.landPrice = 0;
             UI.inputAge.value = 0;
             UI.inputLandArea.value = 0;
             UI.inputLandPrice.value = 0;
+
+            // Desbloquear campo Vida Útil (sin blueprint activo, el usuario puede editarlo)
+            if (UI.inputLife) {
+                UI.inputLife.value = 50;
+                UI.inputLife.removeAttribute('readonly');
+                UI.inputLife.classList.remove('opacity-60', 'cursor-not-allowed', 'select-none');
+                UI.inputLife.title = 'Vida Útil estimada (años). Se bloqueará automáticamente al cargar un Blueprint oficial.';
+                const badge = document.getElementById('vidaUtilBadge');
+                if (badge) badge.remove();
+            }
+
+            if (UI.selectBlueprint) UI.selectBlueprint.value = '';
             saveToStorage();
             recalculate();
-            showToast("Proyecto reiniciado");
+            showToast("Proyecto reiniciado — Vida Útil desbloqueada");
         }
     });
+
 
     [UI.inAdmin, UI.inImprev, UI.inUtil, UI.inVat].forEach(el => el.addEventListener('input', () => {
         STATE.config.admin = parseFloat(UI.inAdmin.value) || 0;
@@ -1881,16 +1905,62 @@ document.addEventListener('DOMContentLoaded', async () => {
                 bp.image
             );
             if (confirmed) {
-                loadBlueprint(bp);
+                loadBlueprint(bp, bpId);
             }
         }
     });
 
-    function loadBlueprint(bp) {
+    /**
+     * TABLA VIDA ÚTIL OFICIAL — IGAC / Resolución 620 de 2008
+     * Referencia técnica para cálculo de depreciación Ross-Heidecke.
+     * Estos valores son FIJOS (no editables por el usuario).
+     * Fuente: IGAC Subdirección de Avalúos - Manual Técnico de Avalúos Comerciales.
+     */
+    const VIDA_UTIL_IGAC = {
+        // ── RESIDENCIAL ──────────────────────────────────────────────────
+        "01S": { años: 50, label: "Casa Interés Social", norma: "IGAC/Res.620-2008" },
+        "01": { años: 60, label: "Casa Media", norma: "IGAC/Res.620-2008" },
+        "01A": { años: 70, label: "Casa Alta Gama", norma: "IGAC/Res.620-2008" },
+        "35": { años: 60, label: "Apartamento Estándar", norma: "IGAC/Res.620-2008" },
+        // ── COMERCIAL / INSTITUCIONAL ─────────────────────────────────────
+        "34": { años: 50, label: "Edificio Comercial", norma: "IGAC/Res.620-2008" },
+        // ── INFRAESTRUCTURA ───────────────────────────────────────────────
+        "INF": { años: 40, label: "Infraestructura Vial", norma: "INVIAS 2023" },
+        // Default
+        "_default": { años: 50, label: "Construcción General", norma: "IGAC/Res.620-2008" }
+    };
+    window.VIDA_UTIL_IGAC = VIDA_UTIL_IGAC; // Exponer para inspección
+
+    function loadBlueprint(bp, bpId) {
         STATE.budget = [];
         STATE.meta.modelName = bp.name;
         STATE.meta.modelDesc = bp.description || '';
         STATE.meta.modelSpecs = bp.specs || '';
+
+        // ── AUTO-CALCULAR VIDA ÚTIL OFICIAL ─────────────────────────────
+        const vidaRef = bpId ? (VIDA_UTIL_IGAC[bpId] || VIDA_UTIL_IGAC["_default"]) : VIDA_UTIL_IGAC["_default"];
+        STATE.meta.usefulLife = vidaRef.años;
+
+        if (UI.inputLife) {
+            UI.inputLife.value = vidaRef.años;
+            UI.inputLife.setAttribute('readonly', 'true');
+            UI.inputLife.classList.add('opacity-60', 'cursor-not-allowed', 'select-none');
+            UI.inputLife.title = `Vida útil oficial: ${vidaRef.años} años (${vidaRef.norma})`;
+
+            // Insertar badge junto al campo si no existe
+            const existing = document.getElementById('vidaUtilBadge');
+            if (existing) existing.remove();
+            const badge = document.createElement('div');
+            badge.id = 'vidaUtilBadge';
+            badge.className = 'flex items-center gap-1.5 mt-1';
+            badge.innerHTML = `
+                <i data-lucide="lock" class="w-3 h-3 text-amber-400 shrink-0"></i>
+                <span class="text-[10px] font-bold text-amber-300/80 uppercase tracking-wide">${vidaRef.años} años · ${vidaRef.norma}</span>
+            `;
+            UI.inputLife.parentElement.appendChild(badge);
+            if (window.lucide) lucide.createIcons();
+        }
+
         Object.entries(bp.chapters).forEach(([name, items]) => {
             items.forEach(it => {
                 const db = allItems.find(x => x.codigo === it.codigo);
