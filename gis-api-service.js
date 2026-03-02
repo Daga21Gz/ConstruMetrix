@@ -5,11 +5,11 @@
  */
 
 const GisApiService = {
-    // Current state: DIRECT (Development)
-    // Future state: PROXY (Production)
-    // Current state: DIRECT (Development) - Optimal for local IGAC queries
+    // MODE: DIRECT — Calls IGAC ArcGIS public API directly from the browser.
+    // Cloud Functions proxy was removed (requires GCP billing).
+    // The IGAC FeatureServer is a public CORS-enabled API — no backend needed.
     MODE: 'DIRECT',
-    PROXY_URL: '/api/igac-proxy',
+    PROXY_URL: null, // Not used — Cloud Functions disabled
 
     /**
      * Consults cadastral records (R1/R2)
