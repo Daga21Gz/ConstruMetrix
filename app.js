@@ -848,7 +848,10 @@ document.addEventListener('DOMContentLoaded', async () => {
 
             // If the synchronized region doesn't exist in item prices, use 'centro'
             const finalRegionKey = availableRegions.includes(regionKey) ? regionKey : 'centro';
-            const inflationFactor = 1.15; // Ajuste Técnico 2024 -> 2026 (ICOCED Proyectado)
+            const originalPrice = item.precios[finalRegionKey] || 0;
+
+            // Factor ICOCED 2024 → 2026 (DANE Dic-2025: +3.61%/año × 2 años ≈ +15%)
+            const inflationFactor = 1.15;
             const basePrice = originalPrice * inflationFactor;
 
             const finalPrice = STATE.editedPrices[item.codigo] !== undefined ? STATE.editedPrices[item.codigo] : basePrice;
