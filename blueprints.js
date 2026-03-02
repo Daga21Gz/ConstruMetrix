@@ -5,9 +5,9 @@
 const ConstructionBlueprints = {
     // VIS - Casa Interés Social
     "01S": {
-        name: "Casa Interés Social",
-        description: "Vivienda de interés social diseñada con optimización de costos y materiales certificados de alta durabilidad.",
-        specs: "Estructura en muros de carga, acabados básicos funcionales, ventanería económica.",
+        name: "CASA DE INTERÉS SOCIAL",
+        description: "Vivienda de interés social diseñada bajo estándares técnicos de optimización y materiales de alta durabilidad.",
+        specs: "Estructura en muros de carga, acabados básicos funcionales, cumplimiento Decreto 1077.",
         image: "asset/vivienda_social_3d.png",
         chapters: {
             "Preliminares": [
@@ -36,9 +36,9 @@ const ConstructionBlueprints = {
     },
     // MEDIA - Casa Media
     "01": {
-        name: "Casa Media",
-        description: "Vivienda urbana estándar con diseño arquitectónico equilibrado y acabados de calidad comercial.",
-        specs: "Estructura porticada, muros en ladrillo limpio, acabados estándar, pisos cerámicos.",
+        name: "CASA MEDIA",
+        description: "Vivienda urbana estándar con diseño arquitectónico contemporáneo y acabados de calidad comercial superior.",
+        specs: "Estructura porticada, muros en ladrillo limpio, acabados estándar norma NSR-10.",
         image: "asset/vivienda_urbana_3d.png",
         chapters: {
             "Preliminares": [
@@ -69,9 +69,9 @@ const ConstructionBlueprints = {
     },
     // ALTA - Casa Alta Gama
     "01A": {
-        name: "Casa Alta Gama",
-        description: "Residencial de lujo con especificaciones técnicas superiores y acabados arquitectónicos de alta gama.",
-        specs: "Estructura reforzada, materiales importados, sistemas de iluminación avanzada, carpintería maciza.",
+        name: "CASA ALTA GAMA",
+        description: "Residencial de lujo con especificaciones técnicas de vanguardia y acabados arquitectónicos de alta gama.",
+        specs: "Estructura reforzada, materiales premium, automatización básica, carpintería maciza.",
         image: "asset/vivienda_premium_3d.png",
         chapters: {
             "Preliminares Pro": [
@@ -100,9 +100,9 @@ const ConstructionBlueprints = {
     },
     // APT - Apartamento Estándar
     "35": {
-        name: "Apartamento Estándar",
-        description: "Unidad residencial en propiedad horizontal con optimización de áreas y servicios compartidos.",
-        specs: "Losa maciza, divisiones en drywall/panel yeso, ventanería institucional, áreas comunes básicas.",
+        name: "APARTAMENTO ESTÁNDAR",
+        description: "Unidad residencial en altura con optimización de áreas privadas y servicios compartidos de alta eficiencia.",
+        specs: "Losa maciza, divisiones termo-acústicas, ventanería institucional, áreas comunes robustas.",
         image: "asset/edificio_residencial_3d.png", // Mantengo imagen de edificio
         chapters: {
             "Cimentación & Estructura": [
@@ -127,9 +127,9 @@ const ConstructionBlueprints = {
     },
     // COM - Edificio Comercial
     "34": {
-        name: "Edificio Comercial",
-        description: "Infraestructura corporativa diseñada para alta rotación, áreas abiertas y flexibilidad espacial.",
-        specs: "Losa aligerada, sistemas técnicos industriales, fachadas flotantes, acabados de alto tráfico.",
+        name: "EDIFICIO COMERCIAL",
+        description: "Infraestructura corporativa diseñada para alto tráfico, flexibilidad espacial y eficiencia técnica.",
+        specs: "Estructura de grandes luces, sistemas técnicos industriales, fachadas flotantes.",
         image: "asset/bodega_industrial_3d.png", // Placeholder comercial
         chapters: {
             "Estructura Grandes Luces": [

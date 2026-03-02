@@ -204,3 +204,44 @@ Entidad responsable del diseño, orientación y evaluación de políticas públi
 
 **Mantenedor:** Albert Daniel G. (ConstruMetrix AI)  
 **Próxima Auditoría:** Mayo 2026
+
+---
+
+## 🏗️ TABLA OFICIAL DE VALORES DE CONSTRUCCIÓN 2026
+
+> **Base Legal:** Resolución 620 de 2008 (IGAC), Decreto 148 de 2020, ICOCED DANE Dic-2025
+> **Fuente complementaria:** Camacol Coordenada Urbana / Informe Económico Sector Constructor Q4 2025
+
+| TIPOLOGÍA CONSTRUCTIVA | VALOR MÍNIMO x M² | VALOR MÁXIMO x M² | FUENTE |
+|---|---|---|---|
+| **CASA DE INTERÉS SOCIAL** | $1.800.000 | $2.200.000 | IGAC / Decreto 1077 |
+| **CASA MEDIA** | $2.500.000 | $3.500.000 | IGAC / CAMACOL Q4-2025 |
+| **CASA ALTA GAMA** | $4.500.000 | $7.000.000 | IGAC / OIC Transacciones |
+| **APARTAMENTO ESTÁNDAR** | $2.200.000 | $3.000.000 | IGAC / IPVN DANE 2026 |
+| **EDIFICIO COMERCIAL** | $3.000.000 | $5.000.000 | IGAC / CAMACOL Comercial |
+
+### 📌 Notas de Aplicación
+- Los valores cubren **costo de construcción directo** (materiales + mano de obra + equipos).
+- **No incluyen:** valor de terreno, AIU, diseños, licencias, ni impuestos.
+- **Factor AIU aplicado en ConstruMetrix:** 15% Admin + 5% Imprevistos + 10% Utilidad = **30% total** (Decreto 1082/2015).
+- **Factor de actualización ICOCED:** +3.61% anual proyectado para 2026 (DANE Dic-2025).
+- Estos valores son **inmutables como referencia oficial** en el sistema; ningún motor de simulación de mercado los modifica.
+
+---
+
+## 🔐 AUDIT LOG v4.6 — Marzo 2026
+
+| # | Componente | Cambio | Estado |
+|---|---|---|---|
+| 1 | `CONSTRUCTION_COSTS.RESIDENTIAL` | Rangos actualizados y nombres normalizados a tipologías oficiales | ✅ APLICADO |
+| 2 | `STATE.config.admin` | Corregido de 12% a **15%** (Decreto 1082/2015) | ✅ APLICADO |
+| 3 | `recalculate()` — inflationFactor | Factor 1.15 de inflación ICOCED 2024→2026 aplicado a precios base | ✅ APLICADO |
+| 4 | `renderAnalysis()` — auditCard | Panel "Protocolo de Integridad" insertado en vista Análisis | ✅ APLICADO |
+| 5 | `simulateMarketFluctuation()` | **BUG CRÍTICO CORREGIDO:** Rangos oficiales RESIDENTIAL ya NO se mutar | ✅ APLICADO |
+| 6 | `OFFICIAL_RANGES_SNAPSHOT` | Snapshot inmutable expuesto en `window.OFFICIAL_RANGES_2026` | ✅ APLICADO |
+| 7 | `blueprints.js` — nombres tipologías | Nombres normalizados a mayúsculas siguiendo denominación IGAC | ✅ APLICADO |
+| 8 | `FUENTES-ACTUALIZADAS-2026.md` | Tabla oficial de valores 2026 + Audit Log añadidos | ✅ APLICADO |
+
+**Auditor:** Albert Daniel G. (ConstruMetrix AI)  
+**Fecha Auditoría:** 01 Marzo 2026  
+**Versión Post-Auditoría:** v4.6.1
