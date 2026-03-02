@@ -1133,6 +1133,26 @@
                         <!-- Content injected via JS -->
                     </div>
 
+                    <!-- ══════════════════════════════════════════════════
+                         VALUATION PRO — Terreno IGAC + Zona Homogénea + OIC
+                         Populated by valuation-pro.js after each recalculate()
+                         ══════════════════════════════════════════════════ -->
+                    <div class="mt-5 pt-5 border-t border-white/[0.04]">
+                        <div class="flex items-center gap-2 mb-3">
+                            <div class="w-1.5 h-4 bg-gradient-to-b from-amber-400 to-orange-500 rounded-full"></div>
+                            <span class="text-[10px] font-black text-gray-400 uppercase tracking-[0.25em]">MÓDULOS —
+                                Res.620/2008</span>
+                            <span
+                                class="ml-auto text-[9px] bg-amber-500/10 text-amber-400 border border-amber-500/20 px-2 py-0.5 rounded-full font-bold uppercase">IGAC</span>
+                        </div>
+                        <div id="valuationProPanel">
+                            <!-- Populated by ValuationProEngine.run() in valuation-pro.js -->
+                            <div class="text-xs text-gray-600 italic p-4 text-center">
+                                Configura el área y el municipio para activar los Módulos PRO.
+                            </div>
+                        </div>
+                    </div>
+
                     <!-- Intelligence Insights Panel -->
                     <div id="intelligencePanel"
                         class="bg-gradient-to-br from-brand/10 to-purple-500/5 border border-brand/20 p-5 rounded-[2rem] relative overflow-hidden group hidden">
@@ -1833,6 +1853,7 @@
     <script src="fuentes-oficiales.js"></script>
     <script src="blueprints.js"></script>
     <script src="app.js"></script>
+    <script src="valuation-pro.js"></script><!-- 🏗️ Módulos PRO: Terreno IGAC + Zona Homogénea + OIC -->
     <script src="advanced-features.js"></script>
     <script src="geo-visor.js"></script>
     <script src="firebase-service.js"></script>

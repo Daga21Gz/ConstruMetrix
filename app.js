@@ -1012,6 +1012,12 @@ document.addEventListener('DOMContentLoaded', async () => {
 
         // 9. Save
         saveToStorage();
+
+        // 10. 🏗️ VALUATION PRO — Terreno IGAC + Zona Homogénea + OIC Comparativo
+        if (window.ValuationProEngine) {
+            const activeBpId = window.STATE._activeBlueprintId || null;
+            window.ValuationProEngine.run(STATE, activeBpId).catch(() => { });
+        }
     }
 
     function updateCharts(mat, lab, eq, tra, aiu, chapterData) {
@@ -1939,6 +1945,7 @@ document.addEventListener('DOMContentLoaded', async () => {
         STATE.meta.modelName = bp.name;
         STATE.meta.modelDesc = bp.description || '';
         STATE.meta.modelSpecs = bp.specs || '';
+        STATE._activeBlueprintId = bpId || null; // Para ValuationProEngine
 
         // ── AUTO-CALCULAR VIDA ÚTIL OFICIAL ─────────────────────────────
         const vidaRef = bpId ? (VIDA_UTIL_IGAC[bpId] || VIDA_UTIL_IGAC["_default"]) : VIDA_UTIL_IGAC["_default"];
